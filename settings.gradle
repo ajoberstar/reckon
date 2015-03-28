@@ -1,7 +1,11 @@
 import java.nio.file.Files
 
-Files.list(rootDir.toPath())
-    .filter { path -> Files.isDirectory(path) }
-    .map { path -> path.fileName.toString() }
-    .filter { !it.startsWith('.') && it != 'gradle' }
-    .forEach { projectPath -> include(projectPath) }
+def modulesDir = rootDir.toPath().resolve('modules')
+Files.list(modulesDir)
+	.filter { path -> Files.isDirectory(path) }
+	.map { path -> path.fileName.toString() }
+	.forEach { dirName ->
+		def path = ":${rootProject.name}-${dirName}"
+		include(path)
+		project(path).projectDir = modulesDir.resolve(dirName).toFile()
+	}

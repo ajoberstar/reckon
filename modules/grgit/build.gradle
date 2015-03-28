@@ -2,6 +2,6 @@ apply plugin: 'groovy'
 
 dependencies {
 	compile "org.codehaus.groovy:groovy-all:${rootProject.depVersions.groovy}"
-	compile project(':api')
-	testCompile project(':test-kit')
+	compile project(':vcs-release-api')
+	testCompile project(':vcs-release-test')
 }
