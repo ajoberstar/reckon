@@ -1,3 +1,7 @@
-plugins {
-	id 'groovy'
+apply plugin: 'groovy'
+
+dependencies {
+	compile "org.codehaus.groovy:groovy-all:${rootProject.depVersions.groovy}"
+	compile "org.spockframework:spock-core:${rootProject.depVersions.spock}"
+	compile project(':api')
 }
