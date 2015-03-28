@@ -37,6 +37,31 @@ subprojects {
     }
 }
 
+
+project(':vcs-release-api') {
+    apply plugin: 'java'
+}
+
+project(':vcs-release-test') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile "org.codehaus.groovy:groovy-all:${rootProject.depVersions.groovy}"
+        compile "org.spockframework:spock-core:${rootProject.depVersions.spock}"
+        compile project(':vcs-release-api')
+    }
+}
+
+project(':vcs-release-grgit') {
+    apply plugin: 'groovy'
+
+    dependencies {
+        compile "org.codehaus.groovy:groovy-all:${rootProject.depVersions.groovy}"
+        compile project(':vcs-release-api')
+        testCompile project(':vcs-release-test')
+    }
+}
+
 wrapper {
     gradleVersion = '2.3'
 }
