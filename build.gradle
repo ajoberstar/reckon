@@ -1,0 +1,29 @@
+plugins {
+    id 'com.jfrog.bintray' version '1.1'
+    id 'org.ajoberstar.defaults' version '0.5.3'
+}
+
+allprojects {
+    group = 'org.ajoberstar'
+    sourceCompatibility = '1.7'
+    repositories {
+        jcenter()
+    }
+}
+
+defaults {
+    id = 'ajoberstar'
+
+    bintrayRepo = 'libraries'
+    bintrayLabels = ['vcs', 'git', 'release', 'semver']
+
+    developers = [
+        [id: 'ajoberstar', name: 'Andrew Oberstar', email: 'andrew@ajoberstar.org']
+    ]
+
+    copyrightYears = '2015'
+}
+
+wrapper {
+    gradleVersion = '2.3'
+}
