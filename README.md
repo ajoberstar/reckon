@@ -1,3 +1,3 @@
-# vcs-release
+# semver-vcs
 
-Release functionality for VCSs to be used with tools such as Gradle.
+Version inference using information available in the VCS.

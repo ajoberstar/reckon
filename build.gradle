@@ -37,7 +37,7 @@ subprojects {
     }
 }
 
-project(':vcs-release-api') {
+project(':semver-vcs-api') {
     apply plugin: 'java'
 
     dependencies {
@@ -45,23 +45,23 @@ project(':vcs-release-api') {
     }
 }
 
-project(':vcs-release-test') {
+project(':semver-vcs-test') {
     apply plugin: 'groovy'
 
     dependencies {
         compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
         compile "org.spockframework:spock-core:${depVersions.spock}"
-        compile project(':vcs-release-api')
+        compile project(':semver-vcs-api')
     }
 }
 
-project(':vcs-release-grgit') {
+project(':semver-vcs-grgit') {
     apply plugin: 'groovy'
 
     dependencies {
         compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
-        compile project(':vcs-release-api')
-        testCompile project(':vcs-release-test')
+        compile project(':semver-vcs-api')
+        testCompile project(':semver-vcs-test')
     }
 }
 
