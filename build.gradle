@@ -64,7 +64,3 @@ project(':semver-vcs-grgit') {
         testCompile project(':semver-vcs-test')
     }
 }
-
-wrapper {
-    gradleVersion = '2.3'
-}
