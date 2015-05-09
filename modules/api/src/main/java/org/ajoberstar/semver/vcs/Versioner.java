@@ -13,8 +13,7 @@ public class Versioner {
 
     public Version rebuild() {
         return provider.getCurrentVersion()
-                .filter(version -> provider.isUnmodified())
-                .orElseThrow(() -> new IllegalStateException("Cannot rebuild since no version on current revision or there are local changes."));
+                .orElseThrow(() -> new IllegalStateException("Cannot rebuild since no version on current revision."));
     }
 
     public Version infer(String scope, String stage, boolean fixed) {

@@ -8,5 +8,4 @@ public interface VcsProvider {
     Optional<Version> getCurrentVersion();
     Optional<Version> getPreviousRelease();
     Optional<Version> getPreviousVersion();
-    boolean isUnmodified();
 }
