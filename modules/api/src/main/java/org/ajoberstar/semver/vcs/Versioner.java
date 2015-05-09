@@ -16,7 +16,7 @@ public class Versioner {
                 .orElseThrow(() -> new IllegalStateException("Cannot rebuild since no version on current revision."));
     }
 
-    public Version infer(String scope, String stage, boolean fixed) {
+    public Version infer(ChangeScope scope, String stage, boolean fixed) {
         Objects.requireNonNull(scope, "Scope cannot be null.");
         Objects.requireNonNull(stage, "Stage cannot be null.");
 
@@ -44,16 +44,16 @@ public class Versioner {
         }
     }
 
-    private Version applyScope(Version version, String scope) {
-        switch (scope.toLowerCase()) {
-            case "major":
+    private Version applyScope(Version version, ChangeScope scope) {
+        switch (scope) {
+            case MAJOR:
                 return version.incrementMajorVersion();
-            case "minor":
+            case MINOR:
                 return version.incrementMinorVersion();
-            case "patch":
+            case PATCH:
                 return version.incrementPatchVersion();
             default:
-                throw new IllegalArgumentException("Scope must be one of major, minor, or patch.");
+                throw new IllegalArgumentException("Scope cannot be null.");
         }
     }
 }
