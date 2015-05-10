@@ -20,31 +20,16 @@ public class Versioner {
         Objects.requireNonNull(scope, "Scope cannot be null.");
         Objects.requireNonNull(stage, "Stage cannot be null.");
 
-        Version previousRelease = provider.getPreviousRelease().orElse(Version.forIntegers(0, 0, 0));
-        Version incremented = applyScope(previousRelease, scope);
-
-
+        Version incremented = applyScope(scope);
         if ("final".equals(stage)) {
             return incremented;
         } else {
-            Version previousVersion = provider.getPreviousVersion().orElse(Version.forIntegers(0, 0, 0));
-            if (incremented.getNormalVersion().equals(previousVersion.getNormalVersion())) {
-                String[] previousPreRelease = previousVersion.getPreReleaseVersion().split("\\.");
-                boolean sameStage = stage.equals(previousPreRelease[0]);
-                if (sameStage) {
-                    return incremented.setPreReleaseVersion(previousVersion.getPreReleaseVersion()).incrementPreReleaseVersion();
-                } else if (fixed) {
-                    return incremented.setPreReleaseVersion(stage).incrementPreReleaseVersion();
-                } else {
-                    return incremented.setPreReleaseVersion(previousVersion.getPreReleaseVersion() + "." + stage).incrementPreReleaseVersion();
-                }
-            } else {
-                return incremented.setPreReleaseVersion(stage).incrementPreReleaseVersion();
-            }
+            return applyStage(incremented, stage, fixed).incrementPreReleaseVersion();
         }
     }
 
-    private Version applyScope(Version version, ChangeScope scope) {
+    private Version applyScope(ChangeScope scope) {
+        Version version = provider.getPreviousRelease().orElse(Version.forIntegers(0, 0, 0));
         switch (scope) {
             case MAJOR:
                 return version.incrementMajorVersion();
@@ -53,7 +38,27 @@ public class Versioner {
             case PATCH:
                 return version.incrementPatchVersion();
             default:
-                throw new IllegalArgumentException("Scope cannot be null.");
+                throw new IllegalArgumentException("Invalid scope: " + scope);
         }
+    }
+
+    private Version applyStage(Version version, String stage, boolean fixed) {
+        Version previous = provider.getPreviousVersion().orElse(Version.forIntegers(0, 0, 0));
+        if (version.getNormalVersion().equals(previous.getNormalVersion())) {
+            if (stage.equals(parseStage(previous))) {
+                return version.setPreReleaseVersion(previous.getPreReleaseVersion());
+            } else if (fixed) {
+                return version.setPreReleaseVersion(stage);
+            } else {
+                return version.setPreReleaseVersion(previous.getPreReleaseVersion() + "." + stage);
+            }
+        } else {
+            return version.setPreReleaseVersion(stage);
+        }
+    }
+
+    private String parseStage(Version version) {
+        String[] preRelease = version.getPreReleaseVersion().split("\\.", 2);
+        return preRelease[0];
     }
 }
