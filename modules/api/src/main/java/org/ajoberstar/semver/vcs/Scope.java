@@ -1,6 +1,6 @@
 package org.ajoberstar.semver.vcs;
 
-public enum ChangeScope {
+public enum Scope {
     MAJOR,
     MINOR,
     PATCH;
