@@ -86,6 +86,7 @@ class VersionerSpec extends Specification {
         MAJOR | 'other' | true  | '1.0.0-other.1'
         MINOR | 'rc'    | true  | '0.1.0-rc.4'
         MINOR | 'other' | false | '0.1.0-rc.3.other.1'
+        MINOR | 'super' | false | '0.1.0-super.1'
     }
 
     @Unroll

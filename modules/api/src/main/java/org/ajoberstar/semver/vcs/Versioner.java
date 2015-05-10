@@ -21,13 +21,13 @@ public class Versioner {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         Version result = doInfer(scope, stage, fixed);
         boolean valid = provider.getPreviousVersion()
-                .map(prev -> result.greaterThanOrEqualTo(prev))
+                .map(result::greaterThanOrEqualTo)
                 .orElse(true);
 
         if (valid) {
             return result;
         } else {
-            throw new IllegalArgumentException("Inferred version " + result + " has lower precendence than previous " + provider.getPreviousVersion().orElse(Version.forIntegers(0)));
+            throw new IllegalArgumentException("Inferred version " + result + " has lower precedence than previous " + provider.getPreviousVersion().orElse(Version.forIntegers(0)));
         }
     }
 
@@ -57,9 +57,10 @@ public class Versioner {
     private Version applyStage(Version version, String stage, boolean fixed) {
         Version previous = provider.getPreviousVersion().orElse(Version.forIntegers(0, 0, 0));
         if (version.getNormalVersion().equals(previous.getNormalVersion())) {
-            if (stage.equals(parseStage(previous))) {
+            String previousStage = parseStage(previous);
+            if (stage.equals(previousStage)) {
                 return version.setPreReleaseVersion(previous.getPreReleaseVersion());
-            } else if (fixed) {
+            } else if (fixed || stage.compareTo(previousStage) > 0) {
                 return version.setPreReleaseVersion(stage);
             } else {
                 return version.setPreReleaseVersion(previous.getPreReleaseVersion() + "." + stage);
