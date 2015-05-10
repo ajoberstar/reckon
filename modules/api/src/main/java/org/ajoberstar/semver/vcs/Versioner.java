@@ -19,12 +19,24 @@ public class Versioner {
     public Version infer(ChangeScope scope, String stage, boolean fixed) {
         Objects.requireNonNull(scope, "Scope cannot be null.");
         Objects.requireNonNull(stage, "Stage cannot be null.");
+        Version result = doInfer(scope, stage, fixed);
+        boolean valid = provider.getPreviousVersion()
+                .map(prev -> result.greaterThanOrEqualTo(prev))
+                .orElse(true);
 
-        Version incremented = applyScope(scope);
-        if ("final".equals(stage)) {
-            return incremented;
+        if (valid) {
+            return result;
         } else {
-            return applyStage(incremented, stage, fixed).incrementPreReleaseVersion();
+            throw new IllegalArgumentException("Inferred version " + result + " has lower precendence than previous " + provider.getPreviousVersion().orElse(Version.forIntegers(0)));
+        }
+    }
+
+    private Version doInfer(ChangeScope scope, String stage, boolean fixed) {
+        Version normal = applyScope(scope);
+        if ("final".equals(stage)) {
+            return normal;
+        } else {
+            return applyStage(normal, stage, fixed).incrementPreReleaseVersion();
         }
     }
 
