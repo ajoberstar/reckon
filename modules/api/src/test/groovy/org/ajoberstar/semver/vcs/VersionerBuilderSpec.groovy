@@ -72,13 +72,14 @@ class VersionerBuilderSpec extends Specification {
         expect:
         doInfer(builder.build()) == Version.valueOf(expected)
         where:
-        expected        | builder
-        '1.0.0'         | Versioners.builder().changeScope(MAJOR).finalRelease()
-        '0.1.0'         | Versioners.builder().changeScope(MINOR).finalRelease()
-        '0.0.1'         | Versioners.builder().changeScope(PATCH).finalRelease()
-        '1.0.0-other.1' | Versioners.builder().changeScope(MAJOR).persistentPreRelease('other')
-        '0.1.0-other.1' | Versioners.builder().changeScope(MINOR).persistentPreRelease('other')
-        '0.0.1-other.1' | Versioners.builder().changeScope(PATCH).persistentPreRelease('other')
+        expected         | builder
+        '1.0.0'          | Versioners.builder().changeScope(MAJOR).finalRelease()
+        '0.1.0'          | Versioners.builder().changeScope(MINOR).finalRelease()
+        '0.0.1'          | Versioners.builder().changeScope(PATCH).finalRelease()
+        '1.0.0-other.1'  | Versioners.builder().changeScope(MAJOR).persistentPreRelease('other')
+        '0.1.0-other.1'  | Versioners.builder().changeScope(MINOR).persistentPreRelease('other')
+        '0.0.1-other.1'  | Versioners.builder().changeScope(PATCH).persistentPreRelease('other')
+        '0.0.1-SNAPSHOT' | Versioners.builder().changeScope(PATCH).snapshotPreRelease()
     }
 
     @Unroll
