@@ -37,7 +37,7 @@ public class VersionerBuilder {
         return this;
     }
 
-    public VersionerBuilder persistentPreRelease(String stage) {
+    public VersionerBuilder fixedStagePreRelease(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         this.preRelease = (base, vcs) -> {
             if (stage.equals(parseStage(base))) {
@@ -49,7 +49,7 @@ public class VersionerBuilder {
         return this;
     }
 
-    public VersionerBuilder transientPreRelease(String stage) {
+    public VersionerBuilder floatingStagePreRelease(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         this.preRelease = (base, vcs) -> {
             String previousStage = parseStage(base);
