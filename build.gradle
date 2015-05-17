@@ -63,6 +63,7 @@ project(':semver-vcs-grgit') {
     dependencies {
         compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
         compile project(':semver-vcs-api')
+        compile 'org.ajoberstar:grgit:1.2.0'
         testCompile project(':semver-vcs-test')
     }
 }
