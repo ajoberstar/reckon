@@ -77,6 +77,7 @@ project(':semver-vcs-gradle') {
     dependencies {
         compile gradleApi()
         compile project(':semver-vcs-api')
+        compile project(':semver-vcs-grgit')
         testCompile "org.spockframework:spock-core:${depVersions.spock}"
     }
 }
