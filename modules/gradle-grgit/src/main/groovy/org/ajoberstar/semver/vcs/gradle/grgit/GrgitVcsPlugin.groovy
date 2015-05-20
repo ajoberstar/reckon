@@ -11,6 +11,7 @@ class GrgitVcsPlugin implements Plugin<Project> {
         project.pluginManager.apply('org.ajoberstar.grgit')
         project.pluginManager.apply('org.ajoberstar.semver-vcs-base')
 
+        // TODO get this lazily somehow
         def grgit = project.extensions.grgit.getRepo()
         project.extensions.getByName('semver').with {
             vcs = new GrgitVcs(grgit)
