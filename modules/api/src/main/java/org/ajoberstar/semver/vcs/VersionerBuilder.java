@@ -5,8 +5,6 @@ import com.github.zafarkhaja.semver.Version;
 import java.util.Objects;
 
 public class VersionerBuilder {
-    private static final Versioner IDENTITY = (base, vcs) -> base;
-
     private Versioner normal;
     private Versioner preRelease;
     private Versioner buildMetadata;
@@ -14,7 +12,7 @@ public class VersionerBuilder {
     VersionerBuilder() {
         this.normal = null;
         this.preRelease = null;
-        this.buildMetadata = IDENTITY;
+        this.buildMetadata = Versioner.IDENTITY;
     }
 
     public VersionerBuilder useScope(Scope scope) {
@@ -33,7 +31,7 @@ public class VersionerBuilder {
 
     public VersionerBuilder useFinal() {
         this.preRelease = (base, vcs) -> Version.valueOf(base.getNormalVersion());
-        this.buildMetadata = IDENTITY;
+        this.buildMetadata = Versioner.IDENTITY;
         return this;
     }
 
