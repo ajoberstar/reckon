@@ -2,7 +2,6 @@ package org.ajoberstar.semver.vcs;
 
 import com.github.zafarkhaja.semver.Version;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 @FunctionalInterface
@@ -13,6 +12,4 @@ public interface Versioner {
         Objects.requireNonNull(before);
         return (base, vcs) -> infer(before.infer(base, vcs), vcs);
     }
-
-    static final Versioner IDENTITY = (base, vcs) -> base;
 }

@@ -3,19 +3,36 @@ package org.ajoberstar.semver.vcs
 import com.github.zafarkhaja.semver.ParseException
 import com.github.zafarkhaja.semver.Version
 import spock.lang.Specification
+import spock.lang.Unroll
+
+import static Scope.*
 
 class VersionersSpec extends Specification {
     private Vcs vcs = Mock()
+    private Version base = Version.forIntegers(1, 2, 3)
 
-    private Version doInfer(Versioner versioner) {
-        return versioner.infer(Versioners.VERSION_0, vcs)
+    def 'identity returns the version it was passed'() {
+        expect:
+        Versioners.identity().infer(base, null) == Version.forIntegers(1, 2, 3)
+    }
+
+    def 'force fails if version is not a valid semver version'() {
+        when:
+        Versioners.force('blah blah')
+        then:
+        thrown(ParseException)
+    }
+
+    def 'force works for valid semver version'() {
+        expect:
+        Versioners.force('1.2.3-beta.1').infer(base, vcs) == Version.valueOf('1.2.3-beta.1')
     }
 
     def 'rebuild fails if no current version'() {
         given:
         vcs.currentVersion >> Optional.empty()
         when:
-        doInfer(Versioners.rebuild())
+        Versioners.rebuild().infer(base, vcs)
         then:
         thrown(IllegalStateException)
     }
@@ -24,18 +41,145 @@ class VersionersSpec extends Specification {
         given:
         vcs.currentVersion >> Optional.of(Version.forIntegers(1, 2, 3))
         expect:
-        doInfer(Versioners.rebuild()) == Version.forIntegers(1, 2, 3)
+        Versioners.rebuild().infer(base, vcs) == Version.forIntegers(1, 2, 3)
     }
 
-    def 'force fails if version is not a valid semver version'() {
-        when:
-        Versioners.force("blah blah")
-        then:
-        thrown(ParseException)
-    }
-
-    def 'force works for valid semver version'() {
+    @Unroll
+    def 'useScope increments from the base, if no previous release'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
         expect:
-        doInfer(Versioners.force("1.2.3-beta.1")) == Version.valueOf("1.2.3-beta.1")
+        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        where:
+        scope | inferred
+        MAJOR | '2.0.0'
+        MINOR | '1.3.0'
+        PATCH | '1.2.4'
+    }
+
+    @Unroll
+    def 'useScope increments from the previous release, if available'() {
+        given:
+        vcs.previousRelease >> Optional.of(Version.forIntegers(2, 3, 4))
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        where:
+        scope | inferred
+        MAJOR | '3.0.0'
+        MINOR | '2.4.0'
+        PATCH | '2.3.5'
+    }
+
+    @Unroll
+    def 'useScope maintains pre-release info from previous version, if has same inferred normal'() {
+        given:
+        vcs.previousRelease >> Optional.of(Version.forIntegers(2, 3, 4))
+        vcs.previousVersion >> Optional.of(Version.valueOf('2.4.0-beta.1'))
+        expect:
+        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        where:
+        scope | inferred
+        MAJOR | '3.0.0'
+        MINOR | '2.4.0-beta.1'
+        PATCH | '2.3.5'
+    }
+
+    @Unroll
+    def 'useFinalStage only retains normal version'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFinalStage().infer(Version.valueOf(input), vcs) == Version.valueOf(inferred)
+        where:
+        input              | inferred
+        '2.3.4'            | '2.3.4'
+        '1.2.3-beta.1'     | '1.2.3'
+        '0.1.2-rc.1+abcde' | '0.1.2'
+    }
+
+    @Unroll
+    def 'useFixedStage increments previous count if base version had same stage'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFixedStage('beta').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
+        where:
+        intermediate         | inferred
+        '1.2.3-beta.1'       | '1.2.3-beta.2'
+        '4.0.0-beta.3.dev.4' | '4.0.0-beta.4'
+    }
+
+    def 'useFixedStage uses "stage.1" if base version has different stage'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFixedStage('beta').infer(Version.valueOf('4.0.0-alpha.3.dev.4'), vcs) == Version.valueOf('4.0.0-beta.1')
+    }
+
+    @Unroll
+    def 'useFloatingStage increments previous count if base version had same stage'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFloatingStage('dev').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
+        where:
+        intermediate         | inferred
+        '1.2.3-dev.1'        | '1.2.3-dev.2'
+        '4.0.0-beta.3.dev.4' | '4.0.0-beta.3.dev.5'
+    }
+
+    def 'useFloatingStage appends "stage.1" if base version had higher-precedence stage'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFloatingStage('dev').infer(Version.valueOf('4.0.0-rc.3'), vcs) == Version.valueOf('4.0.0-rc.3.dev.1')
+    }
+
+    def 'useFloatingStage uses "stage.1" if base version had lower-precedence stage'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useFloatingStage('beta').infer(Version.valueOf('4.0.0-alpha.3.dev.4'), vcs) == Version.valueOf('4.0.0-beta.1')
+    }
+
+    def 'useSnapshotStage uses SNAPSHOT as pre-release'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.empty()
+        expect:
+        Versioners.useSnapshotStage().infer(Version.valueOf("4.0.0-beta.1"), vcs) == Version.valueOf("4.0.0-SNAPSHOT")
+    }
+
+    def 'enforcePrecedence returns base version if it is higher than previous version'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> previous
+        expect:
+        Versioners.enforcePrecedence().infer(base, vcs) == base
+        where:
+        previous << [
+                Optional.empty(),
+                Optional.of(Version.valueOf("1.2.2")),
+                Optional.of(Version.valueOf("1.2.3-beta.1")),
+                Optional.of(Version.valueOf("1.2.3"))
+        ]
+    }
+
+    def 'enforcePrecedence throws if base version is lower precedence than previous version'() {
+        given:
+        vcs.previousRelease >> Optional.empty()
+        vcs.previousVersion >> Optional.of(Version.valueOf("1.2.4"))
+        when:
+        Versioners.enforcePrecedence().infer(base, vcs)
+        then:
+        thrown(IllegalArgumentException)
     }
 }
