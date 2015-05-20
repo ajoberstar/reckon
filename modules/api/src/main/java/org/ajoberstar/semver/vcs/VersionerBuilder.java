@@ -17,7 +17,7 @@ public class VersionerBuilder {
         this.buildMetadata = IDENTITY;
     }
 
-    public VersionerBuilder changeScope(Scope scope) {
+    public VersionerBuilder useScope(Scope scope) {
         this.normal = (identity, vcs) -> {
             Version previous = vcs.getPreviousVersion().orElse(identity);
             Version base = vcs.getPreviousRelease().orElse(identity);
@@ -31,13 +31,13 @@ public class VersionerBuilder {
         return this;
     }
 
-    public VersionerBuilder finalRelease() {
+    public VersionerBuilder useFinal() {
         this.preRelease = (base, vcs) -> Version.valueOf(base.getNormalVersion());
         this.buildMetadata = IDENTITY;
         return this;
     }
 
-    public VersionerBuilder fixedStagePreRelease(String stage) {
+    public VersionerBuilder useFixedStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         this.preRelease = (base, vcs) -> {
             if (stage.equals(parseStage(base))) {
@@ -49,7 +49,7 @@ public class VersionerBuilder {
         return this;
     }
 
-    public VersionerBuilder floatingStagePreRelease(String stage) {
+    public VersionerBuilder useFloatingStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         this.preRelease = (base, vcs) -> {
             String previousStage = parseStage(base);
@@ -64,12 +64,12 @@ public class VersionerBuilder {
         return this;
     }
 
-    public VersionerBuilder snapshotPreRelease() {
+    public VersionerBuilder useSnapshotStage() {
         this.preRelease = (base, vcs) -> base.setPreReleaseVersion("SNAPSHOT");
         return this;
     }
 
-    public VersionerBuilder buildMetadata(Versioner buildMetadata) {
+    public VersionerBuilder useBuildMetadata(Versioner buildMetadata) {
         Objects.requireNonNull(buildMetadata, "Build metadata versioner cannot be null.");
         this.buildMetadata = buildMetadata;
         return this;

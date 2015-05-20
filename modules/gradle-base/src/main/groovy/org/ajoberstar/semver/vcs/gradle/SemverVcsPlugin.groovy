@@ -20,17 +20,17 @@ class SemverVcsPlugin implements Plugin<Project> {
         if (project.hasProperty('semver.scope')) {
             scope = Scope.valueOf(project.getProperty('semver.scope').toUpperCase())
         }
-        builder.changeScope(scope)
+        builder.useScope(scope)
 
         if (project.hasProperty('semver.stage')) {
             String stage = project.getProperty('semver.stage')
             if (stage == 'final') {
-                builder.finalRelease()
+                builder.useFinal()
             } else {
-                builder.fixedStagePreRelease(stage)
+                builder.useFixedStage(stage)
             }
         } else {
-            builder.floatingStagePreRelease('dev')
+            builder.useFloatingStage('dev')
         }
 
         extension.versioner = builder.build()

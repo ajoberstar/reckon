@@ -15,35 +15,35 @@ class VersionerBuilderSpec extends Specification {
 
     def 'build fails if changeScope not called'() {
         when:
-        Versioners.builder().finalRelease().build()
+        Versioners.builder().useFinal().build()
         then:
         thrown(NullPointerException)
     }
 
     def 'build fails if a release method is not called'() {
         when:
-        Versioners.builder().changeScope(MAJOR).build()
+        Versioners.builder().useScope(MAJOR).build()
         then:
         thrown(NullPointerException)
     }
 
     def 'buildMetadata fails for null argument'() {
         when:
-        Versioners.builder().buildMetadata(null)
+        Versioners.builder().useBuildMetadata(null)
         then:
         thrown(NullPointerException)
     }
 
     def 'persistentPreRelease fails for null argument'() {
         when:
-        Versioners.builder().fixedStagePreRelease(null)
+        Versioners.builder().useFixedStage(null)
         then:
         thrown(NullPointerException)
     }
 
     def 'transientPreRelease fails for null argument'() {
         when:
-        Versioners.builder().floatingStagePreRelease(null)
+        Versioners.builder().useFloatingStage(null)
         then:
         thrown(NullPointerException)
     }
@@ -57,11 +57,11 @@ class VersionerBuilderSpec extends Specification {
         doInfer(builder.build()) == Version.valueOf(expected)
         where:
         expected             | builder
-        '2.0.0'              | Versioners.builder().changeScope(MAJOR).finalRelease()
-        '1.3.0'              | Versioners.builder().changeScope(MINOR).finalRelease()
-        '2.0.0-other.1'      | Versioners.builder().changeScope(MAJOR).fixedStagePreRelease('other')
-        '1.3.0-rc.4'         | Versioners.builder().changeScope(MINOR).fixedStagePreRelease('rc')
-        '1.3.0-rc.3.other.1' | Versioners.builder().changeScope(MINOR).floatingStagePreRelease('other')
+        '2.0.0'              | Versioners.builder().useScope(MAJOR).useFinal()
+        '1.3.0'              | Versioners.builder().useScope(MINOR).useFinal()
+        '2.0.0-other.1'      | Versioners.builder().useScope(MAJOR).useFixedStage('other')
+        '1.3.0-rc.4'         | Versioners.builder().useScope(MINOR).useFixedStage('rc')
+        '1.3.0-rc.3.other.1' | Versioners.builder().useScope(MINOR).useFloatingStage('other')
     }
 
     @Unroll
@@ -73,13 +73,13 @@ class VersionerBuilderSpec extends Specification {
         doInfer(builder.build()) == Version.valueOf(expected)
         where:
         expected         | builder
-        '1.0.0'          | Versioners.builder().changeScope(MAJOR).finalRelease()
-        '0.1.0'          | Versioners.builder().changeScope(MINOR).finalRelease()
-        '0.0.1'          | Versioners.builder().changeScope(PATCH).finalRelease()
-        '1.0.0-other.1'  | Versioners.builder().changeScope(MAJOR).fixedStagePreRelease('other')
-        '0.1.0-other.1'  | Versioners.builder().changeScope(MINOR).fixedStagePreRelease('other')
-        '0.0.1-other.1'  | Versioners.builder().changeScope(PATCH).fixedStagePreRelease('other')
-        '0.0.1-SNAPSHOT' | Versioners.builder().changeScope(PATCH).snapshotPreRelease()
+        '1.0.0'          | Versioners.builder().useScope(MAJOR).useFinal()
+        '0.1.0'          | Versioners.builder().useScope(MINOR).useFinal()
+        '0.0.1'          | Versioners.builder().useScope(PATCH).useFinal()
+        '1.0.0-other.1'  | Versioners.builder().useScope(MAJOR).useFixedStage('other')
+        '0.1.0-other.1'  | Versioners.builder().useScope(MINOR).useFixedStage('other')
+        '0.0.1-other.1'  | Versioners.builder().useScope(PATCH).useFixedStage('other')
+        '0.0.1-SNAPSHOT' | Versioners.builder().useScope(PATCH).useSnapshotStage()
     }
 
     @Unroll
@@ -91,12 +91,12 @@ class VersionerBuilderSpec extends Specification {
         doInfer(builder.build()) == Version.valueOf(expected)
         where:
         expected             | builder
-        '1.0.0'              | Versioners.builder().changeScope(MAJOR).finalRelease()
-        '0.1.0'              | Versioners.builder().changeScope(MINOR).finalRelease()
-        '1.0.0-other.1'      | Versioners.builder().changeScope(MAJOR).fixedStagePreRelease('other')
-        '0.1.0-rc.4'         | Versioners.builder().changeScope(MINOR).fixedStagePreRelease('rc')
-        '0.1.0-rc.3.other.1' | Versioners.builder().changeScope(MINOR).floatingStagePreRelease('other')
-        '0.1.0-super.1'      | Versioners.builder().changeScope(MINOR).floatingStagePreRelease('super')
+        '1.0.0'              | Versioners.builder().useScope(MAJOR).useFinal()
+        '0.1.0'              | Versioners.builder().useScope(MINOR).useFinal()
+        '1.0.0-other.1'      | Versioners.builder().useScope(MAJOR).useFixedStage('other')
+        '0.1.0-rc.4'         | Versioners.builder().useScope(MINOR).useFixedStage('rc')
+        '0.1.0-rc.3.other.1' | Versioners.builder().useScope(MINOR).useFloatingStage('other')
+        '0.1.0-super.1'      | Versioners.builder().useScope(MINOR).useFloatingStage('super')
     }
 
     @Unroll
@@ -108,12 +108,12 @@ class VersionerBuilderSpec extends Specification {
         doInfer(builder.build()) == Version.valueOf(expected)
         where:
         expected | builder
-        '2.0.0'  | Versioners.builder().changeScope(MAJOR).finalRelease()
-        '1.1.0'  | Versioners.builder().changeScope(MINOR).finalRelease()
-        '1.0.1'  | Versioners.builder().changeScope(PATCH).finalRelease()
-        '2.0.0-other.1' | Versioners.builder().changeScope(MAJOR).fixedStagePreRelease('other')
-        '1.1.0-other.1' | Versioners.builder().changeScope(MINOR).fixedStagePreRelease('other')
-        '1.0.1-other.1' | Versioners.builder().changeScope(PATCH).fixedStagePreRelease('other')
+        '2.0.0'  | Versioners.builder().useScope(MAJOR).useFinal()
+        '1.1.0'  | Versioners.builder().useScope(MINOR).useFinal()
+        '1.0.1'  | Versioners.builder().useScope(PATCH).useFinal()
+        '2.0.0-other.1' | Versioners.builder().useScope(MAJOR).useFixedStage('other')
+        '1.1.0-other.1' | Versioners.builder().useScope(MINOR).useFixedStage('other')
+        '1.0.1-other.1' | Versioners.builder().useScope(PATCH).useFixedStage('other')
     }
 
     @Unroll
@@ -127,9 +127,9 @@ class VersionerBuilderSpec extends Specification {
         thrown(IllegalArgumentException)
         where:
         builder << [
-                Versioners.builder().changeScope(PATCH).finalRelease(),
-                Versioners.builder().changeScope(PATCH).fixedStagePreRelease('other'),
-                Versioners.builder().changeScope(MINOR).fixedStagePreRelease('other')
+                Versioners.builder().useScope(PATCH).useFinal(),
+                Versioners.builder().useScope(PATCH).useFixedStage('other'),
+                Versioners.builder().useScope(MINOR).useFixedStage('other')
         ]
     }
 }
