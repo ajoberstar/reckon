@@ -79,11 +79,10 @@ public class VersionerBuilder {
         Objects.requireNonNull(normal, "Normal versioner cannot be null.");
         Objects.requireNonNull(preRelease, "PreRelease versioner cannot be null.");
         Objects.requireNonNull(buildMetadata, "Build metadata versioner cannot be null.");
+        Versioner versioner = buildMetadata.compose(preRelease).compose(normal);
         return (base, vcs) -> {
+            Version inferred = versioner.infer(base, vcs);
             Version previous = vcs.getPreviousVersion().orElse(base);
-            Version inferredNormal = normal.infer(base, vcs);
-            Version inferredPreRelease = preRelease.infer(inferredNormal, vcs);
-            Version inferred = buildMetadata.infer(inferredPreRelease, vcs);
             if (inferred.greaterThanOrEqualTo(previous)) {
                 return inferred;
             } else {
