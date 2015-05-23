@@ -41,32 +41,31 @@ class GrgitVcs implements Vcs {
 
     @Override
     Optional<Version> getPreviousRelease() {
-        Commit head = git.head()
-        return getVersions { tag -> tag.commit == head || git.isAncestorOf(tag, head) }
-            .filter { it.preReleaseVersion.empty }
+        return getPreviousVersions()
+            .filter { version -> version.preReleaseVersion.empty }
             .findFirst()
     }
 
     @Override
     Optional<Version> getPreviousVersion() {
+        return getPreviousVersions().findFirst()
+    }
+
+    private Stream<Version> getPreviousVersions() {
         Commit head = git.head()
         return getVersions { tag -> tag.commit == head || git.isAncestorOf(tag, head) }
-                .findFirst()
     }
 
-    private Stream<Version> getVersions(Predicate<Tag> filter) {
+    private Stream<Version> getVersions(Predicate<Tag> tagFilter) {
         return git.tag.list().stream()
-            .filter(filter)
-            .peek { tag -> println "Included $tag" }
+            .filter(tagFilter)
             .map { tag -> toVersionTag(tag) }
             .flatMap { opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty() }
-            .peek { vtag -> println "Valid version tag: $vtag"}
             .sorted(byAncestryThenVersion)
-            .peek { vtag -> println "Sorted version tag: $vtag"}
-            .map { it.version }
+            .map { it.version } 
     }
 
-    Optional<VersionTag> toVersionTag(Tag tag) {
+    private Optional<VersionTag> toVersionTag(Tag tag) {
         return tagParser.apply(tag).map { version -> new VersionTag(tag, version) }
     }
 
