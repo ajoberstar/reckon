@@ -106,11 +106,11 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFixedStage('beta').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
+        Versioners.useFixedStage('rc').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
         where:
         intermediate         | inferred
-        '1.2.3-beta.1'       | '1.2.3-beta.2'
-        '4.0.0-beta.3.dev.4' | '4.0.0-beta.4'
+        '1.2.3-rc.1'       | '1.2.3-rc.2'
+        '4.0.0-rc.3.dev.4' | '4.0.0-rc.4'
     }
 
     def 'useFixedStage uses "stage.1" if base version has different stage'() {
@@ -118,7 +118,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFixedStage('beta').infer(Version.valueOf('4.0.0-alpha.3.dev.4'), vcs) == Version.valueOf('4.0.0-beta.1')
+        Versioners.useFixedStage('rc').infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
     }
 
     @Unroll
@@ -131,7 +131,7 @@ class VersionersSpec extends Specification {
         where:
         intermediate         | inferred
         '1.2.3-dev.1'        | '1.2.3-dev.2'
-        '4.0.0-beta.3.dev.4' | '4.0.0-beta.3.dev.5'
+        '4.0.0-rc.3.dev.4'   | '4.0.0-rc.3.dev.5'
     }
 
     def 'useFloatingStage appends "stage.1" if base version had higher-precedence stage'() {
@@ -147,7 +147,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFloatingStage('beta').infer(Version.valueOf('4.0.0-alpha.3.dev.4'), vcs) == Version.valueOf('4.0.0-beta.1')
+        Versioners.useFloatingStage('rc').infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
     }
 
     def 'useSnapshotStage uses SNAPSHOT as pre-release'() {
