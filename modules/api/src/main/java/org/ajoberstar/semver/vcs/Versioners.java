@@ -3,6 +3,7 @@ package org.ajoberstar.semver.vcs;
 import com.github.zafarkhaja.semver.Version;
 
 import java.util.Objects;
+import java.util.Arrays;
 
 public final class Versioners {
     private Versioners() {
@@ -58,8 +59,10 @@ public final class Versioners {
     public static Versioner useFixedStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         return (base, vcs) -> {
-            if (stage.equals(parseStage(base))) {
-                return base.incrementPreReleaseVersion();
+            String[] previousStage = parseStage(base);
+            if (stage.equals(previousStage[0])) {
+                String stageBase = String.join(".", previousStage);
+                return base.setPreReleaseVersion(stageBase).incrementPreReleaseVersion();
             } else {
                 return base.setPreReleaseVersion(stage).incrementPreReleaseVersion();
             }
@@ -69,10 +72,10 @@ public final class Versioners {
     public static Versioner useFloatingStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         return (base, vcs) -> {
-            String previousStage = parseStage(base);
-            if (stage.equals(previousStage)) {
+            String[] previousStage = parseStage(base);
+            if (stage.equals(previousStage[0])) {
                 return base.incrementPreReleaseVersion();
-            } else if (stage.compareTo(previousStage) > 0) {
+            } else if (stage.compareTo(previousStage[0]) > 0) {
                 return base.setPreReleaseVersion(stage).incrementPreReleaseVersion();
             } else {
                 return base.setPreReleaseVersion(base.getPreReleaseVersion() + "." + stage).incrementPreReleaseVersion();
@@ -84,9 +87,15 @@ public final class Versioners {
         return (base, vcs) -> base.setPreReleaseVersion("SNAPSHOT");
     }
 
-    private static String parseStage(Version inferred) {
+    private static String[] parseStage(Version inferred) {
         String[] preRelease = inferred.getPreReleaseVersion().split("\\.");
-        return preRelease[0];
+        boolean hasCount = preRelease.length == 1 ? false : preRelease[1].chars()
+            .allMatch(Character::isDigit);
+        if (hasCount) {
+            return Arrays.copyOfRange(preRelease, 0, 2);
+        } else {
+            return Arrays.copyOfRange(preRelease, 0, 1);
+        }
     }
 
     public static Versioner enforcePrecedence() {
