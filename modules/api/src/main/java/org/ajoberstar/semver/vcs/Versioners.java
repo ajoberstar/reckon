@@ -59,10 +59,10 @@ public final class Versioners {
     public static Versioner useFixedStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         return (base, vcs) -> {
-            String[] previousStage = parseStage(base);
-            if (stage.equals(previousStage[0])) {
-                String stageBase = String.join(".", previousStage);
-                return base.setPreReleaseVersion(stageBase).incrementPreReleaseVersion();
+            Version sanitized = sanitizeStage(base, stage, true);
+            String previousStage = sanitized.getPreReleaseVersion().split("\\.")[0];
+            if (stage.equals(previousStage)) {
+                return sanitized.incrementPreReleaseVersion();
             } else {
                 return base.setPreReleaseVersion(stage).incrementPreReleaseVersion();
             }
@@ -72,13 +72,14 @@ public final class Versioners {
     public static Versioner useFloatingStage(String stage) {
         Objects.requireNonNull(stage, "Stage cannot be null.");
         return (base, vcs) -> {
-            String[] previousStage = parseStage(base);
-            if (stage.equals(previousStage[0])) {
-                return base.incrementPreReleaseVersion();
-            } else if (stage.compareTo(previousStage[0]) > 0) {
-                return base.setPreReleaseVersion(stage).incrementPreReleaseVersion();
+            Version sanitized = sanitizeStage(base, stage, false);
+            String[] prevStages = sanitized.getPreReleaseVersion().split("\\.");
+            if (Arrays.binarySearch(prevStages, stage) >= 0) {
+                return sanitized.incrementPreReleaseVersion();
+            } else if (stage.compareTo(prevStages[0]) > 0) {
+                return sanitized.setPreReleaseVersion(stage).incrementPreReleaseVersion();
             } else {
-                return base.setPreReleaseVersion(base.getPreReleaseVersion() + "." + stage).incrementPreReleaseVersion();
+                return sanitized.setPreReleaseVersion(sanitized.getPreReleaseVersion() + "." + stage).incrementPreReleaseVersion();
             }
         };
     }
@@ -87,14 +88,33 @@ public final class Versioners {
         return (base, vcs) -> base.setPreReleaseVersion("SNAPSHOT");
     }
 
-    private static String[] parseStage(Version inferred) {
-        String[] preRelease = inferred.getPreReleaseVersion().split("\\.");
-        boolean hasCount = preRelease.length == 1 ? false : preRelease[1].chars()
-            .allMatch(Character::isDigit);
-        if (hasCount) {
-            return Arrays.copyOfRange(preRelease, 0, 2);
+    private static Version sanitizeStage(Version inferred, String stage, boolean fixed) {
+        String[] rawIdents = inferred.getPreReleaseVersion().split("\\.");
+        int rawEndIndex = getEndIndex(rawIdents, 0);
+        int limit;
+        if (stage.equals(rawIdents[0])) {
+           limit = 2; 
+        } else if (!fixed) {
+            if (rawIdents.length > 2 && stage.equals(rawIdents[2])) {
+                limit = 4;
+            } else {
+                limit = 2;
+            }
         } else {
-            return Arrays.copyOfRange(preRelease, 0, 1);
+            return Version.valueOf(inferred.getNormalVersion());
+        }
+        int endIndex = Math.min(rawEndIndex, limit);
+        String[] validIdents = Arrays.copyOfRange(rawIdents, 0, endIndex);
+        String preRelease = String.join(".", validIdents);
+        return inferred.setPreReleaseVersion(preRelease);
+    }
+
+    private static int getEndIndex(String[] array, int index) {
+        if (array.length > index) {
+           boolean isValid = index % 2 == 0 || array[index].chars().allMatch(Character::isDigit);
+           return isValid ? getEndIndex(array, index + 1) : index;
+        } else {
+            return index;
         }
     }
 

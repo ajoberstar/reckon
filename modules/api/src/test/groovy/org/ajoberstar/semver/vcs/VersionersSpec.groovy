@@ -131,6 +131,7 @@ class VersionersSpec extends Specification {
         where:
         intermediate         | inferred
         '1.2.3-dev.1'        | '1.2.3-dev.2'
+        '1.2.3-dev.2.any.1'  | '1.2.3-dev.3'
         '4.0.0-rc.3.dev.4'   | '4.0.0-rc.3.dev.5'
     }
 
