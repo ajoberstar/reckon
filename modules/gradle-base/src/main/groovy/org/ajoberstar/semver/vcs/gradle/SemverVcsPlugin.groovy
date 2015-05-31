@@ -20,6 +20,13 @@ class SemverVcsPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         def extension = project.extensions.create('semver', SemverExtension)
+        
+        extension.with {
+            finalStage()
+            fixedStages('rc', 'milestone')
+            floatingStages('dev')
+        }
+
         extension.versionerSupplier = {
             return projectProp(project, FORCE_PROP).map { version ->
                 try {
