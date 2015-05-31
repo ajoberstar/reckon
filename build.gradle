@@ -2,12 +2,9 @@ buildscript {
     repositories { jcenter() }
     dependencies {
         classpath 'org.ajoberstar:gradle-git:1.2.0-milestone.4'
-        classpath 'org.ajoberstar:gradle-defaults:0.6.0-milestone.6'
+        classpath 'org.ajoberstar:gradle-defaults:0.6.0-milestone.7'
     }
 }
-
-project.sonatypeUsername = null
-project.sonatypePassword = null
 
 apply plugin: 'org.ajoberstar.defaults'
 
@@ -21,6 +18,7 @@ defaults {
 
     bintrayRepo = 'libraries'
     bintrayLabels = ['vcs', 'git', 'semver', 'gradle']
+    bintrayToCentral = false
 
     developers = [
         [id: 'ajoberstar', name: 'Andrew Oberstar', email: 'andrew@ajoberstar.org']
