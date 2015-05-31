@@ -1,5 +1,6 @@
 package org.ajoberstar.semver.vcs.gradle
 
+import com.github.zafarkhaja.semver.ParseException
 import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.semver.vcs.Stage
 import org.ajoberstar.semver.vcs.Versioner
@@ -21,13 +22,17 @@ class SemverVcsPlugin implements Plugin<Project> {
         def extension = project.extensions.create('semver', SemverExtension)
         extension.versionerSupplier = {
             return projectProp(project, FORCE_PROP).map { version ->
-                Versioners.force(version)
+                try {
+                    Versioners.force(version)
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException("Invalid forced version: ${version}", e)
+                }
             }.orElseGet {
                 Scope scope = projectProp(project, SCOPE_PROP).map { value ->
                     try {
                         Scope.valueOf(value.toUpperCase())
                     } catch(IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Scope name ${value} is not valid: ${Scope.values()*.toString()*.toLowerCase()}")
+                        throw new IllegalArgumentException("Scope name ${value} is not valid: ${Scope.values()*.toString()*.toLowerCase()}", e)
                     }
                 }.orElse(extension.defaultScope)
 
@@ -66,8 +71,12 @@ class SemverVcsPlugin implements Plugin<Project> {
         }
 
         private String infer() {
-            Version base = projectProp(project, BASE_PROP).map {
-                Version.valueOf(it)
+            Version base = projectProp(project, BASE_PROP).map { version ->
+                try {
+                    Versioners.force(version)
+                } catch (ParseException e) {
+                    throw new IllegalArgumentException("Invalid forced version: ${version}", e)
+                }
             }.orElse(Versioners.VERSION_0)
 
             Version inferred = extension.versionerSupplier.get()
