@@ -37,8 +37,8 @@ public final class Versioners {
     }
 
     public static Versioner forScopeAndStage(Scope scope, Stage stage, boolean enforcePrecedence) {
-        Objects.requireNonNull(scope);
-        Objects.requireNonNull(stage);
+        Objects.requireNonNull(scope, "Scope cannot be null.");
+        Objects.requireNonNull(stage, "Stage cannot be null.");
         return identity()
                 .compose(enforcePrecedence ? enforcePrecedence() : identity())
                 .compose(stage.getVersioner())

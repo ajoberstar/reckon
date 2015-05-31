@@ -31,7 +31,7 @@ class SemverVcsPlugin implements Plugin<Project> {
                     Optional.ofNullable(extension.stages[name])
                 }.orElse(extension.defaultStage)
 
-                return Versioners.forScopeAndStage(scope, stage, extension.enforcePrecedence)
+                Versioners.forScopeAndStage(scope, stage, extension.enforcePrecedence)
             }
         }
 
