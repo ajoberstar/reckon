@@ -106,7 +106,11 @@ public final class Stage implements Comparable<Stage> {
         int endIndex = Math.min(rawEndIndex, limit);
         String[] validIdents = Arrays.copyOfRange(rawIdents, 0, endIndex);
         String preRelease = String.join(".", validIdents);
-        return inferred.setPreReleaseVersion(preRelease);
+        if (preRelease == null || preRelease.isEmpty()) {
+            return inferred;
+        } else {
+            return inferred.setPreReleaseVersion(preRelease);
+        }
     }
 
     private static int getEndIndex(String[] array, int index) {
