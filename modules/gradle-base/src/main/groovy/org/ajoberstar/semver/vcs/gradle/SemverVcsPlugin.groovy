@@ -28,7 +28,9 @@ class SemverVcsPlugin implements Plugin<Project> {
                 }.orElse(extension.defaultScope)
 
                 Stage stage = projectProp(project, STAGE_PROP).flatMap { name ->
-                    Optional.ofNullable(extension.stages[name])
+                    Optional.ofNullable(extension.stages[name]).orElseThrow {
+                        new IllegalArgumentException("Stage name ${name} is not valid: ${extension.stages.keySet()}")
+                    }
                 }.orElse(extension.defaultStage)
 
                 Versioners.forScopeAndStage(scope, stage, extension.enforcePrecedence)
