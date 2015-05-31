@@ -1,7 +1,7 @@
 buildscript {
     repositories { jcenter() }
     dependencies {
-        classpath 'org.ajoberstar:gradle-git:1.2.0-milestone.4'
+        classpath 'org.ajoberstar:gradle-git:1.2.0-milestone.5'
         classpath 'org.ajoberstar:gradle-defaults:0.6.0-milestone.7'
     }
 }
