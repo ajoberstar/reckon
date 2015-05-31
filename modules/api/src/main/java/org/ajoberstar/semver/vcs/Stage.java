@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public final class Stage implements Comparable<Stage> {
+    private static final String FINAL_NAME = "final";
+
     private final String name;
     private final Versioner versioner;
 
@@ -41,11 +43,19 @@ public final class Stage implements Comparable<Stage> {
 
     @Override
     public int compareTo(Stage that) {
-        return this.getName().compareTo(that.getName());
+        if (this.getName().equals(that.getName())) {
+            return 0;
+        } else if (this.getName().equals(FINAL_NAME)) {
+            return 1;
+        } else if (that.getName().equals(FINAL_NAME)) {
+            return -1;
+        } else {
+            return this.getName().compareTo(that.getName());
+        }
     }
 
     public static Stage finalStage() {
-        return new Stage("final", (base, vcs) -> Version.valueOf(base.getNormalVersion()));
+        return new Stage(FINAL_NAME, (base, vcs) -> Version.valueOf(base.getNormalVersion()));
     }
 
     public static Stage fixedStage(String name) {
