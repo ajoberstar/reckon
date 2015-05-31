@@ -6,7 +6,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.ajoberstar.semver.vcs.Scope
 import org.ajoberstar.semver.vcs.Versioners
-import org.ajoberstar.semver.vcs.VersionerBuilder
 
 import java.util.concurrent.atomic.AtomicReference
 

@@ -50,7 +50,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        scope.getVersioner().infer(base, vcs) == Version.valueOf(inferred)
         where:
         scope | inferred
         MAJOR | '2.0.0'
@@ -64,7 +64,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.of(Version.forIntegers(2, 3, 4))
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        scope.getVersioner().infer(base, vcs) == Version.valueOf(inferred)
         where:
         scope | inferred
         MAJOR | '3.0.0'
@@ -78,7 +78,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.of(Version.forIntegers(2, 3, 4))
         vcs.previousVersion >> Optional.of(Version.valueOf('2.4.0-beta.1'))
         expect:
-        Versioners.useScope(scope).infer(base, vcs) == Version.valueOf(inferred)
+        scope.getVersioner().infer(base, vcs) == Version.valueOf(inferred)
         where:
         scope | inferred
         MAJOR | '3.0.0'
@@ -92,7 +92,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFinalStage().infer(Version.valueOf(input), vcs) == Version.valueOf(inferred)
+        Stage.finalStage().getVersioner().infer(Version.valueOf(input), vcs) == Version.valueOf(inferred)
         where:
         input              | inferred
         '2.3.4'            | '2.3.4'
@@ -106,7 +106,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFixedStage('rc').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
+        Stage.fixedStage('rc').getVersioner().infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
         where:
         intermediate         | inferred
         '1.2.3-rc.1'       | '1.2.3-rc.2'
@@ -118,7 +118,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFixedStage('rc').infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
+        Stage.fixedStage('rc').getVersioner().infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
     }
 
     @Unroll
@@ -127,7 +127,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFloatingStage('dev').infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
+        Stage.floatingStage('dev').getVersioner().infer(Version.valueOf(intermediate), vcs) == Version.valueOf(inferred)
         where:
         intermediate         | inferred
         '1.2.3-dev.1'        | '1.2.3-dev.2'
@@ -140,7 +140,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFloatingStage('dev').infer(Version.valueOf('4.0.0-rc.3'), vcs) == Version.valueOf('4.0.0-rc.3.dev.1')
+        Stage.floatingStage('dev').getVersioner().infer(Version.valueOf('4.0.0-rc.3'), vcs) == Version.valueOf('4.0.0-rc.3.dev.1')
     }
 
     def 'useFloatingStage uses "stage.1" if base version had lower-precedence stage'() {
@@ -148,7 +148,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useFloatingStage('rc').infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
+        Stage.floatingStage('rc').getVersioner().infer(Version.valueOf('4.0.0-milestone.3.dev.4'), vcs) == Version.valueOf('4.0.0-rc.1')
     }
 
     def 'useSnapshotStage uses SNAPSHOT as pre-release'() {
@@ -156,7 +156,7 @@ class VersionersSpec extends Specification {
         vcs.previousRelease >> Optional.empty()
         vcs.previousVersion >> Optional.empty()
         expect:
-        Versioners.useSnapshotStage().infer(Version.valueOf("4.0.0-beta.1"), vcs) == Version.valueOf("4.0.0-SNAPSHOT")
+        Stage.snapshotStage().getVersioner().infer(Version.valueOf("4.0.0-beta.1"), vcs) == Version.valueOf("4.0.0-SNAPSHOT")
     }
 
     def 'enforcePrecedence returns base version if it is higher than previous version'() {
