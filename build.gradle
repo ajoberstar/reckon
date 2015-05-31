@@ -90,7 +90,7 @@ project(':semver-vcs-gradle-grgit') {
         compile gradleApi()
         compile project(':semver-vcs-gradle-base')
         compile project(':semver-vcs-grgit')
-        runtime 'org.ajoberstar:gradle-git:1.2.0-milestone.1'
+        runtime 'org.ajoberstar:gradle-git:1.2.0-milestone.4'
         testCompile "org.spockframework:spock-core:${depVersions.spock}"
     }
 }
