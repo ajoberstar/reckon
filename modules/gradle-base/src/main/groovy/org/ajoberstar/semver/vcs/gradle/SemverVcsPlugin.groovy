@@ -24,7 +24,11 @@ class SemverVcsPlugin implements Plugin<Project> {
                 Versioners.force(version)
             }.orElseGet {
                 Scope scope = projectProp(project, SCOPE_PROP).map { value ->
-                    Scope.valueOf(value.toUpperCase())
+                    try {
+                        Scope.valueOf(value.toUpperCase())
+                    } catch(IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Scope name ${value} is not valid: ${Scope.values()*.toString()*.toLowerCase()}")
+                    }
                 }.orElse(extension.defaultScope)
 
                 Stage stage = projectProp(project, STAGE_PROP).map { name ->
