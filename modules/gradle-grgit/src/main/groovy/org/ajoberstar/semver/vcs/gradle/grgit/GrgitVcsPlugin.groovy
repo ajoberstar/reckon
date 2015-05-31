@@ -10,7 +10,7 @@ class GrgitVcsPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.pluginManager.apply('org.ajoberstar.grgit')
         project.pluginManager.apply('org.ajoberstar.semver-vcs-base')
-        
+
         project.extensions.getByName('semver').with {
             vcs = new GrgitVcs(project.grgit)
         }
