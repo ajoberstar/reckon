@@ -75,7 +75,7 @@ class SemverVcsPlugin implements Plugin<Project> {
                 try {
                     Version.valueOf(version)
                 } catch (ParseException e) {
-                    throw new IllegalArgumentException("Invalid forced version: ${version}", e)
+                    throw new IllegalArgumentException("Invalid base version: ${version}", e)
                 }
             }.orElse(Versioners.VERSION_0)
 
