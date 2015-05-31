@@ -16,9 +16,20 @@ class SemverExtension {
 
     Scope defaultScope = Scope.MINOR
 
-    SortedSet<Stage> stages = []
+    SortedSet<Stage> stages = [] as SortedSet
 
     Stage defaultStage
+
+    SemverExtension stages(Stage... stages) {
+        return stages(stages as List)
+    }
+
+    SemverExtension stages(Iterable<Stage> stages) {
+        stages.each { stage ->
+            this.stages << stage
+        }
+        return this
+    }
 
     Stage getDefaultStage() {
         return defaultStage ?: stages.find()
@@ -28,35 +39,19 @@ class SemverExtension {
         return stages.find { it.name == name }
     }
 
-    SemverExtension clearStages() {
-        stages = []
-        return this
+    Stage finalStage() {
+        return Stage.finalStage()
     }
 
-    SemverExtension stages(Stage... stages) {
-        stages.each { stage ->
-            this.stages << stage
-        }
-        return this
+    List<Stage> fixedStages(String... names) {
+        return names.collect { Stage.fixedStage(it) }
     }
 
-    SemverExtension finalStage() {
-        stages(Stage.finalStage())
-        return this
+    List<Stage> floatingStages(String... names) {
+        return names.collect { Stage.floatingStage(it) }
     }
 
-    SemverExtension fixedStages(String... names) {
-        stages(names.collect { Stage.fixedStage(it) } as Stage[])
-        return this
-    }
-
-    SemverExtension floatingStages(String... names) {
-        stages(names.collect { Stage.floatingStage(it) } as Stage[])
-        return this
-    }
-
-    SemverExtension snapshotStage() {
-        stages(Stage.snapshotStage())
-        return this
+    Stage snapshotStage() {
+        return Stage.snapshotStage()
     }
 }

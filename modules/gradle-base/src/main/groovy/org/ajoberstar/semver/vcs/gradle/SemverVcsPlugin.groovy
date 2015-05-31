@@ -21,9 +21,9 @@ class SemverVcsPlugin implements Plugin<Project> {
         def extension = project.extensions.create('semver', SemverExtension)
 
         extension.with {
-            finalStage()
-            fixedStages('rc', 'milestone')
-            floatingStages('dev')
+            stages finalStage()
+            stages fixedStages('rc', 'milestone')
+            stages floatingStages('dev')
         }
 
         extension.versionerSupplier = {
