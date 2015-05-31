@@ -21,7 +21,7 @@ class SemverExtension {
     Stage defaultStage
 
     SemverExtension stages(Stage... stages) {
-        return stages(stages as List)
+        return this.stages(stages as List)
     }
 
     SemverExtension stages(Iterable<Stage> stages) {
