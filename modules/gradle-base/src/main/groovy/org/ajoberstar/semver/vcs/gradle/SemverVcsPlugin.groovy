@@ -73,7 +73,7 @@ class SemverVcsPlugin implements Plugin<Project> {
         private String infer() {
             Version base = projectProp(project, BASE_PROP).map { version ->
                 try {
-                    Versioners.force(version)
+                    Version.valueOf(version)
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("Invalid forced version: ${version}", e)
                 }
