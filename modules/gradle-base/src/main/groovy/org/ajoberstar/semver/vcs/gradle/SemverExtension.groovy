@@ -37,12 +37,12 @@ class SemverExtension {
     }
 
     SemverExtension fixedStages(String... names) {
-        stages(names.collect { Stage.fixedStage(it) })
+        stages(names.collect { Stage.fixedStage(it) } as Stage[])
         return this
     }
 
     SemverExtension floatingStages(String... names) {
-        stages(names.collect { Stage.floatingStage(it) })
+        stages(names.collect { Stage.floatingStage(it) } as Stage[])
         return this
     }
 
