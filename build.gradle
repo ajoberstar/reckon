@@ -1,9 +1,9 @@
-plugins {
-    id 'groovy'
-    id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.1'
-    id 'org.ajoberstar.defaults' version '0.5.3'
+buildscript {
+    repositories { jcenter() }
+    dependencies { classpath 'org.ajoberstar:gradle-defaults:0.6.0-milestone.3' }
 }
+
+apply plugin: 'org.ajoberstar.defaults'
 
 ext.depVersions = [
     groovy: '2.4.1',
@@ -24,12 +24,13 @@ defaults {
 }
 
 allprojects {
-    apply plugin: 'maven-publish'
     group = 'org.ajoberstar'
 }
 
 subprojects {
     apply plugin: 'groovy'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = '1.8'
 
