@@ -20,6 +20,10 @@ class SemverExtension {
 
     Stage defaultStage
 
+    void setStages(Iterable<Stage> stages) {
+        this.stages = stages as SortedSet
+    }
+
     SemverExtension stages(Stage... stages) {
         return this.stages(stages as List)
     }
