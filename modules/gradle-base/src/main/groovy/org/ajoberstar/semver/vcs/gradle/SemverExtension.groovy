@@ -16,17 +16,26 @@ class SemverExtension {
 
     Scope defaultScope = Scope.MINOR
 
+    SortedSet<Stage> stages = []
+
     Stage defaultStage
 
     Stage getDefaultStage() {
-        return defaultStage ?: stages.values().min()
+        return defaultStage ?: stages.find()
     }
 
-    Map<String, Stage> stages = [:]
+    Stage getStage(String name) {
+        return stages.find { it.name == name }
+    }
+
+    SemverExtension clearStages() {
+        stages = []
+        return this
+    }
 
     SemverExtension stages(Stage... stages) {
         stages.each { stage ->
-            this.stages[stage.name] = stage
+            this.stages << stage
         }
         return this
     }

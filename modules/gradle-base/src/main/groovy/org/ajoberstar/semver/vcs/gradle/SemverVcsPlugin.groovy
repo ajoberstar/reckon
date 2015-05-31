@@ -3,7 +3,6 @@ package org.ajoberstar.semver.vcs.gradle
 import com.github.zafarkhaja.semver.ParseException
 import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.semver.vcs.Stage
-import org.ajoberstar.semver.vcs.Versioner
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.ajoberstar.semver.vcs.Scope
@@ -20,7 +19,7 @@ class SemverVcsPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         def extension = project.extensions.create('semver', SemverExtension)
-        
+
         extension.with {
             finalStage()
             fixedStages('rc', 'milestone')
@@ -44,7 +43,7 @@ class SemverVcsPlugin implements Plugin<Project> {
                 }.orElse(extension.defaultScope)
 
                 Stage stage = projectProp(project, STAGE_PROP).map { name ->
-                    Optional.ofNullable(extension.stages[name]).orElseThrow {
+                    Optional.ofNullable(extension.getStage(name)).orElseThrow {
                         new IllegalArgumentException("Stage name ${name} is not valid: ${extension.stages.keySet()}")
                     }
                 }.orElse(extension.defaultStage)
