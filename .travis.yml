@@ -2,4 +2,4 @@ language: java
 install: ""
 script: TERM=dumb ./gradlew clean check
 jdk:
-    - openjdk8
+    - oraclejdk8
