@@ -40,7 +40,35 @@ will calculate the project's version (given a VCS impl).
 
 ## How to use?
 
-TBD
+The only end-user module right now is the `org.ajoberstar.semver-vcs-grgit` Gradle plugin.
+
+```groovy
+buildscript {
+	repositories { jcenter() }
+	dependencies { classpath 'org.ajoberstar:semver-vcs-gradle-grgit:<version>' }
+}
+
+apply plugin: 'org.ajoberstar.semver-vcs-grgit'
+
+semver {
+	// optionally configure how the version will be calculated
+}
+```
+
+When you run Gradle, pass in any of the following properties to influence the version being inferred:
+
+* `semver.scope` - one of `major`, `minor`, or `patch` to specify which component of the previous release should be incremented
+* `semver.stage` - (by default, one of `final`, `rc`, `milestone`, or `dev`) to specify what phase of development you are in
+* `semver.base` - for your first version, if you don't want to start from `0.0.0`
+* `semver.force` - if you're in a bind and just need a specific version to be used
+
+For example if the previous release was `1.2.4`:
+
+```
+./gradlew build -Psemver.scope=minor -Psemver.stage=milestone
+Inferred version 1.3.0-milestone.1
+...
+```
 
 For full documentation see the [wiki](https://github.com/ajoberstar/semver-vcs/wiki).
 
