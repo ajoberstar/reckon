@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/ajoberstar/semver-vcs.png?branch=master)](https://travis-ci.org/ajoberstar/semver-vcs)
 [![Maintainer Status](http://stillmaintained.com/ajoberstar/semver-vcs.png)](http://stillmaintained.com/ajoberstar/semver-vcs)
 [ ![Download](https://api.bintray.com/packages/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/images/download.svg) ](https://bintray.com/ajoberstar/semver-vcs/org.ajoberstar%3Asemver-vcs/_latestVersion)
-[![Stories in Ready](https://badge.waffle.io/ajoberstar/semver-vcs.png?label=ready&title=Ready)](https://waffle.io/ajoberstar/semver-vcs)
 
 ## Introduction
 
