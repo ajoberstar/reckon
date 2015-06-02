@@ -56,20 +56,13 @@ project(':semver-vcs-api') {
     }
 }
 
-project(':semver-vcs-test') {
-    dependencies {
-        compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
-        compile "org.spockframework:spock-core:${depVersions.spock}"
-        compile project(':semver-vcs-api')
-    }
-}
-
 project(':semver-vcs-grgit') {
     dependencies {
         compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
         compile project(':semver-vcs-api')
         compile 'org.ajoberstar:grgit:1.2.0'
-        testCompile project(':semver-vcs-test')
+        testCompile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
+        testCompile "org.spockframework:spock-core:${depVersions.spock}"
     }
 }
 
