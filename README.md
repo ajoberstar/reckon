@@ -94,5 +94,7 @@ approach you would like to take.
 
 ## Acknowledgements
 
-Thanks to [Zafar Khaja](https://github.com/zafarkhaja) for the very helpful
+Thanks to [everyone](https://github.com/ajoberstar/gradle-git/graphs/contributors)
+who contributed to previous iterations of this library and to
+[Zafar Khaja](https://github.com/zafarkhaja) for the very helpful
 [java-semver](https://github.com/zafarkhaja/java-semver) library.
