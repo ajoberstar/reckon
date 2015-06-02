@@ -47,7 +47,8 @@ For full documentation see the [wiki](https://github.com/ajoberstar/semver-vcs/w
 
 ## How to implement?
 
-TBD
+* VCS providers should implement [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html).
+* Gradle plugin authors should provide a plugin that applies `org.ajoberstar.semver-base` and configures the `semver.vcs` property.
 
 See the reference documentation linked in the *Modules* section for more information.
 
@@ -60,7 +61,7 @@ situation as much as possible. Stack traces and logs are always helpful.
 
 Contributions are very welcome and go through the normal pull request process.
 For larger or more complex changes, please open an issue first to discuss the
-approach you plan to take.
+approach you would like to take.
 
 ## Acknowledgements
 
