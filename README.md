@@ -85,13 +85,13 @@ See the reference documentation linked in the *Modules* section for more informa
 ## Have a question or found a bug?
 
 Open an [issue](https://github.com/ajoberstar/semver-vcs/issues) describing your
-situation as much as possible. Stack traces and logs are always helpful.
+situation. Stack traces and logs are always helpful.
 
 ## Contributing
 
-Contributions are very welcome and go through the normal pull request process.
+Contributions are very welcome and should be submitted as pull requests.
 For larger or more complex changes, please open an issue first to discuss the
-approach you would like to take.
+approach.
 
 ## Acknowledgements
 
