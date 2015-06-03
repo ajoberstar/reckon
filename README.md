@@ -73,7 +73,7 @@ Inferred version 1.3.0-milestone.1
 - [semver-vcs-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-grgit/groovydoc) - Implementation of a grgit backend.
 - [semver-vcs-gradle-base](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-base/groovydoc) - Base Gradle plugin that
 will calculate the project's version (given a VCS impl).
-- [semver-vcs-gradle-grgit](http://ajoberstar.org/semver-vcs/docs/semver-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
+- [semver-vcs-gradle-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
 
 ## How to implement?
 
