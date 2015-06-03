@@ -1,7 +1,7 @@
 # semver-vcs
 
 [![Travis](https://img.shields.io/travis/ajoberstar/semver-vcs.svg)](https://travis-ci.org/ajoberstar/semver-vcs)
-[![Maintainer Status](http://stillmaintained.com/ajoberstar/semver-vcs.png)](http://stillmaintained.com/ajoberstar/semver-vcs)
+[![Maintainer Status](http://stillmaintained.com/ajoberstar/semver-vcs.svg)](http://stillmaintained.com/ajoberstar/semver-vcs)
 [![Download](https://api.bintray.com/packages/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/images/download.svg)](https://bintray.com/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/_latestVersion)
 [![GitHub license](https://img.shields.io/github/license/ajoberstar/semver-vcs.svg)](https://github.com/ajoberstar/semver-vcs/blob/master/LICENSE)
 
