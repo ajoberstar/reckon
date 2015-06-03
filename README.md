@@ -29,7 +29,7 @@ but doesn't need to be specific to Gradle or Git.
 
 * [Gradle](http://gradle.org/) (in progress)
 
-## How to use?
+## Usage
 
 For full documentation see the [wiki](https://github.com/ajoberstar/semver-vcs/wiki).
 
@@ -75,17 +75,21 @@ Inferred version 1.3.0-milestone.1
 will calculate the project's version (given a VCS impl).
 - [semver-vcs-gradle-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
 
-## How to implement?
+## Implementing
+
+semver-vcs is intended to be extended to new VCSs and used in new contexts.
 
 * VCS providers should implement [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html).
 * Gradle plugin authors should provide a plugin that applies `org.ajoberstar.semver-base` and configures the `semver.vcs` property.
 
 See the reference documentation linked in the *Modules* section for more information.
 
-## Have a question or found a bug?
+## Questions, Bugs, and Requests
 
 Open an [issue](https://github.com/ajoberstar/semver-vcs/issues) describing your
-situation. Stack traces and logs are always helpful.
+situation.
+
+For errors, please include logs and/or stack traces when available.
 
 ## Contributing
 
