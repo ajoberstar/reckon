@@ -5,35 +5,58 @@
 [![Download](https://api.bintray.com/packages/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/images/download.svg)](https://bintray.com/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/_latestVersion)
 [![GitHub license](https://img.shields.io/github/license/ajoberstar/semver-vcs.svg?style=flat-square)](https://github.com/ajoberstar/semver-vcs/blob/master/LICENSE)
 
-## Introduction
+## Why do you care?
 
-semver-vcs provides an API for calculating a project's current version number based
-on the state of the version control system (VCS) and (possibly) some user input. You
-can think of it like a more flexible `git describe`.
+### Get your version number out of my build file!
 
-###### Supported VCSs
+Most build tools and release systems require you to hardcode a version number into
+a file in your source repository. This results in commit messages like "Bumping
+version number.". Even if you don't have to do this manually, your release plugin
+probably modifies your build file and commits the new version.
+
+However, your version control system (VCS) also contains tags with a version
+number pointing to a specific commit. Git illustrates the power of this with
+the `git describe` command which creates a version number based on the
+amount of change since the previous tag.
+
+Your VCS also likely contains branches that indicate specific stages of development
+or indicate maintenance for a specific subset of versions.
+
+With this much information available to the Vcs, there's very little the user
+really should have to provide to get the next version number. And it certainly
+doesn't need to be hardcoded anywhere.
+
+### What does this version number mean?
+
+[Semantic versioning](http://semver.org) is the best answer to this question so far.
+It specifies a pretty stringent meaning for what a consumer of an API should expect
+based on the difference between the version number they use now and the one they
+want to move too.
+
+Additionally it describes methods for encoding pre-release and build-metadata and
+how those should be sorted by tools.
+
+## What is it?
+
+TBD
+
+### Current Support
+
+**VCSs**
 
 * [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit)) (in progress)
 
-###### Supported Tooling
+**Tooling**
 
 * [Gradle](http://gradle.org/) (in progress)
 
-### Rationale
-
-- [Semantic versioning](http://semver.org) is a great specification and makes it
-feasible to put meaningful tooling around versioning.
-- Version control systems know your project's history and can provide most, and
-in some cases all, of the information to determine your next version.
-- Useful abstractions should live on their own, rather than hiding inside tooling-specific
-plugins. This functionality originated in [gradle-git](https://github.com/ajoberstar/gradle-git),
-but doesn't need to be specific to Gradle or Git.
-
 ## Usage
 
-For full documentation see the [wiki](https://github.com/ajoberstar/semver-vcs/wiki).
+**NOTE:** *All* semver-vcs modules require Java 8 (or higher).
 
-### From Gradle w/ Git
+Full documentation is in the [wiki](https://github.com/ajoberstar/semver-vcs/wiki).
+
+### Gradle & Git
 
 Apply the plugin:
 
@@ -50,6 +73,9 @@ semver {
 }
 ```
 
+See [SemverVcsExtension](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-base/groovydoc/org/ajoberstar/semver/vcs/gradle/SemverExtension.html)
+for details on the configuration options.
+
 When you run Gradle, pass in any of the following properties to influence the version being inferred:
 
 * `semver.scope` - one of `major`, `minor`, or `patch` to specify which component of the previous release should be incremented
@@ -65,9 +91,36 @@ Inferred version 1.3.0-milestone.1
 ...
 ```
 
-## Modules
+### Direct API Usage
 
-**NOTE:** *All* modules require Java 8.
+The four basic steps are:
+
+1. Construct a [Version](https://github.com/zafarkhaja/jsemver/blob/master/src/main/java/com/github/zafarkhaja/semver/Version.java) to use as a base if one isn't found in the VCS.
+1. Construct a [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html)
+using one of the available providers.
+1. Build a [Versioner](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Versioner.html)
+which is a function of `(Version, Vcs) -> Version`. This does all of the work of inferring the version. The
+[Versioners](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Versioners.html) class
+provides some common `Versioner` implementations that can be composed as needed.
+1. Call the `Versioner` with the base `Version` and the `Vcs`.
+
+For example:
+
+```java
+import com.github.zafarkhaja.semver.Version;
+import org.ajoberstar.semver.vcs.*;
+import org.ajoberstar.semver.vcs.grgit.GrgitVcs;
+import org.ajoberstar.grgit.Grgit;
+
+Version base = Version.forIntegers(0, 0, 0);
+Vcs vcs = new GrgitVcs(Grgit.open()));
+Versioner versioner = Versioners.forScopeAndStage(Scope.MINOR, Stage.finalStage());
+Version inferred = versioner.infer(base, vcs);
+```
+
+## Implementing
+
+### Modules
 
 - [semver-vcs-api](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc) - Base API that tooling should use.
 - [semver-vcs-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-grgit/groovydoc) - Implementation of a grgit backend.
@@ -75,27 +128,33 @@ Inferred version 1.3.0-milestone.1
 will calculate the project's version (given a VCS impl).
 - [semver-vcs-gradle-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
 
-## Implementing
+### Implementing a Vcs
 
-semver-vcs is intended to be extended to new VCSs and used in new contexts.
+A `Vcs` implementation will literally just need to implement the
+[Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html) interface.
 
-* VCS providers should implement [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html).
-* Gradle plugin authors should provide a plugin that applies `org.ajoberstar.semver-base` and configures the `semver.vcs` property.
+See the Grgit module in this repo for further guidance.
 
-See the reference documentation linked in the *Modules* section for more information.
+### Implementing a Tool
 
-## Questions, Bugs, and Requests
+See the example in *Direct API Usage* above for a basic example and the implementation of the
+Gradle modules in this repo as further guidance.
 
-Open an [issue](https://github.com/ajoberstar/semver-vcs/issues) describing your
-situation.
+## Questions, Bugs, and Features
 
-For errors, please include logs and/or stack traces when available.
+Please use the repo's [issue](https://github.com/ajoberstar/semver-vcs/issues)
+for all questions, bug reports, and feature requests.
 
 ## Contributing
 
-Contributions are very welcome and should be submitted as pull requests.
-For larger or more complex changes, please open an issue first to discuss the
-approach.
+Contributions are both welcome and accepted through pull requests.
+
+Smaller changes can come directly as a PR, but larger or more complex
+ones should be discussed in an issue first to flesh out the approach.
+
+If you're interested in implementing a feature on the
+[issues backlog](https://github.com/ajoberstar/semver-vcs/issues), add a comment
+to make sure it's not already in progress and for any needed discussion.
 
 ## Acknowledgements
 
