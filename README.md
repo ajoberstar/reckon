@@ -11,6 +11,14 @@ semver-vcs provides an API for calculating a project's current version number ba
 on the state of the version control system (VCS) and (possibly) some user input. You
 can think of it like a more flexible `git describe`.
 
+###### Supported VCSs
+
+* [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit)) (in progress)
+
+###### Supported Tooling
+
+* [Gradle](http://gradle.org/) (in progress)
+
 ### Rationale
 
 - [Semantic versioning](http://semver.org) is a great specification and makes it
@@ -20,14 +28,6 @@ in some cases all, of the information to determine your next version.
 - Useful abstractions should live on their own, rather than hiding inside tooling-specific
 plugins. This functionality originated in [gradle-git](https://github.com/ajoberstar/gradle-git),
 but doesn't need to be specific to Gradle or Git.
-
-### Supported VCSs
-
-* [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit)) (in progress)
-
-### Supported Tooling
-
-* [Gradle](http://gradle.org/) (in progress)
 
 ## Usage
 
