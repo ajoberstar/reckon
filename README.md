@@ -67,7 +67,7 @@ TBD
 **NOTE:** *All* semver-vcs modules require Java 8 (or higher).
 
 * [Release Notes](https://github.com/ajoberstar/semver-vcs/releases)
-* [Full documentation](https://github.com/ajoberstar/semver-vcs/wiki).
+* [Full Documentation](https://github.com/ajoberstar/semver-vcs/wiki)
 
 ### Gradle & Git
 
@@ -155,12 +155,12 @@ Gradle modules in this repo as further guidance.
 
 ## Questions, Bugs, and Features
 
-Please use the repo's [issue](https://github.com/ajoberstar/semver-vcs/issues)
+Please use the repo's [issues](https://github.com/ajoberstar/semver-vcs/issues)
 for all questions, bug reports, and feature requests.
 
 ## Contributing
 
-Contributions are both welcome and accepted through pull requests.
+Contributions are very welcome and are accepted through pull requests.
 
 Smaller changes can come directly as a PR, but larger or more complex
 ones should be discussed in an issue first to flesh out the approach.
