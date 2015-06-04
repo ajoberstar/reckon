@@ -14,7 +14,7 @@ a file in your source repository. This results in commit messages like "Bumping
 version number.". Even if you don't have to do this manually, your release plugin
 probably modifies your build file and commits the new version.
 
-However, your version control system (VCS) also contains tags with a version
+However, your version control system (VCS) already contains tags with a version
 number pointing to a specific commit. Git illustrates the power of this with
 the `git describe` command which creates a version number based on the
 amount of change since the previous tag.
@@ -36,6 +36,10 @@ want to move too.
 Additionally it describes methods for encoding pre-release and build-metadata and
 how those should be sorted by tools.
 
+With that specification and some conventions related to encoding your stage of
+development into the pre-release information, you can end up with a very
+easy to understand versioning scheme.
+
 ## What is it?
 
 TBD
@@ -54,7 +58,8 @@ TBD
 
 **NOTE:** *All* semver-vcs modules require Java 8 (or higher).
 
-Full documentation is in the [wiki](https://github.com/ajoberstar/semver-vcs/wiki).
+* [Release Notes](https://github.com/ajoberstar/semver-vcs/releases)
+* [Full documentation](https://github.com/ajoberstar/semver-vcs/wiki).
 
 ### Gradle & Git
 
