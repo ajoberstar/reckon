@@ -16,22 +16,21 @@ probably modifies your build file and commits the new version.
 
 However, your version control system (VCS) already contains tags with a version
 number pointing to a specific commit. Git illustrates the power of this with
-the `git describe` command which creates a version number based on the
-amount of change since the previous tag.
+the `git describe` command that creates a version number based on the
+amount of change since the previous tag (e.g. v0.1.0-22-g26f678e).
 
-Your VCS also likely contains branches that indicate specific stages of development
+Your VCS also contains branches that indicate specific stages of development
 or indicate maintenance for a specific subset of versions.
 
-With this much information available to the Vcs, there's very little the user
-really should have to provide to get the next version number. And it certainly
+With this much information available to the VCS, there's very little the user
+should have to provide to get the next version number. And it certainly
 doesn't need to be hardcoded anywhere.
 
 ### What does this version number mean?
 
 [Semantic versioning](http://semver.org) is the best answer to this question so far.
 It specifies a pretty stringent meaning for what a consumer of an API should expect
-based on the difference between the version number they use now and the one they
-want to move too.
+based on the difference between two versions numbers.
 
 Additionally it describes methods for encoding pre-release and build-metadata and
 how those should be sorted by tools.
@@ -39,6 +38,15 @@ how those should be sorted by tools.
 With that specification and some conventions related to encoding your stage of
 development into the pre-release information, you can end up with a very
 easy to understand versioning scheme.
+
+For example, this API's scheme includes four stages:
+
+- **final** (e.g. `1.0.0`) the fully-tested version ready for end-user consumption
+- **rc** (e.g. `1.1.0-rc.1`) release candidates, versions believed to be ready for release with final testing
+- **milestone** (e.g. `1.1.0-milestone.4`) versions containing a significant piece of functionality on the road
+to the next version
+- **dev** (e.g. `1.1.0-dev.2` or `1.1.0-milestone.4.dev.6`) development versions happening in-between more
+formally defined stages (this is a *floating* stage, in semver-vcs parlance)
 
 ## What is it?
 
