@@ -14,7 +14,7 @@ a file in your source repository. This results in commit messages like "Bumping
 version number.". Even if you don't have to do this manually, your release plugin
 probably modifies your build file and commits the new version.
 
- your version control system (VCS) already contains tags with a version
+However, the version control system (VCS) already contains tags with a version
 number pointing to a specific commit. Git illustrates the power of this with
 the `git describe` command that creates a version number based on the
 amount of change since the previous tag (e.g. `v0.1.0-22-g26f678e`).
@@ -62,14 +62,14 @@ components: `<normal>[-<prerelease>][+<buildmetadata>]`.
 
 - **normal** your typical `<major>.<minor>.<patch>` scheme
 - **pre-release** any set of dot-separated alphanumeric identifiers used to indicate
-progress towards the *normal*.
+progress towards the normal
 - **build-metadata** any set of dot-separated alphanumeric identifiers used to indicate
 information about the current build, which should not be used to sort versions
 
 ### Scope
 
-semver-vcs describes changes in the *normal* as the **scope** of the change, being
-one of `major`, `minor`, or `patch`. The *scope* indicates which component of the
+semver-vcs describes changes in the normal as the **scope** of the change, being
+one of `major`, `minor`, or `patch`. The scope indicates which component of the
 version should be incremented, with the components to the right being zeroed out.
 For example, with a previous version of `1.2.3` a `minor` scope change would result
 in `1.3.0`.
@@ -78,18 +78,18 @@ in `1.3.0`.
 
 In order to provide more structure to pre-release information and simplify the
 minutiae of pre-release precedence, the concept of a **stage** of development is
-used. *stage*s can be of a few different flavors:
+used. Stages can be of a few different flavors:
 
 - **final** a special stage indicating no pre-release information should be used
-- **fixed** indicate significant steps along the way to the final release and will
+- **fixed** indicating significant steps along the way to the final release and will
 always consist of `<stage name>.<incremented count>` (e.g. `beta.2`).
-- **floating** indicate intermediate steps after another stage.
-To comply with SemVer precedence rules a *floating* stage can be result in:
+- **floating** indicating intermediate steps after another stage.
+To comply with SemVer precedence rules a floating stage can result in:
 	- `<stage name>.<incremented count>` as long as the stage name is of higher precedence
-	than the previous stage. For example, if `milestone` was a *floating* stage and
+	than the previous stage. For example, if `milestone` was a floating stage and
 	the prior version was `1.0.0-dev.1` it would result in `1.0.0-milestone.1`.
 	- `<previous stage>.<stage name>.<incremented count>` if the stage name is of lower
-	precedence than the previous stage. For example, if `dev` was a *floating* stage
+	precedence than the previous stage. For example, if `dev` was a floating stage
 	and the prior version was `1.0.0-milestone.2` it would result in `1.0.0-milestone.2.dev.1`.
 
 For compatibility with Maven workflows, semver-vcs also provides a `SNAPSHOT` stage
@@ -98,7 +98,7 @@ with no incrementing count.
 ### Build Metadata
 
 Currently, build metadata is not a first-level concept in semver-vcs, but that will
-be addressed in #13.
+be addressed in [#13](https://github.com/ajoberstar/semver-vcs/issues/13).
 
 ### Versioners
 
@@ -107,8 +107,8 @@ depend on them. The actual inference is performed by a **versioner**, which is j
 a function that takes both the version determined so far and the VCS being used and
 returns the next version to use.
 
-semver-vcs provides *versioner* implementations optimized for *scope* and *stage*
-schemes, but you are free to provide your own *versioner* function that produces
+semver-vcs provides versioner implementations optimized for scope and stage
+schemes, but you are free to provide your own versioner function that produces
 a valid semantic version in any way you please.
 
 ### Current Support
@@ -167,7 +167,8 @@ Inferred version 1.3.0-milestone.1
 
 The four basic steps are:
 
-1. Construct a [Version](https://github.com/zafarkhaja/jsemver/blob/master/src/main/java/com/github/zafarkhaja/semver/Version.java) to use as a base if one isn't found in the VCS.
+1. Construct a [Version](https://github.com/zafarkhaja/jsemver/blob/master/src/main/java/com/github/zafarkhaja/semver/Version.java)
+to use as a base, if one isn't found in the VCS.
 1. Construct a [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html)
 using one of the available providers.
 1. Build a [Versioner](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Versioner.html)
