@@ -7,17 +7,17 @@
 
 ## Why do you care?
 
-### Get your version number out of my build file!
+### Get that version number out of my build file!
 
 Most build tools and release systems require you to hardcode a version number into
 a file in your source repository. This results in commit messages like "Bumping
 version number.". Even if you don't have to do this manually, your release plugin
 probably modifies your build file and commits the new version.
 
-However, your version control system (VCS) already contains tags with a version
+ your version control system (VCS) already contains tags with a version
 number pointing to a specific commit. Git illustrates the power of this with
 the `git describe` command that creates a version number based on the
-amount of change since the previous tag (e.g. v0.1.0-22-g26f678e).
+amount of change since the previous tag (e.g. `v0.1.0-22-g26f678e`).
 
 Your VCS also contains branches that indicate specific stages of development
 or indicate maintenance for a specific subset of versions.
@@ -50,7 +50,66 @@ formally defined stages (this is a *floating* stage, in semver-vcs parlance)
 
 ## What is it?
 
-TBD
+semver-vcs is two things:
+
+- an VCS-agnostic API that can calculate your next version
+- a collection of implementations for various VCSs and tools (typically, build tools)
+
+### Version Components
+
+As specified by [SemVer](http://semver.org), a version consists of three primary
+components: `<normal>[-<prerelease>][+<buildmetadata>]`.
+
+- **normal** your typical `<major>.<minor>.<patch>` scheme
+- **pre-release** any set of dot-separated alphanumeric identifiers used to indicate
+progress towards the *normal*.
+- **build-metadata** any set of dot-separated alphanumeric identifiers used to indicate
+information about the current build, which should not be used to sort versions
+
+### Scope
+
+semver-vcs describes changes in the *normal* as the **scope** of the change, being
+one of `major`, `minor`, or `patch`. The *scope* indicates which component of the
+version should be incremented, with the components to the right being zeroed out.
+For example, with a previous version of `1.2.3` a `minor` scope change would result
+in `1.3.0`.
+
+### Stage
+
+In order to provide more structure to pre-release information and simplify the
+minutiae of pre-release precedence, the concept of a **stage** of development is
+used. *stage*s can be of a few different flavors:
+
+- **final** a special stage indicating no pre-release information should be used
+- **fixed** indicate significant steps along the way to the final release and will
+always consist of `<stage name>.<incremented count>` (e.g. `beta.2`).
+- **floating** indicate intermediate steps after another stage.
+To comply with SemVer precedence rules a *floating* stage can be result in:
+	- `<stage name>.<incremented count>` as long as the stage name is of higher precedence
+	than the previous stage. For example, if `milestone` was a *floating* stage and
+	the prior version was `1.0.0-dev.1` it would result in `1.0.0-milestone.1`.
+	- `<previous stage>.<stage name>.<incremented count>` if the stage name is of lower
+	precedence than the previous stage. For example, if `dev` was a *floating* stage
+	and the prior version was `1.0.0-milestone.2` it would result in `1.0.0-milestone.2.dev.1`.
+
+For compatibility with Maven workflows, semver-vcs also provides a `SNAPSHOT` stage
+with no incrementing count.
+
+### Build Metadata
+
+Currently, build metadata is not a first-level concept in semver-vcs, but that will
+be addressed in #13.
+
+### Versioners
+
+Even though semver-vcs promotes the concepts of *scope* and *stage*, the API does not
+depend on them. The actual inference is performed by a **versioner**, which is just
+a function that takes both the version determined so far and the VCS being used and
+returns the next version to use.
+
+semver-vcs provides *versioner* implementations optimized for *scope* and *stage*
+schemes, but you are free to provide your own *versioner* function that produces
+a valid semantic version in any way you please.
 
 ### Current Support
 
