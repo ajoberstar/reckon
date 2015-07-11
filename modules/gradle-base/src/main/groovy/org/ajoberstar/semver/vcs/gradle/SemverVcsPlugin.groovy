@@ -25,6 +25,19 @@ import org.ajoberstar.semver.vcs.Versioners
 
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Plugin providing version inference according to Semantic
+ * Versioning. In addition to the {@code SemVerExtension} the
+ * following project properties are supported to influence the
+ * inference.
+ *
+ * <ul>
+ *   <li>semver.scope - one of MAJOR, MINOR, or PATCH</li>
+ *   <li>semver.stage - the name of the stage to use</li>
+ *   <li>semver.base - a version string to use as the initial input, typically only used if no versions are tagged</li>
+ *   <li>semver.force - a version string to use instead of inferring based on the VCS</li>
+ * </ul>
+ */
 class SemverVcsPlugin implements Plugin<Project> {
     static final String SCOPE_PROP = 'semver.scope'
     static final String STAGE_PROP = 'semver.stage'
