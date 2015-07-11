@@ -109,7 +109,7 @@ public final class Stage implements Comparable<Stage> {
 
     /**
      * Fixed stages will always use pre-release information of the form
-     * "<stage name>.<incremented count>", where the count is always 1,
+     * {@code <stage name>.<incremented count>}, where the count is always 1,
      * unless the previous version used the same stage. In that case the
      * count will be incremented from the previous.
      * @param name the name of the stage
@@ -131,7 +131,7 @@ public final class Stage implements Comparable<Stage> {
      * Floating stages will behave as a fixed stage if the previous versions stage
      * either doesn't exist or has a lower precedence. If the previous has a higher
      * precedence, the pre-release information will be of the form
-     * "<previous stage>.<previous count>.<stage name>.<incremented count>".
+     * {@code <previous stage>.<previous count>.<stage name>.<incremented count>}.
      * @param name the name of the stage
      * @return a floating stage
      */
