@@ -33,9 +33,8 @@ class GrgitVcs implements Vcs {
 
     public GrgitVcs(Grgit git) {
         this(git, { tag ->
-            String name = tag.name.replaceAll(/^v/, '')
             try {
-                return Optional.of(Version.valueOf(name))
+                return Optional.of(Version.valueOf(tag.name))
             } catch (ParseException e) {
                 return Optional.empty()
             }
@@ -77,7 +76,7 @@ class GrgitVcs implements Vcs {
             .map { tag -> toVersionTag(tag) }
             .flatMap { opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty() }
             .sorted(byAncestryThenVersion)
-            .map { it.version } 
+            .map { it.version }
     }
 
     private Optional<VersionTag> toVersionTag(Tag tag) {

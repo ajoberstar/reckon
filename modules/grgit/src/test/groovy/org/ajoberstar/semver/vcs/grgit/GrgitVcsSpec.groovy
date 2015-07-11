@@ -58,14 +58,14 @@ class GrgitVcsSpec extends Specification {
         checkout('RB_0.1')
 
         commit()
-        addTag('v0.1.1+2010.01.01.12.00.00')
+        addTag('0.1.1+2010.01.01.12.00.00')
 
         commit()
         commit()
         commit()
         commit()
-        addTag('v0.1.2-beta.1')
-        addTag('v0.1.2-alpha.1')
+        addTag('0.1.2-beta.1')
+        addTag('0.1.2-alpha.1')
 
         commit()
         commit()
@@ -73,8 +73,8 @@ class GrgitVcsSpec extends Specification {
         checkout('master')
 
         commit()
-        addTag('v1.0.0')
-        addTag('v1.0.0-rc.3')
+        addTag('1.0.0')
+        addTag('1.0.0-rc.3')
         addBranch('RB_1.0')
 
         commit()
