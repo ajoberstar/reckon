@@ -19,10 +19,30 @@ import com.github.zafarkhaja.semver.Version;
 
 import java.util.Objects;
 
+/**
+ * Defines the contract of version inference. This is the core
+ * interface by which a semantic version is calculated from a
+ * VCS's state.
+ */
 @FunctionalInterface
 public interface Versioner {
+    /**
+     * Infers the project's version based on the parameters.
+     * @param base the version to increment off of, unless
+     * @param vcs the version control system holding the
+     *            current state of the project
+     * @return the version to be used for the project or
+     * passed into the next versioner
+     */
     Version infer(Version base, Vcs vcs);
 
+    /**
+     * Combines the given versioner with this one. The given
+     * versioner will be executed first followed by this one.
+     * The returned versioner will behave as {@code this.infer(before.infer(base, vcs), vcs)}.
+     * @param before the versioner to compose with this one
+     * @return a versioner representing the composition of the two
+     */
     default Versioner compose(Versioner before) {
         Objects.requireNonNull(before);
         return (base, vcs) -> infer(before.infer(base, vcs), vcs);

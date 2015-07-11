@@ -15,7 +15,6 @@
  */
 package org.ajoberstar.semver.vcs.gradle.grgit
 
-import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.semver.vcs.grgit.GrgitVcs
 import org.gradle.api.Plugin
 import org.gradle.api.Project

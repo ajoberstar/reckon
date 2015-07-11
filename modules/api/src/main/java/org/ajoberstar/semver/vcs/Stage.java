@@ -20,12 +20,21 @@ import com.github.zafarkhaja.semver.Version;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * The stage of development represented by the VCS currently.
+ */
 public final class Stage implements Comparable<Stage> {
     private static final String FINAL_NAME = "final";
 
     private final String name;
     private final Versioner versioner;
 
+    /**
+     * Constructs a stage.
+     * @param name the name of the stage
+     * @param versioner the versioner used to infer the current
+     *                  version
+     */
     public Stage(String name, Versioner versioner) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(versioner);
@@ -33,14 +42,27 @@ public final class Stage implements Comparable<Stage> {
         this.versioner = versioner;
     }
 
+    /**
+     * Gets the name of this stage.
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the versioner for this stage.
+     * @return the versioner
+     */
     public Versioner getVersioner() {
         return versioner;
     }
 
+    /**
+     * Equality is determined solely based on the name of the stage.
+     * @param obj {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Stage) {
@@ -56,6 +78,13 @@ public final class Stage implements Comparable<Stage> {
         return getName().hashCode();
     }
 
+    /**
+     * Comparison is performed solely based on the name. Names
+     * are ordered by normal lexicographical order, with the
+     * exception of "final" being considered the highest precedence.
+     * @param that {@inheritDoc}
+     * @return {@inheritDoc}
+     */
     @Override
     public int compareTo(Stage that) {
         if (this.getName().equals(that.getName())) {
@@ -69,10 +98,23 @@ public final class Stage implements Comparable<Stage> {
         }
     }
 
+    /**
+     * Final stage will use only the normal version from the base
+     * and remove all other information.
+     * @return the final stage
+     */
     public static Stage finalStage() {
         return new Stage(FINAL_NAME, (base, vcs) -> Version.valueOf(base.getNormalVersion()));
     }
 
+    /**
+     * Fixed stages will always use pre-release information of the form
+     * "<stage name>.<incremented count>", where the count is always 1,
+     * unless the previous version used the same stage. In that case the
+     * count will be incremented from the previous.
+     * @param name the name of the stage
+     * @return a fixed stage
+     */
     public static Stage fixedStage(String name) {
         return new Stage(name, (base, vcs) -> {
             Version sanitized = sanitizeStage(base, name, true);
@@ -85,6 +127,14 @@ public final class Stage implements Comparable<Stage> {
         });
     }
 
+    /**
+     * Floating stages will behave as a fixed stage if the previous versions stage
+     * either doesn't exist or has a lower precedence. If the previous has a higher
+     * precedence, the pre-release information will be of the form
+     * "<previous stage>.<previous count>.<stage name>.<incremented count>".
+     * @param name the name of the stage
+     * @return a floating stage
+     */
     public static Stage floatingStage(String name) {
         return new Stage(name, (base, vcs) -> {
             Version sanitized = sanitizeStage(base, name, false);
@@ -99,6 +149,10 @@ public final class Stage implements Comparable<Stage> {
         });
     }
 
+    /**
+     * Snapshot stage will always set the pre-release information to {@code SNAPSHOT}.
+     * @return the snapshot stage
+     */
     public static Stage snapshotStage() {
         return new Stage("snapshot", (base, vcs) -> base.setPreReleaseVersion("SNAPSHOT"));
     }

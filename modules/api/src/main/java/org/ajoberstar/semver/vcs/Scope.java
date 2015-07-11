@@ -19,6 +19,9 @@ import com.github.zafarkhaja.semver.Version;
 
 import java.util.function.UnaryOperator;
 
+/**
+ * The scope of changes represented in the VCS currently.
+ */
 public enum Scope {
     MAJOR(Version::incrementMajorVersion),
     MINOR(Version::incrementMinorVersion),
@@ -39,6 +42,14 @@ public enum Scope {
         };
     }
 
+    /**
+     * A versioner that will increment the component of the previous release
+     * corresponding with the name of the enum value. (e.g. MAJOR would increment
+     * 1.2.3 to 2.0.0). If the previous version has the same normal component
+     * as the currently incremented one, it's pre-release information will be
+     * preserved.
+     * @return the versioner for this scope
+     */
     public Versioner getVersioner() {
         return versioner;
     }
