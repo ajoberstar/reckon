@@ -27,6 +27,12 @@ import java.util.function.Function
 import java.util.function.Predicate
 import java.util.stream.Stream
 
+/**
+ * A VCS implementation backed by Grgit, to support a Git repository.
+ * Versions are parsed using the tag parsing function passed into the
+ * constructor, which will parse tag names directly by default.
+ * Versions are sorted based on their ancestry, then by their version.
+ */
 class GrgitVcs implements Vcs {
     private final Grgit git
     private final Function<Tag, Optional<Version>> tagParser
@@ -46,6 +52,13 @@ class GrgitVcs implements Vcs {
         this.tagParser = tagParser
     }
 
+    /**
+     * If the current HEAD commit is tagged with a version,
+     * return that version (will always return the one with
+     * the highest precedence if there are multiple).
+     * @return the version tagged on the current commit, or
+     * an empty Optional.
+     */
     @Override
     Optional<Version> getCurrentVersion() {
         Commit head = git.head()
@@ -53,6 +66,13 @@ class GrgitVcs implements Vcs {
             .findFirst()
     }
 
+    /**
+     * Gets the most recently tagged final version in the
+     * ancestry of the current HEAD.
+     * @return the most recent tagged final version, or an
+     * empty Optional if no final versions are tagged in the
+     * current HEAD's ancestry
+     */
     @Override
     Optional<Version> getPreviousRelease() {
         return getPreviousVersions()
@@ -60,6 +80,12 @@ class GrgitVcs implements Vcs {
             .findFirst()
     }
 
+    /**
+     * Gets the most recently tagged version in the ancestry of
+     * the current HEAD.
+     * @return the most recent tagged version, or an empty Optional
+     * if no versions are tagged in the current HEAD's ancestry
+     */
     @Override
     Optional<Version> getPreviousVersion() {
         return getPreviousVersions().findFirst()
