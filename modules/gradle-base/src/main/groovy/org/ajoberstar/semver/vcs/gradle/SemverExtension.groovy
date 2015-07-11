@@ -25,7 +25,7 @@ import java.util.function.Supplier
 class SemverExtension {
     Supplier<Versioner> versionerSupplier
 
-    Vcs vcs
+    Supplier<Vcs> vcsSupplier
 
     boolean enforcePrecedence = true
 

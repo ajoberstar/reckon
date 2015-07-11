@@ -101,7 +101,7 @@ class SemverVcsPlugin implements Plugin<Project> {
             }.orElse(Versioners.VERSION_0)
 
             Version inferred = extension.versionerSupplier.get()
-                .infer(base, extension.vcs)
+                .infer(base, extension.vcsSupplier.get())
 
             project.logger.warn('Inferred version: {}', inferred)
             return inferred.toString()
