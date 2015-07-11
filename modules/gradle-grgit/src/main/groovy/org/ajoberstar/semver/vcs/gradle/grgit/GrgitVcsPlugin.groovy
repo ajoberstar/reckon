@@ -15,18 +15,40 @@
  */
 package org.ajoberstar.semver.vcs.gradle.grgit
 
+import com.github.zafarkhaja.semver.Version
+import org.ajoberstar.grgit.Tag
+import org.ajoberstar.semver.vcs.gradle.SemverExtension
 import org.ajoberstar.semver.vcs.grgit.GrgitVcs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+import java.util.function.Function
+
+/**
+ * Plugin providng Grgit functionality for SemverVcs.
+ */
 class GrgitVcsPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.pluginManager.apply('org.ajoberstar.grgit')
         project.pluginManager.apply('org.ajoberstar.semver-vcs-base')
 
-        project.extensions.getByName('semver').with {
-            vcs = { new GrgitVcs(project.grgit) }
+        SemverExtension semver = project.extensions.getByName('semver')
+        GrgitVcsExtension grgit = semver.extensions.create('grgit', GrgitVcsExtension)
+
+        semver.vcs = {
+            if (grgit.tagParser) {
+                new GrgitVcs(project.grgit, grgit.tagParser)
+            } else {
+                new GrgitVcs(project.grgit)
+            }
         }
+    }
+
+    public static class GrgitVcsExtension {
+        /**
+         * The logic to use when parsing Grgit tags into Versions.
+         */
+        Function<Tag, Optional<Version>> tagParser
     }
 }
