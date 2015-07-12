@@ -115,11 +115,11 @@ a valid semantic version in any way you please.
 
 **VCSs**
 
-* [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit)) (in progress)
+* [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit))
 
 **Tooling**
 
-* [Gradle](http://gradle.org/) (in progress)
+* [Gradle](http://gradle.org/)
 
 ## Usage
 
