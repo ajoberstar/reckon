@@ -36,7 +36,7 @@ class GrgitVcsPlugin implements Plugin<Project> {
         SemverExtension semver = project.extensions.getByName('semver')
         GrgitVcsExtension grgit = semver.extensions.create('grgit', GrgitVcsExtension)
 
-        semver.vcs = {
+        semver.vcsSupplier = {
             if (grgit.tagParser) {
                 new GrgitVcs(project.grgit, grgit.tagParser)
             } else {
