@@ -3,3 +3,4 @@ install: ""
 script: TERM=dumb ./gradlew clean check
 jdk:
     - oraclejdk8
+sudo: false
