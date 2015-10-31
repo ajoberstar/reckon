@@ -1,8 +1,13 @@
 buildscript {
-    repositories { jcenter() }
+    repositories {
+        jcenter()
+        maven {
+            name = 'Gradle Plugins'
+            url = 'https://plugins.gradle.org/m2'
+        }
+    }
     dependencies {
-        classpath 'org.ajoberstar:gradle-git:1.2.0'
-        classpath 'org.ajoberstar:gradle-defaults:0.6.0-milestone.7'
+        classpath 'org.ajoberstar:gradle-defaults:0.6.0'
     }
 }
 
