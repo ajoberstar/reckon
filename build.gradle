@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'org.ajoberstar.defaults'
 
 ext.depVersions = [
-    groovy: '2.4.1',
+    groovy: '2.4.4',
     spock: '1.0-groovy-2.4'
 ]
 
@@ -65,7 +65,7 @@ project(':semver-vcs-grgit') {
     dependencies {
         compile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
         compile project(':semver-vcs-api')
-        compile 'org.ajoberstar:grgit:1.3.0'
+        compile 'org.ajoberstar:grgit:1.4.0'
         testCompile "org.codehaus.groovy:groovy-all:${depVersions.groovy}"
         testCompile "org.spockframework:spock-core:${depVersions.spock}"
     }
@@ -92,7 +92,7 @@ project(':semver-vcs-gradle-grgit') {
         compile gradleApi()
         compile project(':semver-vcs-gradle-base')
         compile project(':semver-vcs-grgit')
-        runtime 'org.ajoberstar:gradle-git:1.2.0'
+        runtime 'org.ajoberstar:gradle-git:1.3.0'
         testCompile "org.spockframework:spock-core:${depVersions.spock}"
     }
 }
