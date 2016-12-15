@@ -2,6 +2,7 @@
 
 [![Bintray](https://img.shields.io/bintray/v/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs.svg?style=flat-square)](https://bintray.com/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/_latestVersion)
 [![Travis](https://img.shields.io/travis/ajoberstar/semver-vcs.svg?style=flat-square)](https://travis-ci.org/ajoberstar/semver-vcs)
+[![Quality Gate](https://sonarqube.ajoberstar.com/api/badges/gate?key=org.ajoberstar:semver-vcs)](https://sonarqube.ajoberstar.com/dashboard/index/org.ajoberstar:semver-vcs)
 [![GitHub license](https://img.shields.io/github/license/ajoberstar/semver-vcs.svg?style=flat-square)](https://github.com/ajoberstar/semver-vcs/blob/master/LICENSE)
 
 ## Why do you care?
