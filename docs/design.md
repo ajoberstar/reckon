@@ -59,3 +59,21 @@ There may be other generic parallel issues. Such as wanting to develop 2.0.x and
 ## Merges
 
 When branches are merged gradle-git backwards inference doesn't always match user expectations. This, I think, is just because it focuses on distance rather than ancestry. The initial semver-vcs sorting is based on ancestry, where as long as there are no commits between you and the head, you're equal to any other commit that's true for. So if 2.0.0 is 100 commits before the HEAD and 0.1.0 is 1 commit before, they could still be tied. That tie is broken by version precedence, so 2.0.0 would win. This makes one (hopefully not big) assumption that you would never merge a 2.0.0 branch into a 1.x branch and still expect a 1.x version to come out. It seems illogical, given that you're merging the 2 history in, which presumably has a breaking change.
+
+## Axioms
+
+In order to determine how the inference can be implemented, I want to start from a few axioms and see what that implies. Assuming these continue to make sense at that point, the implementation should be verified with an automated analysis running against existing repos from large open source projects. This can validate whether the logic can choose the right versions in practice.
+
+1. **NO duplicates.** A single version MUST not be produced from two different commits.
+1. **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
+1. **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
+1. **Pre-release versions can skip at most one version.** The skip only applies if the skipped version is being developed on a different branch with a shared merge base.
+
+### Implications
+
+* Version inference needs to take into account **globally**, all tagged versions in the repo. If a version would duplicate another commit, the inference must fail.
+* If you're rebuilding an already released commit the version can be the same or higher as the existing tagged version.
+* If a pre-release for final version Y does skip a version X. Y cannot have a final release until X is merged into it's history.
+* A pre-release skip is caused by:
+  * Another branch with a tag for the version you would have otherwise targeted.
+  * Another branch matching some naming scheme indicating it has claimed that version.
