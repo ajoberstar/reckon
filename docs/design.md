@@ -77,3 +77,4 @@ In order to determine how the inference can be implemented, I want to start from
 * A pre-release skip is caused by:
   * Another branch with a tag for the version you would have otherwise targeted.
   * Another branch matching some naming scheme indicating it has claimed that version.
+* The merge base of two branches is treated as if it was tagged with the latest version on either branch (and/or the version claimed via branch name)
