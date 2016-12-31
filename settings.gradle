@@ -1,11 +1,3 @@
-import java.nio.file.Files
-
-def modulesDir = rootDir.toPath().resolve('modules')
-Files.list(modulesDir)
-	.filter { path -> Files.isDirectory(path) }
-	.map { path -> path.fileName.toString() }
-	.forEach { dirName ->
-		def path = ":${rootProject.name}-${dirName}"
-		include(path)
-		project(path).projectDir = modulesDir.resolve(dirName).toFile()
-	}
+include 'reckon-core'
+include 'reckon-analyzer'
+include 'reckon-gradle'

@@ -1,9 +1,9 @@
-# semver-vcs
+# reckon
 
-[![Bintray](https://img.shields.io/bintray/v/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs.svg?style=flat-square)](https://bintray.com/ajoberstar/libraries/org.ajoberstar%3Asemver-vcs/_latestVersion)
-[![Travis](https://img.shields.io/travis/ajoberstar/semver-vcs.svg?style=flat-square)](https://travis-ci.org/ajoberstar/semver-vcs)
-[![Quality Gate](https://sonarqube.ajoberstar.com/api/badges/gate?key=org.ajoberstar:semver-vcs)](https://sonarqube.ajoberstar.com/dashboard/index/org.ajoberstar:semver-vcs)
-[![GitHub license](https://img.shields.io/github/license/ajoberstar/semver-vcs.svg?style=flat-square)](https://github.com/ajoberstar/semver-vcs/blob/master/LICENSE)
+[![Bintray](https://img.shields.io/bintray/v/ajoberstar/maven/org.ajoberstar%3Areckon.svg?style=flat-square)](https://bintray.com/ajoberstar/maven/org.ajoberstar%3Areckon/_latestVersion)
+[![Travis](https://img.shields.io/travis/ajoberstar/reckon.svg?style=flat-square)](https://travis-ci.org/ajoberstar/reckon)
+[![Quality Gate](https://sonarqube.ajoberstar.com/api/badges/gate?key=org.ajoberstar:reckon)](https://sonarqube.ajoberstar.com/dashboard/index/org.ajoberstar:reckon)
+[![GitHub license](https://img.shields.io/github/license/ajoberstar/reckon.svg?style=flat-square)](https://github.com/ajoberstar/reckon/blob/master/LICENSE)
 
 ## Why do you care?
 
@@ -14,15 +14,15 @@ a file in your source repository. This results in commit messages like "Bumping
 version number.". Even if you don't have to do this manually, your release plugin
 probably modifies your build file and commits the new version.
 
-However, the version control system (VCS) already contains tags with a version
-number pointing to a specific commit. Git illustrates the power of this with
-the `git describe` command that creates a version number based on the
-amount of change since the previous tag (e.g. `v0.1.0-22-g26f678e`).
+Git already contains tags with a version number pointing to a
+specific commit, illustrating that power of this with the `git describe`
+command that creates a version number based on the amount of change since the
+previous tag (e.g. `v0.1.0-22-g26f678e`).
 
-Your VCS also contains branches that indicate specific stages of development
-or indicate maintenance for a specific subset of versions.
+Git also contains branches for specific stages of development or maintenance
+for a specific subset of versions.
 
-With this much information available to the VCS, there's very little the user
+With this much information available, there's little the user
 should have to provide to get the next version number. And it certainly
 doesn't need to be hardcoded anywhere.
 
@@ -32,7 +32,7 @@ doesn't need to be hardcoded anywhere.
 It specifies a pretty stringent meaning for what a consumer of an API should expect
 based on the difference between two versions numbers.
 
-Additionally it describes methods for encoding pre-release and build-metadata and
+Additionally, it describes methods for encoding pre-release and build-metadata and
 how those should be sorted by tools.
 
 With that specification and some conventions related to encoding your stage of
@@ -46,14 +46,14 @@ For example, this API's scheme includes four stages:
 - **milestone** (e.g. `1.1.0-milestone.4`) versions containing a significant piece of functionality on the road
 to the next version
 - **dev** (e.g. `1.1.0-dev.2` or `1.1.0-milestone.4.dev.6`) development versions happening in-between more
-formally defined stages (this is a *floating* stage, in semver-vcs parlance)
+formally defined stages (this is a *floating* stage, in reckon parlance)
 
 ## What is it?
 
-semver-vcs is two things:
+reckon is two things:
 
-- an VCS-agnostic API that can calculate your next version
-- a collection of implementations for various VCSs and tools (typically, build tools)
+- an API to infer your next version from a Git repository
+- applications of that API in various tools (initially, just Gradle)
 
 ### Version Components
 
@@ -68,7 +68,7 @@ information about the current build, which should not be used to sort versions
 
 ### Scope
 
-semver-vcs describes changes in the normal as the **scope** of the change, being
+reckon describes changes in the normal as the **scope** of the change, being
 one of `major`, `minor`, or `patch`. The scope indicates which component of the
 version should be incremented, with the components to the right being zeroed out.
 For example, with a previous version of `1.2.3` a `minor` scope change would result
@@ -92,60 +92,49 @@ To comply with SemVer precedence rules a floating stage can result in:
 	precedence than the previous stage. For example, if `dev` was a floating stage
 	and the prior version was `1.0.0-milestone.2` it would result in `1.0.0-milestone.2.dev.1`.
 
-For compatibility with Maven workflows, semver-vcs also provides a `SNAPSHOT` stage
+For compatibility with Maven workflows, reckon also provides a `SNAPSHOT` stage
 with no incrementing count.
 
 ### Build Metadata
 
-Currently, build metadata is not a first-level concept in semver-vcs, but that will
-be addressed in [#13](https://github.com/ajoberstar/semver-vcs/issues/13).
+Currently, build metadata is not a first-level concept in reckon, but that will
+be addressed in [#13](https://github.com/ajoberstar/reckon/issues/13).
 
 ### Versioners
 
-Even though semver-vcs promotes the concepts of *scope* and *stage*, the API does not
+Even though reckon promotes the concepts of *scope* and *stage*, the API does not
 depend on them. The actual inference is performed by a **versioner**, which is just
 a function that takes both the version determined so far and the VCS being used and
 returns the next version to use.
 
-semver-vcs provides versioner implementations optimized for scope and stage
+reckon provides versioner implementations optimized for scope and stage
 schemes, but you are free to provide your own versioner function that produces
 a valid semantic version in any way you please.
 
-### Current Support
-
-**VCSs**
-
-* [Git](http://git-scm.com/) (through [grgit](https://github.com/ajoberstar/grgit))
-
-**Tooling**
-
-* [Gradle](http://gradle.org/)
-
 ## Usage
 
-**NOTE:** *All* semver-vcs modules require Java 8 (or higher).
+**NOTE:** *All* reckon modules require Java 8 (or higher).
 
-* [Release Notes](https://github.com/ajoberstar/semver-vcs/releases)
-* [Full Documentation](https://github.com/ajoberstar/semver-vcs/wiki)
+* [Release Notes](https://github.com/ajoberstar/reckon/releases)
 
-### Gradle & Git
+### Gradle
 
 Apply the plugin:
 
 ```groovy
 buildscript {
 	repositories { jcenter() }
-	dependencies { classpath 'org.ajoberstar:semver-vcs-gradle-grgit:<version>' }
+	dependencies { classpath 'org.ajoberstar:reckon-gradle:<version>' }
 }
 
-apply plugin: 'org.ajoberstar.semver-vcs-grgit'
+apply plugin: 'org.ajoberstar.reckon'
 
-semver {
+reckon {
 	// optionally configure how the version will be calculated
 }
 ```
 
-See [SemverVcsExtension](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-base/groovydoc/org/ajoberstar/semver/vcs/gradle/SemverExtension.html)
+See [SemverVcsExtension](http://ajoberstar.org/reckon/docs/reckon-gradle-base/groovydoc/org/ajoberstar/semver/vcs/gradle/SemverExtension.html)
 for details on the configuration options.
 
 When you run Gradle, pass in any of the following properties to influence the version being inferred:
@@ -169,11 +158,11 @@ The four basic steps are:
 
 1. Construct a [Version](https://github.com/zafarkhaja/jsemver/blob/master/src/main/java/com/github/zafarkhaja/semver/Version.java)
 to use as a base, if one isn't found in the VCS.
-1. Construct a [Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html)
+1. Construct a [Vcs](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html)
 using one of the available providers.
-1. Build a [Versioner](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Versioner.html)
+1. Build a [Versioner](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Versioner.html)
 which is a function of `(Version, Vcs) -> Version`. This does all of the work of inferring the version. The
-[Versioners](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Versioners.html) class
+[Versioners](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Versioners.html) class
 provides some common `Versioner` implementations that can be composed as needed.
 1. Call the `Versioner` with the base `Version` and the `Vcs`.
 
@@ -195,16 +184,16 @@ Version inferred = versioner.infer(base, vcs);
 
 ### Modules
 
-- [semver-vcs-api](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc) - Base API that tooling should use.
-- [semver-vcs-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-grgit/groovydoc) - Implementation of a grgit backend.
-- [semver-vcs-gradle-base](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-base/groovydoc) - Base Gradle plugin that
+- [reckon-api](http://ajoberstar.org/reckon/docs/reckon-api/javadoc) - Base API that tooling should use.
+- [reckon-grgit](http://ajoberstar.org/reckon/docs/reckon-grgit/groovydoc) - Implementation of a grgit backend.
+- [reckon-gradle-base](http://ajoberstar.org/reckon/docs/reckon-gradle-base/groovydoc) - Base Gradle plugin that
 will calculate the project's version (given a VCS impl).
-- [semver-vcs-gradle-grgit](http://ajoberstar.org/semver-vcs/docs/semver-vcs-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
+- [reckon-gradle-grgit](http://ajoberstar.org/reckon/docs/reckon-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
 
 ### Implementing a Vcs
 
 A `Vcs` implementation will literally just need to implement the
-[Vcs](http://ajoberstar.org/semver-vcs/docs/semver-vcs-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html) interface.
+[Vcs](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html) interface.
 
 See the Grgit module in this repo for further guidance.
 
@@ -215,7 +204,7 @@ Gradle modules in this repo as further guidance.
 
 ## Questions, Bugs, and Features
 
-Please use the repo's [issues](https://github.com/ajoberstar/semver-vcs/issues)
+Please use the repo's [issues](https://github.com/ajoberstar/reckon/issues)
 for all questions, bug reports, and feature requests.
 
 ## Contributing
@@ -226,7 +215,7 @@ Smaller changes can come directly as a PR, but larger or more complex
 ones should be discussed in an issue first to flesh out the approach.
 
 If you're interested in implementing a feature on the
-[issues backlog](https://github.com/ajoberstar/semver-vcs/issues), add a comment
+[issues backlog](https://github.com/ajoberstar/reckon/issues), add a comment
 to make sure it's not already in progress and for any needed discussion.
 
 ## Acknowledgements
