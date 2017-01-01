@@ -4,6 +4,7 @@ plugins {
     id 'org.ajoberstar.bintray' version '0.1.0'
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'org.ajoberstar.stutter' version '0.1.0'
 }
 
 model {
