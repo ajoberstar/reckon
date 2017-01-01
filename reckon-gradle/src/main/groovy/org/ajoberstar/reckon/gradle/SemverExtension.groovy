@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.semver.vcs.gradle
+package org.ajoberstar.reckon.gradle
 
-import org.ajoberstar.semver.vcs.Scope
-import org.ajoberstar.semver.vcs.Stage
-import org.ajoberstar.semver.vcs.Vcs
-import org.ajoberstar.semver.vcs.Versioner
+import org.ajoberstar.reckon.core.Scope
+import org.ajoberstar.reckon.core.Stage
+import org.ajoberstar.reckon.core.Vcs
+import org.ajoberstar.reckon.core.Versioner
 
 import java.util.function.Supplier
 
@@ -110,7 +110,7 @@ class SemverExtension {
     /**
      * Helper to create a final stage.
      * @return a final stage
-     * @see org.ajoberstar.semver.vcs.Stage#finalStage()
+     * @see org.ajoberstar.reckon.core.Stage#finalStage()
      */
     Stage finalStage() {
         return Stage.finalStage()
@@ -120,7 +120,7 @@ class SemverExtension {
      * Helper to create one or more fixed stages.
      * @param names the names of the stages
      * @return a list of fixed stages
-     * @see org.ajoberstar.semver.vcs.Stage#fixedStage(String)
+     * @see org.ajoberstar.reckon.core.Stage#fixedStage(String)
      */
     List<Stage> fixedStages(String... names) {
         return names.collect { Stage.fixedStage(it) }
@@ -130,7 +130,7 @@ class SemverExtension {
      * Helper to create one or more floating stages.
      * @param names the names of the stages
      * @return a list of floating stages
-     * @see org.ajoberstar.semver.vcs.Stage#floatingStage(String)
+     * @see org.ajoberstar.reckon.core.Stage#floatingStage(String)
      */
     List<Stage> floatingStages(String... names) {
         return names.collect { Stage.floatingStage(it) }
@@ -139,7 +139,7 @@ class SemverExtension {
     /**
      * Helper to create a snapshot stage.
      * @return a snapshot stage
-     * @see org.ajoberstar.semver.vcs.Stage#snapshotStage()
+     * @see org.ajoberstar.reckon.core.Stage#snapshotStage()
      */
     Stage snapshotStage() {
         return Stage.snapshotStage()

@@ -67,7 +67,9 @@ In order to determine how the inference can be implemented, I want to start from
 1. **NO duplicates.** A single version MUST not be produced from two different commits.
 1. **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
 1. **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
-1. **Pre-release versions can skip at most one version.** The skip only applies if the skipped version is being developed on a different branch with a shared merge base.
+1. **Two branches MUST NOT create tagged pre-releases for the same targeted final version.**
+    * If the branches have a shared merge base the version being inferred must skip the targeted final version and increment a second time.
+    * If no shared merge base the inference should fail.
 
 ### Implications
 

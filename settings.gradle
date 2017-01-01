@@ -1,3 +1,2 @@
 include 'reckon-core'
-include 'reckon-analyzer'
 include 'reckon-gradle'

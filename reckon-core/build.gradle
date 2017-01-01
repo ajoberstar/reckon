@@ -1,11 +1,20 @@
 plugins {
     id 'groovy'
     id 'maven-publish'
+    id 'org.ajoberstar.bintray' version '0.1.0'
 }
 
 group = 'org.ajoberstar'
 
 sourceCompatibility = '1.8'
+
+model {
+    bintray {
+        owner = 'ajoberstar'
+        repo = 'maven'
+        pkg = 'reckon'
+    }
+}
 
 repositories {
     jcenter()
@@ -38,13 +47,5 @@ publishing {
     }
     repositories {
         mavenLocal()
-        maven {
-            name = 'bintray'
-            url = 'https://api.bintray.com/maven/ajoberstar/maven/reckon/;publish=1'
-            credentials {
-                username = System.env['BINTRAY_USER']
-                password = System.env['BINTRAY_KEY']
-            }
-        }
     }
 }

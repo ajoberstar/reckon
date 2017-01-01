@@ -1,11 +1,23 @@
 plugins {
     id 'groovy'
-    id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'org.ajoberstar.bintray' version '0.1.0'
+    id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'org.ajoberstar.stutter' version '0.1.0'
 }
 
-apply from: '../gradle/compatTest.gradle'
+model {
+    bintray {
+        owner = 'ajoberstar'
+        repo = 'maven'
+        pkg = 'reckon'
+    }
+}
+
+stutter {
+    supports '3.0', '3.1', '3.2', '3.2.1'
+}
 
 group = 'org.ajoberstar'
 
@@ -22,7 +34,6 @@ repositories {
 dependencies {
     compile gradleApi()
     compile project(':reckon-core')
-    // runtime 'org.ajoberstar:gradle-git:1.3.0'
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
     compatTestCompile gradleTestKit()
 }
@@ -40,14 +51,6 @@ task javadocJar(type: Jar) {
 publishing {
     repositories {
         mavenLocal()
-        maven {
-            name = 'bintray'
-            url = 'https://api.bintray.com/maven/ajoberstar/maven/reckon/;publish=1'
-            credentials {
-                username = System.env['BINTRAY_USER']
-                password = System.env['BINTRAY_KEY']
-            }
-        }
     }
 }
 
