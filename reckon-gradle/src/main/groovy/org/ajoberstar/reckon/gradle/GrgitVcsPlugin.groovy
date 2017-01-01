@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.semver.vcs.gradle.grgit
+package org.ajoberstar.reckon.gradle
 
 import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.grgit.Tag
-import org.ajoberstar.semver.vcs.gradle.SemverExtension
-import org.ajoberstar.semver.vcs.grgit.GrgitVcs
+import org.ajoberstar.reckon.gradle.SemverExtension
+import org.ajoberstar.reckon.core.GrgitVcs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -31,7 +31,7 @@ class GrgitVcsPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         project.pluginManager.apply('org.ajoberstar.grgit')
-        project.pluginManager.apply('org.ajoberstar.semver-vcs-base')
+        project.pluginManager.apply(SemverVcsPlugin)
 
         SemverExtension semver = project.extensions.getByName('semver')
         GrgitVcsExtension grgit = semver.extensions.create('grgit', GrgitVcsExtension)

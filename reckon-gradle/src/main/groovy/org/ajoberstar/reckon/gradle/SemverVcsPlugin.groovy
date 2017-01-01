@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.semver.vcs.gradle
+package org.ajoberstar.reckon.gradle
 
 import com.github.zafarkhaja.semver.ParseException
 import com.github.zafarkhaja.semver.Version
-import org.ajoberstar.semver.vcs.Stage
+import org.ajoberstar.reckon.core.Stage
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.ajoberstar.semver.vcs.Scope
-import org.ajoberstar.semver.vcs.Versioners
+import org.ajoberstar.reckon.core.Scope
+import org.ajoberstar.reckon.core.Versioners
 
 import java.util.concurrent.atomic.AtomicReference
 

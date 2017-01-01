@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.semver.vcs.grgit
+package org.ajoberstar.reckon.core
 
 import com.github.zafarkhaja.semver.ParseException
 import com.github.zafarkhaja.semver.Version
@@ -21,7 +21,7 @@ import groovy.transform.Immutable
 import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Tag
-import org.ajoberstar.semver.vcs.Vcs
+import org.ajoberstar.reckon.core.Vcs
 
 import java.util.function.Function
 import java.util.function.Predicate
