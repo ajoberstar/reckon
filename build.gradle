@@ -1,20 +1,13 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'org.ajoberstar:semver-vcs-gradle-grgit:0.1.0'
-    }
-}
-
 plugins {
-    id 'org.sonarqube' version '2.2.1'
+    id 'org.ajoberstar.defaults' version '0.7.1'
 }
 
-apply plugin: 'org.ajoberstar.semver-vcs-grgit'
-
-sonarqube {
-    properties {
-        property 'sonar.projectVersion', version.toString().split('-')[0]
-    }
+allprojects {
+  model {
+      bintray {
+          owner = 'ajoberstar'
+          repo = 'maven'
+          pkg = 'reckon'
+      }
+  }
 }

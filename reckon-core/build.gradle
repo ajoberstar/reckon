@@ -1,20 +1,10 @@
 plugins {
     id 'groovy'
-    id 'maven-publish'
-    id 'org.ajoberstar.bintray' version '0.1.0'
 }
 
 group = 'org.ajoberstar'
 
 sourceCompatibility = '1.8'
-
-model {
-    bintray {
-        owner = 'ajoberstar'
-        repo = 'maven'
-        pkg = 'reckon'
-    }
-}
 
 repositories {
     jcenter()
@@ -25,27 +15,4 @@ dependencies {
     compile 'org.ajoberstar:grgit:1.8.0-rc.1'
     compile "org.codehaus.groovy:groovy-all:2.4.5"
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from tasks.javadoc.outputs.files
-}
-
-publishing {
-    publications {
-        main(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
 }
