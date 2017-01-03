@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,27 +28,27 @@ import java.util.function.Function
  * Plugin providng Grgit functionality for SemverVcs.
  */
 class GrgitVcsPlugin implements Plugin<Project> {
-    @Override
-    void apply(Project project) {
-        project.pluginManager.apply('org.ajoberstar.grgit')
-        project.pluginManager.apply(SemverVcsPlugin)
+  @Override
+  void apply(Project project) {
+    project.pluginManager.apply('org.ajoberstar.grgit')
+    project.pluginManager.apply(SemverVcsPlugin)
 
-        SemverExtension semver = project.extensions.getByName('semver')
-        GrgitVcsExtension grgit = semver.extensions.create('grgit', GrgitVcsExtension)
+    SemverExtension semver = project.extensions.getByName('semver')
+    GrgitVcsExtension grgit = semver.extensions.create('grgit', GrgitVcsExtension)
 
-        semver.vcsSupplier = {
-            if (grgit.tagParser) {
-                new GrgitVcs(project.grgit, grgit.tagParser)
-            } else {
-                new GrgitVcs(project.grgit)
-            }
-        }
+    semver.vcsSupplier = {
+      if (grgit.tagParser) {
+        new GrgitVcs(project.grgit, grgit.tagParser)
+      } else {
+        new GrgitVcs(project.grgit)
+      }
     }
+  }
 
-    public static class GrgitVcsExtension {
-        /**
-         * The logic to use when parsing Grgit tags into Versions.
-         */
-        Function<Tag, Optional<Version>> tagParser
-    }
+  public static class GrgitVcsExtension {
+    /**
+     * The logic to use when parsing Grgit tags into Versions.
+     */
+    Function<Tag, Optional<Version>> tagParser
+  }
 }

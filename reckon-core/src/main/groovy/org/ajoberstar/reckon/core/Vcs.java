@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,30 +19,26 @@ import com.github.zafarkhaja.semver.Version;
 
 import java.util.Optional;
 
-/**
- *
- */
+/** */
 public interface Vcs {
-    /**
-     * Gets the version of the current revision of the VCS, if it
-     * is marked.
-     * @return a version representing the current revision or an empty
-     * Optional
-     */
-    Optional<Version> getCurrentVersion();
+  /**
+   * Gets the version of the current revision of the VCS, if it is marked.
+   *
+   * @return a version representing the current revision or an empty Optional
+   */
+  Optional<Version> getCurrentVersion();
 
-    /**
-     * Gets the previous final version (i.e. no pre-release information),
-     * if there is one.
-     * @return a version representing the previous release marked in the VCS
-     * or an empty Optional
-     */
-    Optional<Version> getPreviousRelease();
+  /**
+   * Gets the previous final version (i.e. no pre-release information), if there is one.
+   *
+   * @return a version representing the previous release marked in the VCS or an empty Optional
+   */
+  Optional<Version> getPreviousRelease();
 
-    /**
-     * Gets the previous version, if there is one.
-     * @return a version representing the previous version marked
-     * in the VCS or an empty Optional
-     */
-    Optional<Version> getPreviousVersion();
+  /**
+   * Gets the previous version, if there is one.
+   *
+   * @return a version representing the previous version marked in the VCS or an empty Optional
+   */
+  Optional<Version> getPreviousVersion();
 }

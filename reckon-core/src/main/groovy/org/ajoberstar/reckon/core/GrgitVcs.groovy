@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,99 +34,99 @@ import java.util.stream.Stream
  * Versions are sorted based on their ancestry, then by their version.
  */
 class GrgitVcs implements Vcs {
-    private final Grgit git
-    private final Function<Tag, Optional<Version>> tagParser
+  private final Grgit git
+  private final Function<Tag, Optional<Version>> tagParser
 
-    public GrgitVcs(Grgit git) {
-        this(git, { tag ->
-            try {
-                return Optional.of(Version.valueOf(tag.name))
-            } catch (ParseException e) {
-                return Optional.empty()
-            }
-        })
+  public GrgitVcs(Grgit git) {
+    this(git, { tag ->
+      try {
+        return Optional.of(Version.valueOf(tag.name))
+      } catch (ParseException e) {
+        return Optional.empty()
+      }
+    })
+  }
+
+  public GrgitVcs(Grgit git, Function<Tag, Optional<Version>> tagParser) {
+    this.git = git
+    this.tagParser = tagParser
+  }
+
+  /**
+   * If the current HEAD commit is tagged with a version,
+   * return that version (will always return the one with
+   * the highest precedence if there are multiple).
+   * @return the version tagged on the current commit, or
+   * an empty Optional.
+   */
+  @Override
+  Optional<Version> getCurrentVersion() {
+    Commit head = git.head()
+    return getVersions { tag -> tag.commit == head }
+      .findFirst()
+  }
+
+  /**
+   * Gets the most recently tagged final version in the
+   * ancestry of the current HEAD.
+   * @return the most recent tagged final version, or an
+   * empty Optional if no final versions are tagged in the
+   * current HEAD's ancestry
+   */
+  @Override
+  Optional<Version> getPreviousRelease() {
+    return getPreviousVersions()
+      .filter { version -> version.preReleaseVersion.empty }
+      .findFirst()
+  }
+
+  /**
+   * Gets the most recently tagged version in the ancestry of
+   * the current HEAD.
+   * @return the most recent tagged version, or an empty Optional
+   * if no versions are tagged in the current HEAD's ancestry
+   */
+  @Override
+  Optional<Version> getPreviousVersion() {
+    return getPreviousVersions().findFirst()
+  }
+
+  private Stream<Version> getPreviousVersions() {
+    Commit head = git.head()
+    return getVersions { tag -> tag.commit == head || git.isAncestorOf(tag, head) }
+  }
+
+  private Stream<Version> getVersions(Predicate<Tag> tagFilter) {
+    return git.tag.list().stream()
+      .filter(tagFilter)
+      .map { tag -> toVersionTag(tag) }
+      .flatMap { opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty() }
+      .sorted(byAncestryThenVersion)
+      .map { it.version }
+  }
+
+  private Optional<VersionTag> toVersionTag(Tag tag) {
+    return tagParser.apply(tag).map { version -> new VersionTag(tag, version) }
+  }
+
+  @Immutable(knownImmutableClasses=[Version])
+  private class VersionTag {
+    Tag tag
+    Version version
+  }
+
+  private final Comparator<Tag> byAncestry = { a, b ->
+    if (a.commit == b.commit) {
+      0
+    } else if (git.isAncestorOf(a, b)) {
+      -1
+    } else if (git.isAncestorOf(b, a)) {
+      1
+    } else {
+      0
     }
+  }
 
-    public GrgitVcs(Grgit git, Function<Tag, Optional<Version>> tagParser) {
-        this.git = git
-        this.tagParser = tagParser
-    }
-
-    /**
-     * If the current HEAD commit is tagged with a version,
-     * return that version (will always return the one with
-     * the highest precedence if there are multiple).
-     * @return the version tagged on the current commit, or
-     * an empty Optional.
-     */
-    @Override
-    Optional<Version> getCurrentVersion() {
-        Commit head = git.head()
-        return getVersions { tag -> tag.commit == head }
-            .findFirst()
-    }
-
-    /**
-     * Gets the most recently tagged final version in the
-     * ancestry of the current HEAD.
-     * @return the most recent tagged final version, or an
-     * empty Optional if no final versions are tagged in the
-     * current HEAD's ancestry
-     */
-    @Override
-    Optional<Version> getPreviousRelease() {
-        return getPreviousVersions()
-            .filter { version -> version.preReleaseVersion.empty }
-            .findFirst()
-    }
-
-    /**
-     * Gets the most recently tagged version in the ancestry of
-     * the current HEAD.
-     * @return the most recent tagged version, or an empty Optional
-     * if no versions are tagged in the current HEAD's ancestry
-     */
-    @Override
-    Optional<Version> getPreviousVersion() {
-        return getPreviousVersions().findFirst()
-    }
-
-    private Stream<Version> getPreviousVersions() {
-        Commit head = git.head()
-        return getVersions { tag -> tag.commit == head || git.isAncestorOf(tag, head) }
-    }
-
-    private Stream<Version> getVersions(Predicate<Tag> tagFilter) {
-        return git.tag.list().stream()
-            .filter(tagFilter)
-            .map { tag -> toVersionTag(tag) }
-            .flatMap { opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty() }
-            .sorted(byAncestryThenVersion)
-            .map { it.version }
-    }
-
-    private Optional<VersionTag> toVersionTag(Tag tag) {
-        return tagParser.apply(tag).map { version -> new VersionTag(tag, version) }
-    }
-
-    @Immutable(knownImmutableClasses=[Version])
-    private class VersionTag {
-        Tag tag
-        Version version
-    }
-
-    private final Comparator<Tag> byAncestry = { a, b ->
-        if (a.commit == b.commit) {
-            0
-        } else if (git.isAncestorOf(a, b)) {
-            -1
-        } else if (git.isAncestorOf(b, a)) {
-            1
-        } else {
-            0
-        }
-    }
-
-    private final Comparator<VersionTag> byAncestryThenVersion =
-            Comparator.comparing({ it.tag }, byAncestry).thenComparing({ it.version } as Function).reversed()
+  private final Comparator<VersionTag> byAncestryThenVersion =
+      Comparator.comparing({ it.tag }, byAncestry).thenComparing({ it.version } as Function).reversed()
 }

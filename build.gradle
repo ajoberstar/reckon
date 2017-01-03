@@ -1,13 +1,15 @@
 plugins {
-    id 'org.ajoberstar.defaults' version '0.7.1'
+    id 'org.ajoberstar.defaults' version '0.7.2-rc.3'
 }
 
 allprojects {
-  model {
-      bintray {
-          owner = 'ajoberstar'
-          repo = 'maven'
-          pkg = 'reckon'
-      }
+  plugins.withId('java') {
+    model {
+        bintray {
+            owner = 'ajoberstar'
+            repo = 'maven'
+            pkg = 'reckon'
+        }
+    }
   }
 }
