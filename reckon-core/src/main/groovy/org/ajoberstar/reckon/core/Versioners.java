@@ -21,12 +21,12 @@ import java.util.Objects;
 
 /** Companion functions for creating common versioners. */
 public final class Versioners {
+  /** A Version 0.0.0 */
+  public static final Version VERSION_0 = Version.forIntegers(0, 0, 0);
+
   private Versioners() {
     throw new AssertionError("Cannot instantiate this class.");
   }
-
-  /** A Version 0.0.0 */
-  public static final Version VERSION_0 = Version.forIntegers(0, 0, 0);
 
   /** @return a versioner that will return the base. */
   public static Versioner identity() {

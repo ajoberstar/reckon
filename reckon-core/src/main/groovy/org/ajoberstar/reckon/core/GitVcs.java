@@ -26,11 +26,9 @@ import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.revwalk.filter.*;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import java.util.stream.Collectors;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Objects;
@@ -99,12 +97,12 @@ public class GitVcs implements Vcs {
 
         if (maybeVersion.isPresent()) {
           GitVersion version = maybeVersion.get();
-          walk.reset();
-          walk.setRevFilter(RevFilter.MERGE_BASE);
-          walk.markStart(version.getRevCommit());
-          walk.markStart(headCommit);
-
-          RevCommit mergeBase = walk.next();
+          // walk.reset();
+          // walk.setRevFilter(RevFilter.MERGE_BASE);
+          // walk.markStart(version.getRevCommit());
+          // walk.markStart(headCommit);
+          //
+          // RevCommit mergeBase = walk.next();
 
           versions.add(version);
           // if (!headCommit.equals(mergeBase)) {
@@ -221,6 +219,7 @@ public class GitVcs implements Vcs {
       return anyIsHead;
     }
 
+    @Override
     public boolean equals(Object obj) {
       if (obj instanceof BaseVersion) {
         BaseVersion other = (BaseVersion) obj;
@@ -232,6 +231,7 @@ public class GitVcs implements Vcs {
       }
     }
 
+    @Override
     public int hashCode() {
       return Objects.hash(normal, any, anyIsHead);
     }
