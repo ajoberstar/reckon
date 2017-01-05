@@ -17,7 +17,6 @@ package org.ajoberstar.reckon.gradle
 
 import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.grgit.Tag
-import org.ajoberstar.reckon.gradle.SemverExtension
 import org.ajoberstar.reckon.core.GrgitVcs
 import org.gradle.api.Plugin
 import org.gradle.api.Project

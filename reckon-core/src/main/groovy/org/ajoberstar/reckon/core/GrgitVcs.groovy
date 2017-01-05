@@ -21,7 +21,6 @@ import groovy.transform.Immutable
 import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Tag
-import org.ajoberstar.reckon.core.Vcs
 
 import java.util.function.Function
 import java.util.function.Predicate
