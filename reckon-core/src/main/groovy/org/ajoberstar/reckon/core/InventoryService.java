@@ -43,7 +43,7 @@ public final class InventoryService {
   private final Repository repo;
   private final Function<Ref, Optional<ReckonVersion>> tagParser;
 
-  public InventoryService(Repository repo, Function<String, Optional<String>> tagSelector) {
+  InventoryService(Repository repo, Function<String, Optional<String>> tagSelector) {
     this.repo = repo;
     this.tagParser =
         ref -> {

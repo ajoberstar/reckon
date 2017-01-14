@@ -27,7 +27,7 @@ public final class Inventory {
   private final Set<ReckonVersion> parallelNormals;
   private final Set<ReckonVersion> claimedVersions;
 
-  public Inventory(
+  Inventory(
       ReckonVersion currentVersion,
       int commitsSinceBase,
       ReckonVersion baseVersion,
