@@ -38,10 +38,18 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class InventoryService {
+  private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+
   private final Repository repo;
   private final Function<Ref, Optional<ReckonVersion>> tagParser;
+
+  InventoryService(Repository repo) {
+    this(repo, tagName -> Optional.of(tagName.replaceAll("^v", "")));
+  }
 
   InventoryService(Repository repo, Function<String, Optional<String>> tagSelector) {
     this.repo = repo;
@@ -57,6 +65,12 @@ public final class InventoryService {
       walk.setRetainBody(false);
 
       ObjectId headObjectId = repo.getRefDatabase().getRef("HEAD").getObjectId();
+
+      if (headObjectId == null) {
+        logger.debug("No HEAD commit. Presuming repo is empty.");
+        return new Inventory(null, 0, null, null, null, null);
+      }
+
       RevCommit headCommit = walk.parseCommit(headObjectId);
 
       Set<TaggedVersion> taggedVersions = getTaggedVersions(walk);
