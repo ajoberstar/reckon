@@ -33,23 +33,27 @@ public final class Inventory {
 
   Inventory(
       ReckonVersion currentVersion,
-      int commitsSinceBase,
       ReckonVersion baseVersion,
       ReckonVersion baseNormal,
+      int commitsSinceBase,
       Set<ReckonVersion> parallelNormals,
       Set<ReckonVersion> claimedVersions) {
+    if (commitsSinceBase < 0) {
+      throw new IllegalArgumentException("Commits since base must be 0 or greater: " + commitsSinceBase);
+    }
+
     this.currentVersion = currentVersion;
+    this.baseVersion = Optional.ofNullable(baseVersion).orElse(ReckonVersion.VERSION_0);
+    this.baseNormal = Optional.ofNullable(baseNormal).orElse(ReckonVersion.VERSION_0);
     this.commitsSinceBase = commitsSinceBase;
-    this.baseVersion = baseVersion;
-    this.baseNormal = baseNormal;
     this.parallelNormals =
         Optional.ofNullable(parallelNormals)
-            .map(Collections::unmodifiableSet)
-            .orElse(Collections.emptySet());
+        .map(Collections::unmodifiableSet)
+        .orElse(Collections.emptySet());
     this.claimedVersions =
         Optional.ofNullable(claimedVersions)
-            .map(Collections::unmodifiableSet)
-            .orElse(Collections.emptySet());
+        .map(Collections::unmodifiableSet)
+        .orElse(Collections.emptySet());
   }
 
   public Optional<ReckonVersion> getCurrentVersion() {
@@ -60,12 +64,12 @@ public final class Inventory {
     return commitsSinceBase;
   }
 
-  public Optional<ReckonVersion> getBaseVersion() {
-    return Optional.ofNullable(baseVersion);
+  public ReckonVersion getBaseVersion() {
+    return baseVersion;
   }
 
-  public Optional<ReckonVersion> getBaseNormal() {
-    return Optional.ofNullable(baseNormal);
+  public ReckonVersion getBaseNormal() {
+    return baseNormal;
   }
 
   public Set<ReckonVersion> getParallelNormals() {

@@ -41,28 +41,28 @@ class InventoryServiceTest extends Specification {
     given:
     checkout('head-single-tag')
     expect:
-    service.get().currentVersion == Optional.of(ReckonVersion.valueOf('9.8.7'))
+    service.get().currentVersion == ReckonVersion.valueOf('0.1.0-milestone.1')
   }
 
   def 'if multiple tagged version on HEAD, the max is current version'() {
     given:
     checkout('head-multi-tag')
     expect:
-    service.get().currentVersion == Optional.of(ReckonVersion.valueOf('9.8.7'))
+    service.get().currentVersion == ReckonVersion.valueOf('0.1.0')
   }
 
-  def 'if no tagged finals in HEAD\'s history, base normal is empty'() {
+  def 'if no tagged finals in HEAD\'s history, base normal is 0.0.0'() {
     given:
     checkout('final-unreachable')
     expect:
-    service.get().baseNormal == Optional.empty()
+    service.get().baseNormal == ReckonVersion.valueOf('0.0.0').get()
   }
 
   def 'if tagged finals in HEAD\'s history, base normal is max of finals which have no other final between them and HEAD'() {
     given:
     checkout('final-reachable')
     expect:
-    service.get().baseNormal == Optional.of(ReckonVersion.valueOf('9.8.7'))
+    service.get().baseNormal == ReckonVersion.valueOf('1.0.0').get()
   }
 
   def 'if tagged finals on head, base normal and version are same as current version'() {
@@ -71,22 +71,22 @@ class InventoryServiceTest extends Specification {
     when:
     def inventory = service.get()
     then:
-    inventory.baseNormal == inventory.currentVersion
-    inventory.baseVersion == inventory.currentVersion
+    inventory.baseNormal == inventory.currentVersion.get()
+    inventory.baseVersion == inventory.currentVersion.get()
   }
 
-  def 'if no tagged versions in HEAD\'s history, base version is empty'() {
+  def 'if no tagged versions in HEAD\'s history, base version is 0.0.0'() {
     given:
     checkout('version-unreachable')
     expect:
-    service.get().baseVersion == Optional.empty()
+    service.get().baseVersion == ReckonVersion.valueOf('0.0.0').get()
   }
 
   def 'if tagged versions in HEAD\'s history, base version is max of versions which have no other version between them and HEAD'() {
     given:
     checkout('version-reachable')
     expect:
-    service.get().baseVersion == Optional.of(ReckonVersion.valueOf('9.8.7'))
+    service.get().baseVersion == ReckonVersion.valueOf('0.3.0-milestone.1').get()
   }
 
   def 'if tagged versions on head, base version is same as current version'() {
@@ -95,7 +95,7 @@ class InventoryServiceTest extends Specification {
     when:
     def inventory = service.get()
     then:
-    inventory.baseVersion == inventory.currentVersion
+    inventory.baseVersion == inventory.currentVersion.get()
   }
 
   def 'if current is tagged with final, commits since base is 0'() {
@@ -109,14 +109,14 @@ class InventoryServiceTest extends Specification {
     given:
     checkout('final-unreachable')
     expect:
-    service.get().commitsSinceBase == 987
+    service.get().commitsSinceBase == 4
   }
 
   def 'if reachable tagged finals, commits since base is size of log from HEAD excluding the base normal'() {
     given:
     checkout('final-reachable')
     expect:
-    service.get().commitsSinceBase == 987
+    service.get().commitsSinceBase == 10
   }
 
   def 'if no branches share merge base with HEAD, no parallel versions returned'() {
@@ -137,12 +137,20 @@ class InventoryServiceTest extends Specification {
     given:
     checkout('parallel-untagged-since-merge')
     expect:
-    service.get().parallelNormals == [ReckonVersion.valueOf('9.8.7')] as Set
+    service.get().parallelNormals == [ReckonVersion.valueOf('0.2.0').get()] as Set
   }
 
   def 'all tagged versions treated as claimed versions'() {
     expect:
-    service.get() == [ReckonVersion.valueOf('9.8.7')] as Set
+    service.get().claimedVersions == [
+      ReckonVersion.valueOf('0.1.0-milestone.1').get(),
+      ReckonVersion.valueOf('0.1.0-rc.1').get(),
+      ReckonVersion.valueOf('0.1.0').get(),
+      ReckonVersion.valueOf('0.2.0-rc.1').get(),
+      ReckonVersion.valueOf('0.3.0-milestone.1').get(),
+      ReckonVersion.valueOf('0.3.0').get(),
+      ReckonVersion.valueOf('1.0.0').get()
+    ] as Set
   }
 
   def 'if no commits, all results are empty'() {
@@ -150,7 +158,7 @@ class InventoryServiceTest extends Specification {
     def emptyGrgit = Grgit.init(dir: Files.createTempDirectory('repo2').toFile())
     def emptyService = new InventoryService(emptyGrgit.repository.jgit.repository)
     expect:
-    emptyService.get() == new Inventory(null, 0, null, null, null, null)
+    emptyService.get() == new Inventory(null, null, null, 0, null, null)
   }
 
   def setupSpec() {
@@ -162,6 +170,67 @@ class InventoryServiceTest extends Specification {
     commit()
     branch('version-unreachable')
     branch('head-untagged')
+
+    commit()
+    tag('0.1.0-milestone.1')
+    branch('head-single-tag')
+    branch('version-current')
+    branch('final-unreachable')
+    tag('not-a-version')
+
+    commit()
+    commit()
+    tag('0.1.0-rc.1')
+    tag('0.1.0')
+    branch('final-current')
+    branch('head-multi-tag')
+    branch('parallel-no-base')
+
+    commit()
+    branch('RB_0.2')
+    checkout('RB_0.2')
+    commit()
+    commit()
+    tag('0.2.0-rc.1')
+    commit()
+
+    checkout('master')
+    commit()
+    branch('parallel-untagged-since-merge')
+    commit()
+    tag('0.3.0-milestone.1')
+    commit()
+    branch('parallel-tagged-since-merge')
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+    merge('RB_0.2')
+    branch('version-reachable')
+
+    commit()
+    branch('RB_1.0')
+    checkout('RB_1.0')
+    commit()
+    tag('1.0.0')
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+    commit()
+
+    checkout('master')
+    commit()
+    tag('0.3.0')
+    commit()
+    merge('RB_1.0')
+    branch('final-reachable')
+
   }
 
   def cleanupSpec() {
@@ -176,8 +245,9 @@ class InventoryServiceTest extends Specification {
   private void commit() {
     byte[] bytes = new byte[128]
     random.nextBytes(bytes)
-    new File(grgit.repository.rootDir, '1.txt') << bytes
-    grgit.add(patterns: ['1.txt'])
+    int fileName = random.nextInt();
+    new File(grgit.repository.rootDir, "${fileName}.txt") << bytes
+    grgit.add(patterns: ["${fileName}.txt"])
     def commit = grgit.commit(message: 'do')
     println "Created commit: ${commit.abbreviatedId}"
   }
@@ -206,5 +276,12 @@ class InventoryServiceTest extends Specification {
     def atCommit = grgit.resolve.toCommit(name)
     println "Checkout out ${name}, which is at ${atCommit.abbreviatedId}"
     assert name == grgit.branch.current.name
+  }
+
+  private void merge(String name) {
+    def currentBranch = grgit.branch.current.name
+    grgit.merge(head: name)
+    println "Merged ${name} into ${currentBranch}"
+    assert currentBranch == grgit.branch.current.name
   }
 }
