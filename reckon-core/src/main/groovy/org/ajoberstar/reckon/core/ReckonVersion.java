@@ -20,9 +20,13 @@ import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ReckonVersion implements Comparable<ReckonVersion> {
   public static final ReckonVersion VERSION_0 = new ReckonVersion(Version.forIntegers(0, 0, 0));
+
+  private static final Logger logger = LoggerFactory.getLogger(ReckonVersion.class);
 
   private final Version version;
 
@@ -63,8 +67,8 @@ public final class ReckonVersion implements Comparable<ReckonVersion> {
   public static Optional<ReckonVersion> valueOf(String version) {
     try {
       return Optional.of(new ReckonVersion(Version.valueOf(version)));
-    } catch (IllegalArgumentException | ParseException ignored) {
-      // intentionally ignoring the exception, since it just indicates this isn't a version
+    } catch (IllegalArgumentException | ParseException e) {
+      logger.debug("Cannot parse {} as version.", version, e);
       return Optional.empty();
     }
   }
