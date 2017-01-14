@@ -39,7 +39,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 
-public class InventoryService {
+public final class InventoryService {
   private final Repository repo;
   private final Function<Ref, Optional<ReckonVersion>> tagParser;
 

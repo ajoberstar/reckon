@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class ReckonVersion implements Comparable<ReckonVersion> {
+public final class ReckonVersion implements Comparable<ReckonVersion> {
   public static final ReckonVersion VERSION_0 = new ReckonVersion(Version.forIntegers(0, 0, 0));
 
   private final Version version;
@@ -64,7 +64,7 @@ public class ReckonVersion implements Comparable<ReckonVersion> {
     try {
       return Optional.of(new ReckonVersion(Version.valueOf(version)));
     } catch (IllegalArgumentException | ParseException ignored) {
-      // explicitly ignoring the exception, since it just indicates this isn't a version
+      // intentionally ignoring the exception, since it just indicates this isn't a version
       return Optional.empty();
     }
   }
