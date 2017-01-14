@@ -26,7 +26,38 @@ public final class Reckoner {
 
   public static String reckon(
       Repository repo, Function<String, Optional<String>> tagSelector, Scope scope, String stage) {
+
+    Inventory inventory = new InventoryService(repo, tagSelector).get();
+
+    ReckonVersion targetNormal = reckonNormal(inventory, scope);
+    ReckonVersion version = reckonStage(inventory, targetNormal, stage);
+
+    if (inventory.getClaimedVersions().contains(version)) {
+      throw new IllegalStateException(
+          "Reckoned version " + version + " has already been released.");
+    }
+
+    return version.toString();
+  }
+
+  private static ReckonVersion reckonNormal(Inventory inventory, Scope scope) {
+    ReckonVersion targetNormal = inventory.getBaseNormal().incrementNormal(scope);
+
+    // if a version's already being developed on a parallel branch we'll skip it
+    if (inventory.getParallelNormals().contains(targetNormal)) {
+      targetNormal = targetNormal.incrementNormal(scope);
+    }
+
+    if (inventory.getClaimedVersions().contains(targetNormal)) {
+      throw new IllegalStateException(
+          "Reckoned target normal version " + targetNormal + " has already been released.");
+    }
+    return targetNormal;
+  }
+
+  private static ReckonVersion reckonStage(
+      Inventory inventory, ReckonVersion targetNormal, String stage) {
     // TODO implement
-    return null;
+    return targetNormal;
   }
 }

@@ -179,6 +179,8 @@ public final class InventoryService {
   }
 
   private boolean doMergedInto(RevWalk walk, RevCommit base, RevCommit tip) {
+    // TODO consider something like JGit's 24 hour clock skew to eliminate candidates
+    // you know can't be see RevWalkUtils#findBranchesReachableFrom
     try {
       return walk.isMergedInto(base, tip);
     } catch (IOException e) {

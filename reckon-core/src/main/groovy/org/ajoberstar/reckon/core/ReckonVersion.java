@@ -44,6 +44,19 @@ public final class ReckonVersion implements Comparable<ReckonVersion> {
     return version.getPreReleaseVersion().isEmpty();
   }
 
+  public ReckonVersion incrementNormal(Scope scope) {
+    switch (scope) {
+      case MAJOR:
+        return new ReckonVersion(version.incrementMajorVersion());
+      case MINOR:
+        return new ReckonVersion(version.incrementMinorVersion());
+      case PATCH:
+        return new ReckonVersion(version.incrementPatchVersion());
+      default:
+        throw new AssertionError("Invalid scope: " + scope);
+    }
+  }
+
   @Override
   public boolean equals(Object other) {
     return EqualsBuilder.reflectionEquals(this, other);
