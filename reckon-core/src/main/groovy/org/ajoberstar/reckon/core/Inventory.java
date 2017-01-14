@@ -39,7 +39,8 @@ public final class Inventory {
       Set<ReckonVersion> parallelNormals,
       Set<ReckonVersion> claimedVersions) {
     if (commitsSinceBase < 0) {
-      throw new IllegalArgumentException("Commits since base must be 0 or greater: " + commitsSinceBase);
+      throw new IllegalArgumentException(
+          "Commits since base must be 0 or greater: " + commitsSinceBase);
     }
 
     this.currentVersion = currentVersion;
@@ -48,12 +49,12 @@ public final class Inventory {
     this.commitsSinceBase = commitsSinceBase;
     this.parallelNormals =
         Optional.ofNullable(parallelNormals)
-        .map(Collections::unmodifiableSet)
-        .orElse(Collections.emptySet());
+            .map(Collections::unmodifiableSet)
+            .orElse(Collections.emptySet());
     this.claimedVersions =
         Optional.ofNullable(claimedVersions)
-        .map(Collections::unmodifiableSet)
-        .orElse(Collections.emptySet());
+            .map(Collections::unmodifiableSet)
+            .orElse(Collections.emptySet());
   }
 
   public Optional<ReckonVersion> getCurrentVersion() {

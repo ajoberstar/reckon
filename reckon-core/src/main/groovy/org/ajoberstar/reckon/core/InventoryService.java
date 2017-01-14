@@ -81,27 +81,26 @@ public final class InventoryService {
 
       ReckonVersion currentVersion =
           findCurrent(headCommit, taggedVersions.stream())
-          .map(TaggedVersion::getVersion)
-          .orElse(null);
+              .map(TaggedVersion::getVersion)
+              .orElse(null);
       TaggedVersion baseNormal =
           findBase(walk, headCommit, taggedVersions.stream().filter(TaggedVersion::isNormal));
       TaggedVersion baseVersion = findBase(walk, headCommit, taggedVersions.stream());
 
       int commitsSinceBase = RevWalkUtils.count(walk, headCommit, baseNormal.getCommit());
 
+      Set<TaggedVersion> parallelCandidates =
+          findParallelCandidates(walk, headCommit, taggedVersions);
 
-      Set<TaggedVersion> parallelCandidates = findParallelCandidates(walk, headCommit, taggedVersions);
-
-      Set<RevCommit> taggedCommits = taggedVersions.stream()
-          .map(TaggedVersion::getCommit)
-          .collect(Collectors.toSet());
+      Set<RevCommit> taggedCommits =
+          taggedVersions.stream().map(TaggedVersion::getCommit).collect(Collectors.toSet());
       Set<ReckonVersion> parallelVersions =
           parallelCandidates
-          .stream()
-          .map(version -> findParallel(walk, headCommit, version, taggedCommits))
-          // TODO Java 9 Optional::stream
-          .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty())
-          .collect(Collectors.toSet());
+              .stream()
+              .map(version -> findParallel(walk, headCommit, version, taggedCommits))
+              // TODO Java 9 Optional::stream
+              .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty())
+              .collect(Collectors.toSet());
 
       Set<ReckonVersion> claimedVersions =
           taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
@@ -126,11 +125,11 @@ public final class InventoryService {
       ObjectId objectId = tag.getPeeledObjectId();
       RevCommit commit = walk.parseCommit(objectId);
       tagParser
-      .apply(tag)
-      .ifPresent(
-          version -> {
-            versions.add(new TaggedVersion(version, commit));
-          });
+          .apply(tag)
+          .ifPresent(
+              version -> {
+                versions.add(new TaggedVersion(version, commit));
+              });
     }
     return versions;
   }
@@ -170,8 +169,10 @@ public final class InventoryService {
         .orElse(new TaggedVersion(ReckonVersion.VERSION_0, null));
   }
 
-  private Set<TaggedVersion> findParallelCandidates(RevWalk walk, RevCommit head, Set<TaggedVersion> candidates) {
-    return candidates.stream()
+  private Set<TaggedVersion> findParallelCandidates(
+      RevWalk walk, RevCommit head, Set<TaggedVersion> candidates) {
+    return candidates
+        .stream()
         .filter(candidate -> !doMergedInto(walk, head, candidate.getCommit()))
         .filter(candidate -> !doMergedInto(walk, candidate.getCommit(), head))
         .collect(Collectors.toSet());
@@ -197,10 +198,12 @@ public final class InventoryService {
 
       walk.reset();
       walk.setRevFilter(RevFilter.ALL);
-      boolean taggedSinceMergeBase = RevWalkUtils.find(walk,  head, mergeBase).stream()
-          .filter(tagged::contains)
-          .findAny()
-          .isPresent();
+      boolean taggedSinceMergeBase =
+          RevWalkUtils.find(walk, head, mergeBase)
+              .stream()
+              .filter(tagged::contains)
+              .findAny()
+              .isPresent();
 
       if (mergeBase != null
           && !taggedSinceMergeBase
