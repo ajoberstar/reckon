@@ -71,9 +71,13 @@ public final class InventoryService {
         return new Inventory(null, null, null, 0, null, null);
       }
 
+      logger.debug("Found HEAD commit {}", headObjectId);
+
       RevCommit headCommit = walk.parseCommit(headObjectId);
 
       Set<TaggedVersion> taggedVersions = getTaggedVersions(walk);
+
+      logger.debug("Found tagged versions: {}", taggedVersions);
 
       ReckonVersion currentVersion =
           findCurrent(headCommit, taggedVersions.stream())
@@ -85,11 +89,14 @@ public final class InventoryService {
 
       int commitsSinceBase = RevWalkUtils.count(walk, headCommit, baseNormal.getCommit());
 
+
+      Set<TaggedVersion> parallelCandidates = findParallelCandidates(walk, headCommit, taggedVersions);
+
       Set<RevCommit> taggedCommits = taggedVersions.stream()
           .map(TaggedVersion::getCommit)
           .collect(Collectors.toSet());
       Set<ReckonVersion> parallelVersions =
-          taggedVersions
+          parallelCandidates
           .stream()
           .map(version -> findParallel(walk, headCommit, version, taggedCommits))
           // TODO Java 9 Optional::stream
@@ -161,6 +168,21 @@ public final class InventoryService {
         .flatMap(List::stream)
         .max(Comparator.comparing(TaggedVersion::getVersion))
         .orElse(new TaggedVersion(ReckonVersion.VERSION_0, null));
+  }
+
+  private Set<TaggedVersion> findParallelCandidates(RevWalk walk, RevCommit head, Set<TaggedVersion> candidates) {
+    return candidates.stream()
+        .filter(candidate -> !doMergedInto(walk, head, candidate.getCommit()))
+        .filter(candidate -> !doMergedInto(walk, candidate.getCommit(), head))
+        .collect(Collectors.toSet());
+  }
+
+  private boolean doMergedInto(RevWalk walk, RevCommit base, RevCommit tip) {
+    try {
+      return walk.isMergedInto(base, tip);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private Optional<ReckonVersion> findParallel(
