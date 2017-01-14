@@ -18,6 +18,8 @@ package org.ajoberstar.reckon.core;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public final class Inventory {
   private final ReckonVersion currentVersion;
@@ -38,8 +40,14 @@ public final class Inventory {
     this.commitsSinceBase = commitsSinceBase;
     this.baseVersion = baseVersion;
     this.baseNormal = baseNormal;
-    this.parallelNormals = parallelNormals == null ? Collections.emptySet() : parallelNormals;
-    this.claimedVersions = claimedVersions == null ? Collections.emptySet() : claimedVersions;
+    this.parallelNormals =
+        Optional.ofNullable(parallelNormals)
+            .map(Collections::unmodifiableSet)
+            .orElse(Collections.emptySet());
+    this.claimedVersions =
+        Optional.ofNullable(claimedVersions)
+            .map(Collections::unmodifiableSet)
+            .orElse(Collections.emptySet());
   }
 
   public Optional<ReckonVersion> getCurrentVersion() {
@@ -64,5 +72,15 @@ public final class Inventory {
 
   public Set<ReckonVersion> getClaimedVersions() {
     return claimedVersions;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return EqualsBuilder.reflectionEquals(this, other);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 }
