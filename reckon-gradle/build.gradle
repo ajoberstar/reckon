@@ -3,7 +3,7 @@ plugins {
     id 'java-gradle-plugin'
 }
 
-group = 'org.ajoberstar'
+group = 'org.ajoberstar.reckon'
 
 sourceCompatibility = '1.8'
 
