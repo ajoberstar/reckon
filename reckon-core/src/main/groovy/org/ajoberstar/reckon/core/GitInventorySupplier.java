@@ -15,6 +15,7 @@
  */
 package org.ajoberstar.reckon.core;
 
+import com.github.zafarkhaja.semver.Version;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Comparator;
@@ -41,26 +42,27 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class InventoryService {
-  private static final Logger logger = LoggerFactory.getLogger(InventoryService.class);
+public final class GitInventorySupplier implements VcsInventorySupplier {
+  private static final Logger logger = LoggerFactory.getLogger(GitInventorySupplier.class);
 
   private final Repository repo;
-  private final Function<Ref, Optional<ReckonVersion>> tagParser;
+  private final Function<Ref, Optional<Version>> tagParser;
 
-  InventoryService(Repository repo) {
+  GitInventorySupplier(Repository repo) {
     this(repo, tagName -> Optional.of(tagName.replaceAll("^v", "")));
   }
 
-  InventoryService(Repository repo, Function<String, Optional<String>> tagSelector) {
+  GitInventorySupplier(Repository repo, Function<String, Optional<String>> tagSelector) {
     this.repo = repo;
     this.tagParser =
         ref -> {
           String tagName = Repository.shortenRefName(ref.getName());
-          return tagSelector.apply(tagName).flatMap(ReckonVersion::valueOf);
+          return tagSelector.apply(tagName).flatMap(Versions::valueOf);
         };
   }
 
-  public Inventory get() {
+  @Override
+  public VcsInventory getInventory() {
     try (RevWalk walk = new RevWalk(repo)) {
       walk.setRetainBody(false);
 
@@ -68,7 +70,7 @@ public final class InventoryService {
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
-        return new Inventory(null, null, null, null, 0, null, null);
+        return new VcsInventory(null, null, null, null, 0, null, null);
       }
 
       logger.debug("Found HEAD commit {}", headObjectId);
@@ -79,7 +81,7 @@ public final class InventoryService {
 
       logger.debug("Found tagged versions: {}", taggedVersions);
 
-      ReckonVersion currentVersion =
+      Version currentVersion =
           findCurrent(headCommit, taggedVersions.stream())
               .map(TaggedVersion::getVersion)
               .orElse(null);
@@ -94,7 +96,7 @@ public final class InventoryService {
 
       Set<RevCommit> taggedCommits =
           taggedVersions.stream().map(TaggedVersion::getCommit).collect(Collectors.toSet());
-      Set<ReckonVersion> parallelVersions =
+      Set<Version> parallelVersions =
           parallelCandidates
               .stream()
               .map(version -> findParallel(walk, headCommit, version, taggedCommits))
@@ -102,10 +104,10 @@ public final class InventoryService {
               .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty())
               .collect(Collectors.toSet());
 
-      Set<ReckonVersion> claimedVersions =
+      Set<Version> claimedVersions =
           taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
 
-      return new Inventory(
+      return new VcsInventory(
           headObjectId.getName(),
           currentVersion,
           baseVersion.getVersion(),
@@ -167,7 +169,7 @@ public final class InventoryService {
         .build()
         .flatMap(List::stream)
         .max(Comparator.comparing(TaggedVersion::getVersion))
-        .orElse(new TaggedVersion(ReckonVersion.VERSION_0, null));
+        .orElse(new TaggedVersion(Versions.VERSION_0, null));
   }
 
   private Set<TaggedVersion> findParallelCandidates(
@@ -189,7 +191,7 @@ public final class InventoryService {
     }
   }
 
-  private Optional<ReckonVersion> findParallel(
+  private Optional<Version> findParallel(
       RevWalk walk, RevCommit head, TaggedVersion candidate, Set<RevCommit> tagged) {
     try {
       walk.reset();
@@ -212,7 +214,7 @@ public final class InventoryService {
           && !taggedSinceMergeBase
           && !mergeBase.equals(head)
           && !mergeBase.equals(candidate.getCommit())) {
-        return Optional.of(candidate.getVersion().getNormal());
+        return Optional.of(Versions.getNormal(candidate.getVersion()));
       } else {
         return Optional.empty();
       }
@@ -222,15 +224,15 @@ public final class InventoryService {
   }
 
   private static class TaggedVersion {
-    private final ReckonVersion version;
+    private final Version version;
     private final RevCommit commit;
 
-    public TaggedVersion(ReckonVersion version, RevCommit commit) {
+    public TaggedVersion(Version version, RevCommit commit) {
       this.version = version;
       this.commit = commit;
     }
 
-    public ReckonVersion getVersion() {
+    public Version getVersion() {
       return version;
     }
 
@@ -239,7 +241,7 @@ public final class InventoryService {
     }
 
     public boolean isNormal() {
-      return version.isNormal();
+      return Versions.isNormal(version);
     }
 
     @Override

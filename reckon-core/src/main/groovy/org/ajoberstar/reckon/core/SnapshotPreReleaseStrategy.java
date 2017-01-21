@@ -16,23 +16,22 @@
 package org.ajoberstar.reckon.core;
 
 import com.github.zafarkhaja.semver.Version;
+import java.util.function.Supplier;
 
-public final class Reckoner {
-  private Reckoner() {
-    // do not instantiate
+final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
+  private final Supplier<Boolean> snapshotSupplier;
+
+  public SnapshotPreReleaseStrategy(Supplier<Boolean> snapshotSupplier) {
+    this.snapshotSupplier = snapshotSupplier;
   }
 
-  public static String reckon(
-      VcsInventorySupplier inventorySupplier,
-      NormalStrategy normalStrategy,
-      PreReleaseStrategy preReleaseStrategy) {
-    VcsInventory inventory = inventorySupplier.getInventory();
-    Version targetNormal = normalStrategy.reckonNormal(inventory);
-    Version targetVersion = preReleaseStrategy.reckonTargetVersion(inventory, targetNormal);
-    if (inventory.getClaimedVersions().contains(targetVersion)) {
-      throw new IllegalStateException(
-          "Reckoned version " + targetVersion + " has already been released.");
+  @Override
+  public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
+    boolean isSnapshot = snapshotSupplier.get();
+    if (isSnapshot) {
+      return targetNormal.setPreReleaseVersion("SNAPSHOT");
+    } else {
+      return targetNormal;
     }
-    return targetVersion.toString();
   }
 }

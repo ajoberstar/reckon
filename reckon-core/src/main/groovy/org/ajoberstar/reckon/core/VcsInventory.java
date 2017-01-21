@@ -15,6 +15,7 @@
  */
 package org.ajoberstar.reckon.core;
 
+import com.github.zafarkhaja.semver.Version;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -23,23 +24,23 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public final class Inventory {
+public final class VcsInventory {
   private final String commitId;
-  private final ReckonVersion currentVersion;
+  private final Version currentVersion;
   private final int commitsSinceBase;
-  private final ReckonVersion baseVersion;
-  private final ReckonVersion baseNormal;
-  private final Set<ReckonVersion> parallelNormals;
-  private final Set<ReckonVersion> claimedVersions;
+  private final Version baseVersion;
+  private final Version baseNormal;
+  private final Set<Version> parallelNormals;
+  private final Set<Version> claimedVersions;
 
-  Inventory(
+  VcsInventory(
       String commitId,
-      ReckonVersion currentVersion,
-      ReckonVersion baseVersion,
-      ReckonVersion baseNormal,
+      Version currentVersion,
+      Version baseVersion,
+      Version baseNormal,
       int commitsSinceBase,
-      Set<ReckonVersion> parallelNormals,
-      Set<ReckonVersion> claimedVersions) {
+      Set<Version> parallelNormals,
+      Set<Version> claimedVersions) {
     if (commitsSinceBase < 0) {
       throw new IllegalArgumentException(
           "Commits since base must be 0 or greater: " + commitsSinceBase);
@@ -47,8 +48,8 @@ public final class Inventory {
 
     this.commitId = commitId;
     this.currentVersion = currentVersion;
-    this.baseVersion = Optional.ofNullable(baseVersion).orElse(ReckonVersion.VERSION_0);
-    this.baseNormal = Optional.ofNullable(baseNormal).orElse(ReckonVersion.VERSION_0);
+    this.baseVersion = Optional.ofNullable(baseVersion).orElse(Versions.VERSION_0);
+    this.baseNormal = Optional.ofNullable(baseNormal).orElse(Versions.VERSION_0);
     this.commitsSinceBase = commitsSinceBase;
     this.parallelNormals =
         Optional.ofNullable(parallelNormals)
@@ -64,7 +65,7 @@ public final class Inventory {
     return commitId;
   }
 
-  public Optional<ReckonVersion> getCurrentVersion() {
+  public Optional<Version> getCurrentVersion() {
     return Optional.ofNullable(currentVersion);
   }
 
@@ -72,19 +73,19 @@ public final class Inventory {
     return commitsSinceBase;
   }
 
-  public ReckonVersion getBaseVersion() {
+  public Version getBaseVersion() {
     return baseVersion;
   }
 
-  public ReckonVersion getBaseNormal() {
+  public Version getBaseNormal() {
     return baseNormal;
   }
 
-  public Set<ReckonVersion> getParallelNormals() {
+  public Set<Version> getParallelNormals() {
     return parallelNormals;
   }
 
-  public Set<ReckonVersion> getClaimedVersions() {
+  public Set<Version> getClaimedVersions() {
     return claimedVersions;
   }
 
