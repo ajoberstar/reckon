@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.reckon.core;
+package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
@@ -21,8 +21,11 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.ajoberstar.reckon.core.PreReleaseStrategy;
+import org.ajoberstar.reckon.core.VcsInventory;
+import org.ajoberstar.reckon.core.Versions;
 
-final class StagePreReleaseStrategy implements PreReleaseStrategy {
+public final class StagePreReleaseStrategy implements PreReleaseStrategy {
   public static final String FINAL_STAGE = "final";
   private static final Pattern STAGE_REGEX = Pattern.compile("^(?<name>\\w+)(?:\\.(?<num>\\d+))?");
 

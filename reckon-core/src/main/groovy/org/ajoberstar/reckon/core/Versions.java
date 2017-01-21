@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class Versions {
+public final class Versions {
   private static final Logger logger = LoggerFactory.getLogger(Versions.class);
 
   public static final Version VERSION_0 = Version.forIntegers(0, 0, 0);

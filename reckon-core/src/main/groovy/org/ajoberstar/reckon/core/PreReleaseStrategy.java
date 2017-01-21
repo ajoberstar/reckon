@@ -16,18 +16,8 @@
 package org.ajoberstar.reckon.core;
 
 import com.github.zafarkhaja.semver.Version;
-import java.util.Set;
-import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface PreReleaseStrategy {
   Version reckonTargetVersion(VcsInventory inventory, Version targetNormal);
-
-  static PreReleaseStrategy createStage(Set<String> stages, Supplier<String> stageSupplier) {
-    return new StagePreReleaseStrategy(stages, stageSupplier);
-  }
-
-  static PreReleaseStrategy createSnapshot(Supplier<Boolean> snapshotSupplier) {
-    return new SnapshotPreReleaseStrategy(snapshotSupplier);
-  }
 }

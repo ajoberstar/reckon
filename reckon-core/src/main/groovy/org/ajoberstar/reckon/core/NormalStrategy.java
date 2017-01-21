@@ -16,13 +16,8 @@
 package org.ajoberstar.reckon.core;
 
 import com.github.zafarkhaja.semver.Version;
-import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface NormalStrategy {
   Version reckonNormal(VcsInventory inventory);
-
-  static NormalStrategy create(Supplier<Scope> scopeSupplier) {
-    return new DefaultNormalStrategy(scopeSupplier);
-  }
 }

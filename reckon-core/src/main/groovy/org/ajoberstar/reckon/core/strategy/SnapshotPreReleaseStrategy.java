@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.reckon.core;
+package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
 import java.util.function.Supplier;
+import org.ajoberstar.reckon.core.PreReleaseStrategy;
+import org.ajoberstar.reckon.core.VcsInventory;
 
-final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
+public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
   private final Supplier<Boolean> snapshotSupplier;
 
   public SnapshotPreReleaseStrategy(Supplier<Boolean> snapshotSupplier) {

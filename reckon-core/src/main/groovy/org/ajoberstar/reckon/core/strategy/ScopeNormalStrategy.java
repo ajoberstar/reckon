@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.reckon.core;
+package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
 import java.util.function.Supplier;
+import org.ajoberstar.reckon.core.NormalStrategy;
+import org.ajoberstar.reckon.core.Scope;
+import org.ajoberstar.reckon.core.VcsInventory;
+import org.ajoberstar.reckon.core.Versions;
 
-class DefaultNormalStrategy implements NormalStrategy {
+public class ScopeNormalStrategy implements NormalStrategy {
   private final Supplier<Scope> scopeSupplier;
 
-  public DefaultNormalStrategy(Supplier<Scope> scopeSupplier) {
+  public ScopeNormalStrategy(Supplier<Scope> scopeSupplier) {
     this.scopeSupplier = scopeSupplier;
   }
 

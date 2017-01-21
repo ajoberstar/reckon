@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.reckon.core;
+package org.ajoberstar.reckon.core.git;
 
 import com.github.zafarkhaja.semver.Version;
 import java.io.IOException;
@@ -27,6 +27,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.ajoberstar.reckon.core.VcsInventory;
+import org.ajoberstar.reckon.core.VcsInventorySupplier;
+import org.ajoberstar.reckon.core.Versions;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;

@@ -33,7 +33,7 @@ public final class VcsInventory {
   private final Set<Version> parallelNormals;
   private final Set<Version> claimedVersions;
 
-  VcsInventory(
+  public VcsInventory(
       String commitId,
       Version currentVersion,
       Version baseVersion,

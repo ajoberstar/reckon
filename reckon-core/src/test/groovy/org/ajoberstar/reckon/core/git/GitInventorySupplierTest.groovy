@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ajoberstar.reckon.core
+package org.ajoberstar.reckon.core.git
 
 import java.nio.file.Files
 import java.security.SecureRandom
 import org.ajoberstar.grgit.Grgit
+import org.ajoberstar.reckon.core.VcsInventory
+import org.ajoberstar.reckon.core.Versions
 import spock.lang.Shared
 import spock.lang.Specification
 
