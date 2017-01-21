@@ -19,6 +19,7 @@ import com.github.zafarkhaja.semver.Version;
 import java.util.Set;
 import java.util.function.Supplier;
 
+@FunctionalInterface
 public interface PreReleaseStrategy {
   Version reckonTargetVersion(VcsInventory inventory, Version targetNormal);
 
