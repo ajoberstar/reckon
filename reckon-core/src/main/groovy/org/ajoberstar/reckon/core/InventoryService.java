@@ -68,7 +68,7 @@ public final class InventoryService {
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
-        return new Inventory(null, null, null, 0, null, null);
+        return new Inventory(null, null, null, null, 0, null, null);
       }
 
       logger.debug("Found HEAD commit {}", headObjectId);
@@ -106,6 +106,7 @@ public final class InventoryService {
           taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
 
       return new Inventory(
+          headObjectId.getName(),
           currentVersion,
           baseVersion.getVersion(),
           baseNormal.getVersion(),

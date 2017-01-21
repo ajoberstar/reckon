@@ -158,7 +158,7 @@ class InventoryServiceTest extends Specification {
     def emptyGrgit = Grgit.init(dir: Files.createTempDirectory('repo2').toFile())
     def emptyService = new InventoryService(emptyGrgit.repository.jgit.repository)
     expect:
-    emptyService.get() == new Inventory(null, null, null, 0, null, null)
+    emptyService.get() == new Inventory(null, null, null, null, 0, null, null)
   }
 
   def setupSpec() {

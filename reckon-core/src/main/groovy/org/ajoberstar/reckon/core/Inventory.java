@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class Inventory {
+  private final String commitId;
   private final ReckonVersion currentVersion;
   private final int commitsSinceBase;
   private final ReckonVersion baseVersion;
@@ -32,6 +33,7 @@ public final class Inventory {
   private final Set<ReckonVersion> claimedVersions;
 
   Inventory(
+      String commitId,
       ReckonVersion currentVersion,
       ReckonVersion baseVersion,
       ReckonVersion baseNormal,
@@ -43,6 +45,7 @@ public final class Inventory {
           "Commits since base must be 0 or greater: " + commitsSinceBase);
     }
 
+    this.commitId = commitId;
     this.currentVersion = currentVersion;
     this.baseVersion = Optional.ofNullable(baseVersion).orElse(ReckonVersion.VERSION_0);
     this.baseNormal = Optional.ofNullable(baseNormal).orElse(ReckonVersion.VERSION_0);
@@ -55,6 +58,10 @@ public final class Inventory {
         Optional.ofNullable(claimedVersions)
             .map(Collections::unmodifiableSet)
             .orElse(Collections.emptySet());
+  }
+
+  public String getCommitId() {
+    return commitId;
   }
 
   public Optional<ReckonVersion> getCurrentVersion() {

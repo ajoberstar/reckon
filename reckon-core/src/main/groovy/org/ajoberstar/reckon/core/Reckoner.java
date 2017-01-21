@@ -15,22 +15,63 @@
  */
 package org.ajoberstar.reckon.core;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.eclipse.jgit.lib.Repository;
 
 public final class Reckoner {
-  private Reckoner() {
-    // do not instantiate
+  public static final String FINAL_STAGE = "final";
+
+  private final Repository repo;
+  private final Function<String, Optional<String>> tagSelector;
+  private final Set<String> stages;
+  private final String defaultStage;
+
+  public Reckoner(
+      Repository repo, Function<String, Optional<String>> tagSelector, Set<String> stages) {
+    this.repo = repo;
+    this.tagSelector = tagSelector;
+    this.stages = Collections.unmodifiableSet(stages);
+    this.defaultStage =
+        stages
+            .stream()
+            .sorted()
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No stages provided."));
   }
 
-  public static String reckon(
-      Repository repo, Function<String, Optional<String>> tagSelector, Scope scope, String stage) {
+  public String reckonTagged(Scope scope, String stage) {
+    Objects.requireNonNull(scope, "Scope must be non-null.");
+    if (!stages.contains(stage)) {
+      String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
+      throw new IllegalArgumentException(message);
+    }
+    return reckon(scope, (base, inventory) -> base.incrementTaggedStage(stage));
+  }
 
+  public String reckonUntagged(Scope scope) {
+    Objects.requireNonNull(scope, "Scope must be non-null.");
+    return reckon(
+        scope,
+        (base, inventory) ->
+            base.incrementUntaggedStage(
+                defaultStage, inventory.getCommitsSinceBase(), inventory.getCommitId()));
+  }
+
+  private String reckon(
+      Scope scope, BiFunction<ReckonVersion, Inventory, ReckonVersion> reckonStage) {
     Inventory inventory = new InventoryService(repo, tagSelector).get();
 
     ReckonVersion targetNormal = reckonNormal(inventory, scope);
-    ReckonVersion version = reckonStage(inventory, targetNormal, stage);
+    ReckonVersion targetBase =
+        targetNormal.equals(inventory.getBaseVersion().getNormal())
+            ? inventory.getBaseVersion()
+            : targetNormal;
+    ReckonVersion version = reckonStage.apply(targetBase, inventory);
 
     if (inventory.getClaimedVersions().contains(version)) {
       throw new IllegalStateException(
@@ -40,7 +81,7 @@ public final class Reckoner {
     return version.toString();
   }
 
-  private static ReckonVersion reckonNormal(Inventory inventory, Scope scope) {
+  private ReckonVersion reckonNormal(Inventory inventory, Scope scope) {
     ReckonVersion targetNormal = inventory.getBaseNormal().incrementNormal(scope);
 
     // if a version's already being developed on a parallel branch we'll skip it
@@ -52,12 +93,6 @@ public final class Reckoner {
       throw new IllegalStateException(
           "Reckoned target normal version " + targetNormal + " has already been released.");
     }
-    return targetNormal;
-  }
-
-  private static ReckonVersion reckonStage(
-      Inventory inventory, ReckonVersion targetNormal, String stage) {
-    // TODO implement
     return targetNormal;
   }
 }
