@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,42 +15,8 @@
  */
 package org.ajoberstar.reckon.core;
 
-import com.github.zafarkhaja.semver.Version;
-
-import java.util.function.UnaryOperator;
-
-/**
- * The scope of changes represented in the VCS currently.
- */
 public enum Scope {
-    MAJOR(Version::incrementMajorVersion),
-    MINOR(Version::incrementMinorVersion),
-    PATCH(Version::incrementPatchVersion);
-
-    private final Versioner versioner;
-
-    Scope(UnaryOperator<Version> incrementer) {
-        this.versioner = (base, vcs) -> {
-            Version prevVersion = vcs.getPreviousVersion().orElse(base);
-            Version prevRelease = vcs.getPreviousRelease().orElse(base);
-            Version incremented = incrementer.apply(prevRelease);
-            if (incremented.getNormalVersion().equals(prevVersion.getNormalVersion())) {
-                return prevVersion;
-            } else {
-                return incremented;
-            }
-        };
-    }
-
-    /**
-     * A versioner that will increment the component of the previous release
-     * corresponding with the name of the enum value. (e.g. MAJOR would increment
-     * 1.2.3 to 2.0.0). If the previous version has the same normal component
-     * as the currently incremented one, it's pre-release information will be
-     * preserved.
-     * @return the versioner for this scope
-     */
-    public Versioner getVersioner() {
-        return versioner;
-    }
+  MAJOR,
+  MINOR,
+  PATCH;
 }

@@ -1,20 +1,10 @@
 plugins {
     id 'groovy'
-    id 'maven-publish'
-    id 'org.ajoberstar.bintray' version '0.1.0'
 }
 
-group = 'org.ajoberstar'
+group = 'org.ajoberstar.reckon'
 
 sourceCompatibility = '1.8'
-
-model {
-    bintray {
-        owner = 'ajoberstar'
-        repo = 'maven'
-        pkg = 'reckon'
-    }
-}
 
 repositories {
     jcenter()
@@ -22,30 +12,10 @@ repositories {
 
 dependencies {
     compile 'com.github.zafarkhaja:java-semver:0.9.0'
-    compile 'org.ajoberstar:grgit:1.7.0'
-    compile "org.codehaus.groovy:groovy-all:2.4.5"
+    compile 'org.ajoberstar:grgit:1.8.0'
+    compile 'org.slf4j:slf4j-api:1.7.22'
+    compile "org.codehaus.groovy:groovy-all:2.4.7"
+    compile 'org.apache.commons:commons-lang3:3.5'
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from tasks.javadoc.outputs.files
-}
-
-publishing {
-    publications {
-        main(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-        }
-    }
-    repositories {
-        mavenLocal()
-    }
+    testRuntime 'org.slf4j:slf4j-simple:1.7.22'
 }

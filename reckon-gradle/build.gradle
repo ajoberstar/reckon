@@ -1,29 +1,9 @@
 plugins {
     id 'groovy'
-    id 'maven-publish'
-    id 'org.ajoberstar.bintray' version '0.1.0'
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.9.7'
-    id 'org.ajoberstar.stutter' version '0.1.0'
 }
 
-model {
-    bintray {
-        owner = 'ajoberstar'
-        repo = 'maven'
-        pkg = 'reckon'
-    }
-}
-
-stutter {
-    supports '3.0', '3.1', '3.2', '3.2.1'
-}
-
-group = 'org.ajoberstar'
-
-configurations.all {
-    exclude group: 'org.codehaus.groovy'
-}
+group = 'org.ajoberstar.reckon'
 
 sourceCompatibility = '1.8'
 
@@ -38,20 +18,8 @@ dependencies {
     compatTestCompile gradleTestKit()
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from tasks.javadoc.outputs.files
-}
-
-publishing {
-    repositories {
-        mavenLocal()
-    }
+stutter {
+    supports '3.0', '3.1', '3.2', '3.2.1', '3.3'
 }
 
 pluginBundle {
