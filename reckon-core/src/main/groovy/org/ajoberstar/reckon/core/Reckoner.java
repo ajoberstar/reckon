@@ -29,10 +29,30 @@ public final class Reckoner {
     VcsInventory inventory = inventorySupplier.getInventory();
     Version targetNormal = normalStrategy.reckonNormal(inventory);
     Version targetVersion = preReleaseStrategy.reckonTargetVersion(inventory, targetNormal);
-    if (inventory.getClaimedVersions().contains(targetVersion)) {
+
+    // unless it looks like an intentional increment, we should consider this a rebuild
+    Version reckoned =
+        inventory
+            .getCurrentVersion()
+            .filter(
+                current ->
+                    !Versions.getNormal(current).equals(Versions.getNormal(targetVersion))
+                        && !Versions.isNormal(targetVersion))
+            .orElse(targetVersion);
+
+    if (inventory.getClaimedVersions().contains(reckoned)) {
       throw new IllegalStateException(
-          "Reckoned version " + targetVersion + " has already been released.");
+          "Reckoned version " + reckoned + " has already been released.");
     }
-    return targetVersion.toString();
+
+    if (inventory.getBaseVersion().compareTo(reckoned) > 0) {
+      throw new IllegalStateException(
+          "Reckoned version "
+              + reckoned
+              + " is (and cannot be) less than base version "
+              + inventory.getBaseVersion());
+    }
+
+    return reckoned.toString();
   }
 }

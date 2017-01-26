@@ -48,7 +48,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
     String stage = stageSupplier.get();
 
-    if (!stages.contains(stage)) {
+    if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
       throw new IllegalArgumentException(message);
     }
@@ -68,7 +68,6 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
     if (matcher.find()) {
       stageName = matcher.group("name");
       stageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(-1);
-      Optional.ofNullable(matcher.group("commits")).map(Integer::parseInt).orElse(-1);
     } else {
       stageName = null;
       stageNum = -1;
