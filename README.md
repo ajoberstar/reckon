@@ -2,7 +2,7 @@
 
 [![Bintray](https://img.shields.io/bintray/v/ajoberstar/maven/reckon.svg?style=flat-square)](https://bintray.com/ajoberstar/maven/reckon/_latestVersion)
 [![Travis](https://img.shields.io/travis/ajoberstar/reckon.svg?style=flat-square)](https://travis-ci.org/ajoberstar/reckon)
-[![Quality Gate](https://sonarqube.ajoberstar.com/api/badges/gate?key=org.ajoberstar:reckon)](https://sonarqube.ajoberstar.com/dashboard/index/org.ajoberstar:reckon)
+[![Quality Gate](https://sonarqube.ajoberstar.com/api/badges/gate?key=org.ajoberstar.reckon:reckon)](https://sonarqube.ajoberstar.com/dashboard/index/org.ajoberstar.reckon:reckon)
 [![GitHub license](https://img.shields.io/github/license/ajoberstar/reckon.svg?style=flat-square)](https://github.com/ajoberstar/reckon/blob/master/LICENSE)
 
 ## Why do you care?
