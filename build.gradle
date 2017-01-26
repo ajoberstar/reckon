@@ -3,6 +3,8 @@ plugins {
 }
 
 allprojects {
+  group = 'org.ajoberstar.reckon'
+  
   plugins.withId('java') {
     model {
         bintray {
