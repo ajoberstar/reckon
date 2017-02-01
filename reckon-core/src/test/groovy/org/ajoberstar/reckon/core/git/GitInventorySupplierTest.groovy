@@ -200,7 +200,7 @@ class GitInventorySupplierTest extends Specification {
     commit()
     branch('parallel-untagged-since-merge')
     commit()
-    tag('0.3.0-milestone.1')
+    tag('0.3.0-milestone.1', false)
     commit()
     branch('parallel-tagged-since-merge')
     commit()
@@ -264,9 +264,9 @@ class GitInventorySupplierTest extends Specification {
     assert currentHead == atCommit
   }
 
-  private void tag(String name) {
+  private void tag(String name, boolean annotate = true) {
     def currentHead = grgit.head()
-    def newTag = grgit.tag.add(name: name)
+    def newTag = grgit.tag.add(name: name, annotate: annotate)
     def atCommit = grgit.resolve.toCommit(newTag.fullName)
     println "Added new tag ${name} at ${atCommit.abbreviatedId}"
     assert currentHead == atCommit

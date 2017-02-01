@@ -128,7 +128,9 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
 
     for (Ref ref : repo.getRefDatabase().getRefs(Constants.R_TAGS).values()) {
       Ref tag = repo.peel(ref);
-      ObjectId objectId = tag.getPeeledObjectId();
+      // only annotated tags return a peeled object id
+      ObjectId objectId =
+          tag.getPeeledObjectId() == null ? tag.getObjectId() : tag.getPeeledObjectId();
       RevCommit commit = walk.parseCommit(objectId);
       tagParser
           .apply(tag)
