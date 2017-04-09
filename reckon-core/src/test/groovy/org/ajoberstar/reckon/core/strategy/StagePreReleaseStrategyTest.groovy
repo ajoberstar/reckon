@@ -64,6 +64,6 @@ class StagePreReleaseStrategyTest extends Specification {
   }
 
   private StagePreReleaseStrategy strategy(String stage) {
-    return new StagePreReleaseStrategy(['dev', 'milestone', 'rc', 'final'] as Set, { stage })
+    return new StagePreReleaseStrategy(['dev', 'milestone', 'rc', 'final'] as Set, { Optional.ofNullable(stage) })
   }
 }

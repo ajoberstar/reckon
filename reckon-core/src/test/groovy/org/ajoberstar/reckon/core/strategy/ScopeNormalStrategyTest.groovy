@@ -50,7 +50,7 @@ class ScopeNormalStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new ScopeNormalStrategy({ Scope.MAJOR }).reckonNormal(inventory) == Version.valueOf('2.0.0')
+    new ScopeNormalStrategy({ Optional.of('major') }).reckonNormal(inventory) == Version.valueOf('2.0.0')
   }
 
   def 'if incremented version is in the parallel normals, increment again'() {
@@ -65,7 +65,7 @@ class ScopeNormalStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new ScopeNormalStrategy({ Scope.MAJOR }).reckonNormal(inventory) == Version.valueOf('3.0.0')
+    new ScopeNormalStrategy({ Optional.of('major') }).reckonNormal(inventory) == Version.valueOf('3.0.0')
   }
 
   def 'if target normal is in the claimed versions, throw'() {
@@ -80,18 +80,9 @@ class ScopeNormalStrategyTest extends Specification {
         [Version.valueOf('2.0.0')] as Set
         )
     when:
-    new ScopeNormalStrategy({ Scope.MAJOR }).reckonNormal(inventory)
+    new ScopeNormalStrategy({ Optional.of('major') }).reckonNormal(inventory)
     then:
     thrown(IllegalStateException)
   }
 
 }
-
-
-//String commitId,
-//Version currentVersion,
-//Version baseVersion,
-//Version baseNormal,
-//int commitsSinceBase,
-//Set<Version> parallelNormals,
-//Set<Version> claimedVersions

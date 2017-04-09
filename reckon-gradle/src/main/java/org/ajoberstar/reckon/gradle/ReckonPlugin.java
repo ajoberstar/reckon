@@ -17,22 +17,34 @@ package org.ajoberstar.reckon.gradle;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 public class ReckonPlugin implements Plugin<Project> {
   @Override
   public void apply(Project project) {
-    ReckonExtension extension = project.getExtensions().create("reckon", ReckonExtension.class);
-
-    DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);
+    if (!project.equals(project.getRootProject())) {
+      throw new IllegalStateException(
+          "org.ajoberstar.reckon can only be applied to the root project.");
+    }
+    ReckonExtension extension =
+        project.getExtensions().create("reckon", ReckonExtension.class, project);
 
     project
-        .getRootProject()
-        .allprojects(
-            prj -> {
-              prj.setVersion(sharedVersion);
+        .getPluginManager()
+        .withPlugin(
+            "org.ajoberstar.grgit",
+            plugin -> {
+              Grgit grgit = (Grgit) project.findProperty("grgit");
+              extension.setVcsInventory(extension.git(grgit));
             });
+
+    DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);
+    project.allprojects(
+        prj -> {
+          prj.setVersion(sharedVersion);
+        });
   }
 
   private static class DelayedVersion {

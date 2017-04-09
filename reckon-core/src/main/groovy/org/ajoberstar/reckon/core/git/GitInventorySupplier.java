@@ -51,11 +51,11 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
   private final Repository repo;
   private final Function<Ref, Optional<Version>> tagParser;
 
-  GitInventorySupplier(Repository repo) {
+  public GitInventorySupplier(Repository repo) {
     this(repo, tagName -> Optional.of(tagName.replaceAll("^v", "")));
   }
 
-  GitInventorySupplier(Repository repo, Function<String, Optional<String>> tagSelector) {
+  public GitInventorySupplier(Repository repo, Function<String, Optional<String>> tagSelector) {
     this.repo = repo;
     this.tagParser =
         ref -> {

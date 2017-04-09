@@ -15,15 +15,37 @@
  */
 package org.ajoberstar.reckon.gradle;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.Reckoner;
+import org.ajoberstar.reckon.core.Scope;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
+import org.ajoberstar.reckon.core.git.GitInventorySupplier;
+import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
+import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
+import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;
+import org.gradle.api.Project;
 
 public class ReckonExtension {
+  private static final String SCOPE_PROP = "reckon.scope";
+  private static final String STAGE_PROP = "reckon.stage";
+  private static final String SNAPSHOT_PROP = "reckon.snapshot";
+
+  private Project project;
   private VcsInventorySupplier vcsInventory;
   private NormalStrategy normal;
   private PreReleaseStrategy preRelease;
+
+  public ReckonExtension(Project project) {
+    this.project = project;
+  }
 
   public void setVcsInventory(VcsInventorySupplier vcsInventory) {
     this.vcsInventory = vcsInventory;
@@ -35,6 +57,33 @@ public class ReckonExtension {
 
   public void setPreRelease(PreReleaseStrategy preRelease) {
     this.preRelease = preRelease;
+  }
+
+  public VcsInventorySupplier git(Grgit grgit) {
+    return new GitInventorySupplier(grgit.getRepository().getJgit().getRepository());
+  }
+
+  public NormalStrategy scopeFromProp() {
+    Supplier<Optional<String>> supplier =
+        () -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
+    return new ScopeNormalStrategy(supplier);
+  }
+
+  public PreReleaseStrategy stageFromProp(String... stages) {
+    Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
+    Supplier<Optional<String>> supplier =
+        () -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    return new StagePreReleaseStrategy(stageSet, supplier);
+  }
+
+  public PreReleaseStrategy snapshotFromProp() {
+    Supplier<Boolean> supplier =
+        () ->
+            Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
+                .map(Object::toString)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+    return new SnapshotPreReleaseStrategy(supplier);
   }
 
   String reckonVersion() {
