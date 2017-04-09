@@ -184,23 +184,30 @@ Version inferred = versioner.infer(base, vcs);
 
 ### Modules
 
-- [reckon-api](http://ajoberstar.org/reckon/docs/reckon-api/javadoc) - Base API that tooling should use.
-- [reckon-grgit](http://ajoberstar.org/reckon/docs/reckon-grgit/groovydoc) - Implementation of a grgit backend.
-- [reckon-gradle-base](http://ajoberstar.org/reckon/docs/reckon-gradle-base/groovydoc) - Base Gradle plugin that
-will calculate the project's version (given a VCS impl).
-- [reckon-gradle-grgit](http://ajoberstar.org/reckon/docs/reckon-gradle-grgit/groovydoc) - Extension of the base Gradle plugin to automatically configure a grgit VCS.
+- [reckon-core](http://ajoberstar.org/reckon/docs/reckon-core/javadoc) - Base API for inferring a version
+- [reckon-gradle](http://ajoberstar.org/reckon/docs/reckon-gradle/javadoc) - Support for the Gradle build tool
 
-### Implementing a Vcs
+### Supporting a new VCS
 
-A `Vcs` implementation will literally just need to implement the
-[Vcs](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html) interface.
+A VCS implementation will need to implement the
+[VcsInventorySupplier](http://ajoberstar.org/reckon/docs/reckon-core/javadoc/org/ajoberstar/reckon/core/VcsInventorySupplier.html)
+interface. You will likely want to enhance the Gradle DSL to provide an easy to configure it there
+too.
 
-See the Grgit module in this repo for further guidance.
+See the [Git](reckon-core/src/main/java/org/ajoberstar/reckon/core/git/GitVcsInventorySupplier.java)
+implementation as an example.
 
-### Implementing a Tool
+### Supporting a new strategy
 
-See the example in *Direct API Usage* above for a basic example and the implementation of the
-Gradle modules in this repo as further guidance.
+See the examples in [reckon-core](reckon-core/src/main/java/org/ajoberstar/reckon/core/strategy).
+
+_More detail can be provided, if needed._
+
+### Supporting a new consumer
+
+See the [reckon-gradle](reckon-gradle) implementation for an example.
+
+_More detail can be provided, if needed._
 
 ## Questions, Bugs, and Features
 
