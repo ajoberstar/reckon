@@ -31,9 +31,9 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
 
   private final Set<String> stages;
   private final String defaultStage;
-  private final Supplier<String> stageSupplier;
+  private final Supplier<Optional<String>> stageSupplier;
 
-  public StagePreReleaseStrategy(Set<String> stages, Supplier<String> stageSupplier) {
+  public StagePreReleaseStrategy(Set<String> stages, Supplier<Optional<String>> stageSupplier) {
     this.stages = stages;
     this.defaultStage =
         stages
@@ -46,7 +46,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage = stageSupplier.get();
+    String stage = stageSupplier.get().orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
@@ -62,35 +62,27 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
             ? inventory.getBaseVersion()
             : targetNormal;
 
-    String stageName;
-    int stageNum;
+    String baseStageName;
+    int baseStageNum;
     Matcher matcher = STAGE_REGEX.matcher(targetBase.getPreReleaseVersion());
     if (matcher.find()) {
-      stageName = matcher.group("name");
-      stageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(-1);
+      baseStageName = matcher.group("name");
+      baseStageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
     } else {
-      stageName = null;
-      stageNum = -1;
+      baseStageName = defaultStage;
+      baseStageNum = 0;
     }
 
     if (stage == null) {
-      if (stageName == null) {
-        return targetBase
-            .setPreReleaseVersion(defaultStage + ".0." + inventory.getCommitsSinceBase())
-            .setBuildMetadata(inventory.getCommitId());
-      } else {
-        return targetBase
-            .setPreReleaseVersion(
-                stageName + "." + stageNum + "." + inventory.getCommitsSinceBase())
-            .setBuildMetadata(inventory.getCommitId());
-      }
+      return targetBase
+          .setPreReleaseVersion(
+              baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
+          .setBuildMetadata(inventory.getCommitId());
+    } else if (stage.equals(baseStageName)) {
+      int num = baseStageNum > 0 ? baseStageNum + 1 : 1;
+      return targetBase.setPreReleaseVersion(stage + "." + num);
     } else {
-      if (stage.equals(stageName)) {
-        int num = stageNum > 0 ? stageNum + 1 : 1;
-        return targetBase.setPreReleaseVersion(stage + "." + num);
-      } else {
-        return targetBase.setPreReleaseVersion(stage + ".1");
-      }
+      return targetBase.setPreReleaseVersion(stage + ".1");
     }
   }
 }

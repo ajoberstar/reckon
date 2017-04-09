@@ -16,6 +16,7 @@
 package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.Scope;
@@ -23,15 +24,22 @@ import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.Versions;
 
 public class ScopeNormalStrategy implements NormalStrategy {
-  private final Supplier<Scope> scopeSupplier;
+  private final Supplier<Optional<String>> scopeSupplier;
 
-  public ScopeNormalStrategy(Supplier<Scope> scopeSupplier) {
+  public ScopeNormalStrategy(Supplier<Optional<String>> scopeSupplier) {
     this.scopeSupplier = scopeSupplier;
   }
 
   @Override
   public Version reckonNormal(VcsInventory inventory) {
-    Scope scope = scopeSupplier.get();
+    Scope scope =
+        scopeSupplier
+            .get()
+            .filter(value -> !value.isEmpty())
+            .map(String::toUpperCase)
+            .map(Scope::valueOf)
+            .orElse(Scope.MINOR);
+
     Version targetNormal = Versions.incrementNormal(inventory.getBaseNormal(), scope);
 
     // if a version's already being developed on a parallel branch we'll skip it
