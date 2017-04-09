@@ -16,7 +16,6 @@
 package org.ajoberstar.reckon.gradle;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -25,7 +24,6 @@ import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.Reckoner;
-import org.ajoberstar.reckon.core.Scope;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
 import org.ajoberstar.reckon.core.git.GitInventorySupplier;
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
