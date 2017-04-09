@@ -67,7 +67,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
     Matcher matcher = STAGE_REGEX.matcher(targetBase.getPreReleaseVersion());
     if (matcher.find()) {
       baseStageName = matcher.group("name");
-      baseStageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(-1);
+      baseStageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
     } else {
       baseStageName = defaultStage;
       baseStageNum = 0;
