@@ -194,7 +194,7 @@ A VCS implementation will need to implement the
 interface. You will likely want to enhance the Gradle DSL to provide an easy to configure it there
 too.
 
-See the [Git](reckon-core/src/main/java/org/ajoberstar/reckon/core/git/GitVcsInventorySupplier.java)
+See the [Git](reckon-core/src/main/java/org/ajoberstar/reckon/core/git/GitInventorySupplier.java)
 implementation as an example.
 
 ### Supporting a new strategy
