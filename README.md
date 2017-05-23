@@ -124,7 +124,7 @@ Apply the plugin:
 ```groovy
 buildscript {
 	repositories { jcenter() }
-	dependencies { classpath 'org.ajoberstar:reckon-gradle:<version>' }
+	dependencies { classpath 'org.ajoberstar.reckon:reckon-gradle:<version>' }
 }
 
 apply plugin: 'org.ajoberstar.reckon'
