@@ -80,7 +80,7 @@ public class ReckonExtension {
             Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
                 .map(Object::toString)
                 .map(Boolean::parseBoolean)
-                .orElse(false);
+                .orElse(true);
     return new SnapshotPreReleaseStrategy(supplier);
   }
 

@@ -16,6 +16,7 @@
 package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.VcsInventory;
@@ -29,7 +30,7 @@ public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    boolean isSnapshot = snapshotSupplier.get();
+    boolean isSnapshot = Optional.ofNullable(snapshotSupplier.get()).orElse(true);
     if (isSnapshot) {
       return targetNormal.setPreReleaseVersion("SNAPSHOT");
     } else {
