@@ -48,5 +48,6 @@ class SnapshotPreReleaseStrategyTest extends Specification {
         )
     expect:
     new SnapshotPreReleaseStrategy({ true }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
+    new SnapshotPreReleaseStrategy({ null }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
   }
 }
