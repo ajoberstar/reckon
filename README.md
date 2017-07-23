@@ -17,7 +17,7 @@ probably modifies your build file and commits the new version.
 Git already contains tags with a version number pointing to a
 specific commit, illustrating that power of this with the `git describe`
 command that creates a version number based on the amount of change since the
-previous tag (e.g. `v0.1.0-22-g26f678e`).
+previous tag (e.g. v0.1.0-22-g26f678e).
 
 Git also contains branches for specific stages of development or maintenance
 for a specific subset of versions.
@@ -39,180 +39,110 @@ With that specification and some conventions related to encoding your stage of
 development into the pre-release information, you can end up with a very
 easy to understand versioning scheme.
 
-For example, this API's scheme includes four stages:
+For example, this API's scheme includes 3 stages:
 
-- **final** (e.g. `1.0.0`) the fully-tested version ready for end-user consumption
-- **rc** (e.g. `1.1.0-rc.1`) release candidates, versions believed to be ready for release with final testing
-- **milestone** (e.g. `1.1.0-milestone.4`) versions containing a significant piece of functionality on the road
+- **final** (e.g. 1.0.0) the fully-tested version ready for end-user consumption
+- **rc** (e.g. 1.1.0-rc.1) release candidates, versions believed to be ready for release after final testing
+- **milestone** (e.g. 1.1.0-milestone.4) versions containing a significant piece of functionality on the road
 to the next version
-- **dev** (e.g. `1.1.0-dev.2` or `1.1.0-milestone.4.dev.6`) development versions happening in-between more
-formally defined stages (this is a *floating* stage, in reckon parlance)
 
 ## What is it?
 
-reckon is two things:
+Reckon is two things:
 
 - an API to infer your next version from a Git repository
 - applications of that API in various tools (initially, just Gradle)
 
-### Version Components
+### Reckon Versioning
 
-As specified by [SemVer](http://semver.org), a version consists of three primary
-components: `<normal>[-<prerelease>][+<buildmetadata>]`.
+Reckon uses an opinionated subset of [SemVer](http://semver.org), meant to provide more structure around how the
+pre-release versions are managed.
 
-- **normal** your typical `<major>.<minor>.<patch>` scheme
-- **pre-release** any set of dot-separated alphanumeric identifiers used to indicate
-progress towards the normal
-- **build-metadata** any set of dot-separated alphanumeric identifiers used to indicate
-information about the current build, which should not be used to sort versions
+There are three types of versions:
 
-### Scope
+| Type              | Scheme                                                   | Example                                                 | Description |
+|-------------------|----------------------------------------------------------|---------------------------------------------------------|-------------|
+| **final**         | `<major>.<minor>.<patch>`                                | `1.2.3`                                                 | A version ready for end-user consumption |
+| **significant**   | `<major>.<minor>.<patch>-<stage>.<num>`                  | `1.3.0-rc.1`                                            | A version indicating an important stage has been reached on the way to the next final release (e.g. alpha, beta, rc, milestone) |
+| **insignificant** | `<major>.<minor>.<patch>-<stage>.<num>.<commits>+<hash>` | `1.3.0-rc.1.8+3bb416187b0a478677b274ae29fb4deb664acda3` | A general build in-between significant releases. |
 
-reckon describes changes in the normal as the **scope** of the change, being
-one of `major`, `minor`, or `patch`. The scope indicates which component of the
-version should be incremented, with the components to the right being zeroed out.
-For example, with a previous version of `1.2.3` a `minor` scope change would result
-in `1.3.0`.
+- `<major>` a postive integer incremented when incompatible API changes are made
+- `<minor>` a positive integer incremented when functionality is added while preserving backwards-compatibility
+- `<patch>` a positive integer incremented when fixes are made that preserve backwards-compatibility
+- `<stage>` an alphabetical identifier indicating a level of maturity on the way to a final release. They should make logical sense to a human, but alphabetical order **must** be the indicator of maturity to ensure they sort correctly. (e.g. milestone, rc, snapshot would not make sense because snapshot would sort after rc)
+- `<num>` a positive integer incremented when a significant release is made
+- `<commits>` a positive integer indicating the number of commits since the last significant or final release was made
+- `<hash>` a full commit hash of the current HEAD
 
-### Stage
+NOTE: This approach is tuned to ensure it sorts correctly both with SemVer rules and Gradle's built in version sorting (which is subtly different).
 
-In order to provide more structure to pre-release information and simplify the
-minutiae of pre-release precedence, the concept of a **stage** of development is
-used. Stages can be of a few different flavors:
+### Maven Versioning
 
-- **final** a special stage indicating no pre-release information should be used
-- **fixed** indicating significant steps along the way to the final release and will
-always consist of `<stage name>.<incremented count>` (e.g. `beta.2`).
-- **floating** indicating intermediate steps after another stage.
-To comply with SemVer precedence rules a floating stage can result in:
-	- `<stage name>.<incremented count>` as long as the stage name is of higher precedence
-	than the previous stage. For example, if `milestone` was a floating stage and
-	the prior version was `1.0.0-dev.1` it would result in `1.0.0-milestone.1`.
-	- `<previous stage>.<stage name>.<incremented count>` if the stage name is of lower
-	precedence than the previous stage. For example, if `dev` was a floating stage
-	and the prior version was `1.0.0-milestone.2` it would result in `1.0.0-milestone.2.dev.1`.
+Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
-For compatibility with Maven workflows, reckon also provides a `SNAPSHOT` stage
-with no incrementing count.
+| Type         | Scheme                             | Example          | Description |
+|--------------|------------------------------------|------------------|-------------|
+| **final**    | `<major>.<minor>.<patch>`          | `1.2.3`          | A version ready for end-user consumption |
+| **snapshot** | `<major>.<minor>.<patch>-SNAPSHOT` | `1.3.0-SNAPSHOT` | An intermediate version before the final release is ready. |
 
-### Build Metadata
+### Inferring the Version
 
-Currently, build metadata is not a first-level concept in reckon, but that will
-be addressed in [#13](https://github.com/ajoberstar/reckon/issues/13).
+In order to infer the next version, reckon needs two pieces of input:
 
-### Versioners
+- **scope** - one of `major`, `minor`, or `patch` (defaults to `minor`), indicating which component of the version should be incremented. If the previous version was 1.2.3, a scope of `minor` would result in 1.3.0.
+- **stage** - if not present,
 
-Even though reckon promotes the concepts of *scope* and *stage*, the API does not
-depend on them. The actual inference is performed by a **versioner**, which is just
-a function that takes both the version determined so far and the VCS being used and
-returns the next version to use.
+These inputs can be provided directly by the user or using a custom implementation that might detect them from elsewhere.
 
-reckon provides versioner implementations optimized for scope and stage
-schemes, but you are free to provide your own versioner function that produces
-a valid semantic version in any way you please.
+Reckon will use the history of your repository to determine what version your changes are based on and the inputs above
 
-## Usage
+## How do I use it?
 
-**NOTE:** *All* reckon modules require Java 8 (or higher).
-
-* [Release Notes](https://github.com/ajoberstar/reckon/releases)
+**NOTE:** Check the [Release Notes](https://github.com/ajoberstar/reckon/releases) for details on compatibility and changes.
 
 ### Gradle
+
+**NOTE:** This plugin only calculates a version, it will not tag it or otherwise modify your Git repository.
 
 Apply the plugin:
 
 ```groovy
-buildscript {
-	repositories { jcenter() }
-	dependencies { classpath 'org.ajoberstar.reckon:reckon-gradle:<version>' }
+plugins {
+  id 'org.ajoberstar.grgit' version '<version>'
+  id 'org.ajoberstar.reckon' version '<version>'
 }
-
-apply plugin: 'org.ajoberstar.reckon'
 
 reckon {
-	// optionally configure how the version will be calculated
+  normal = scopeFromProp()
+  preRelease = stageFromProp('milestone', 'rc', 'final')
+  // alternately
+  // preRelease = snapshotFromProp()
 }
 ```
+Execute Gradle providing the properties, as needed:
 
-See [SemverVcsExtension](http://ajoberstar.org/reckon/docs/reckon-gradle-base/groovydoc/org/ajoberstar/semver/vcs/gradle/SemverExtension.html)
-for details on the configuration options.
-
-When you run Gradle, pass in any of the following properties to influence the version being inferred:
-
-* `semver.scope` - one of `major`, `minor`, or `patch` to specify which component of the previous release should be incremented
-* `semver.stage` - (by default, one of `final`, `rc`, `milestone`, or `dev`) to specify what phase of development you are in
-* `semver.base` - for your first version, if you don't want to start from `0.0.0`
-* `semver.force` - if you're in a bind and just need a specific version to be used
-
-For example if the previous release was `1.2.4`:
+* `reckon.scope` - one of `major`, `minor`, or `patch` (defaults to `minor`) to specify which component of the previous release should be incremented
+* `reckon.stage` - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
+* `reckon.snapshot` - (if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
 
 ```
-./gradlew build -Psemver.scope=minor -Psemver.stage=milestone
-Inferred version 1.3.0-milestone.1
+./gradlew build -Preckon.scope=minor -Preckon.stage=milestone
+Reckoned version 1.3.0-milestone.1
 ...
 ```
 
-### Direct API Usage
+## How does it work?
 
-The four basic steps are:
+### Axioms
 
-1. Construct a [Version](https://github.com/zafarkhaja/jsemver/blob/master/src/main/java/com/github/zafarkhaja/semver/Version.java)
-to use as a base, if one isn't found in the VCS.
-1. Construct a [Vcs](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Vcs.html)
-using one of the available providers.
-1. Build a [Versioner](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Versioner.html)
-which is a function of `(Version, Vcs) -> Version`. This does all of the work of inferring the version. The
-[Versioners](http://ajoberstar.org/reckon/docs/reckon-api/javadoc/org/ajoberstar/semver/vcs/Versioners.html) class
-provides some common `Versioner` implementations that can be composed as needed.
-1. Call the `Versioner` with the base `Version` and the `Vcs`.
+These are the rules that reckon presumes are true, both informing how it reads a repo's history and how it calculates the next version:
 
-For example:
-
-```java
-import com.github.zafarkhaja.semver.Version;
-import org.ajoberstar.semver.vcs.*;
-import org.ajoberstar.semver.vcs.grgit.GrgitVcs;
-import org.ajoberstar.grgit.Grgit;
-
-Version base = Version.forIntegers(0, 0, 0);
-Vcs vcs = new GrgitVcs(Grgit.open()));
-Versioner versioner = Versioners.forScopeAndStage(Scope.MINOR, Stage.finalStage());
-Version inferred = versioner.infer(base, vcs);
-```
-
-## Implementing
-
-### Modules
-
-- [reckon-core](http://ajoberstar.org/reckon/docs/reckon-core/javadoc) - Base API for inferring a version
-- [reckon-gradle](http://ajoberstar.org/reckon/docs/reckon-gradle/javadoc) - Support for the Gradle build tool
-
-### Supporting a new VCS
-
-A VCS implementation will need to implement the
-[VcsInventorySupplier](http://ajoberstar.org/reckon/docs/reckon-core/javadoc/org/ajoberstar/reckon/core/VcsInventorySupplier.html)
-interface. You will likely want to enhance the Gradle DSL to provide an easy to configure it there
-too.
-
-See the [Git](reckon-core/src/main/java/org/ajoberstar/reckon/core/git/GitInventorySupplier.java)
-implementation as an example.
-
-### Supporting a new strategy
-
-See the examples in [reckon-core](reckon-core/src/main/java/org/ajoberstar/reckon/core/strategy).
-
-_More detail can be provided, if needed._
-
-### Supporting a new consumer
-
-See the [reckon-gradle](reckon-gradle) implementation for an example.
-
-_More detail can be provided, if needed._
-
-## Questions, Bugs, and Features
-
-Please use the repo's [issues](https://github.com/ajoberstar/reckon/issues)
-for all questions, bug reports, and feature requests.
+1. **NO duplicates.** A single version MUST not be produced from two different commits.
+1. **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
+1. **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
+1. **Two branches MUST NOT create tagged pre-releases for the same targeted final version.**
+    * If the branches have a shared merge base the version being inferred must skip the targeted final version and increment a second time.
+    * If no shared merge base the inference should fail.
 
 ## Contributing
 
