@@ -66,7 +66,7 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [Version.valueOf('1.3.0')] as Set,
-        [Version.valueOf('2.0.0-rc.1')] as Set
+        [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
         )
     VcsInventorySupplier inventorySupplier2 = Mock()
     inventorySupplier2.getInventory() >> inventory2
@@ -85,7 +85,7 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [Version.valueOf('1.3.0')] as Set,
-        [Version.valueOf('2.0.0-rc.2')] as Set
+        [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1'), Version.valueOf('2.0.0-milestone.1')] as Set
         )
     VcsInventorySupplier inventorySupplier2 = Mock()
     inventorySupplier2.getInventory() >> inventory2
@@ -104,7 +104,7 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [Version.valueOf('1.3.0')] as Set,
-        [Version.valueOf('2.0.0-rc.2')] as Set
+        [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
         )
     VcsInventorySupplier inventorySupplier2 = Mock()
     inventorySupplier2.getInventory() >> inventory2

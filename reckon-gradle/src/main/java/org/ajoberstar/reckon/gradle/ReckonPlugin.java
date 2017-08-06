@@ -66,8 +66,18 @@ public class ReckonPlugin implements Plugin<Project> {
     task.setGroup("publish");
     task.onlyIf(
         t -> {
+          String version = project.getVersion().toString();
           // using the presence of build metadata as the indicator of taggable versions
-          return !project.getVersion().toString().contains("+");
+          boolean insignificant = version.contains("+");
+          // rebuilds shouldn't trigger a new tag
+          boolean alreadyTagged =
+              extension
+                  .getGrgit()
+                  .getTag()
+                  .list()
+                  .stream()
+                  .anyMatch(tag -> tag.getName().equals(version));
+          return !(insignificant || alreadyTagged);
         });
     task.doLast(
         t -> {
@@ -83,11 +93,7 @@ public class ReckonPlugin implements Plugin<Project> {
     Task task = project.getTasks().create(PUSH_TASK);
     task.setDescription("Push version tag created by reckon.");
     task.setGroup("publish");
-    task.onlyIf(
-        t -> {
-          // using the presence of build metadata as the indicator of taggable versions
-          return !project.getVersion().toString().contains("+");
-        });
+    task.onlyIf(Task::dependsOnTaskDidWork);
     task.doLast(
         t -> {
           Map<String, Object> args = new HashMap<>();

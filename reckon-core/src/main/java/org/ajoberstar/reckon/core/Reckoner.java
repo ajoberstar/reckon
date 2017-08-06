@@ -40,7 +40,8 @@ public final class Reckoner {
                         && !Versions.isNormal(targetVersion))
             .orElse(targetVersion);
 
-    if (inventory.getClaimedVersions().contains(reckoned)) {
+    if (inventory.getClaimedVersions().contains(reckoned)
+        && !inventory.getCurrentVersion().map(reckoned::equals).orElse(false)) {
       throw new IllegalStateException(
           "Reckoned version " + reckoned + " has already been released.");
     }

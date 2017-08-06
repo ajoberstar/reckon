@@ -107,9 +107,9 @@ reckon {
     when:
     def result = build('reckonTagPush')
     then:
+    result.output.contains('Reckoned version: 1.1.0-alpha.0')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
-    result.output.contains('Reckoned version: 1.1.0-alpha.0')
   }
 
   def 'if reckoned version has no build metadata tag created and pushed'() {
@@ -130,11 +130,35 @@ reckon {
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha')
     then:
+    result.output.contains('Reckoned version: 1.1.0-alpha.1')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
-    result.output.contains('Reckoned version: 1.1.0-alpha.1')
     and:
     remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+  }
+
+  def 'if reckoned version is rebuild, skip tag and push'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    local.tag.add(name: '1.1.0', message: '1.1.0')
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.grgit'
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  normal = scopeFromProp()
+  preRelease = stageFromProp('alpha','beta', 'final')
+}
+"""
+    when:
+    def result = build('reckonTagPush')
+    then:
+    result.output.contains('Reckoned version: 1.1.0')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
+    result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
   }
 
   private BuildResult build(String... args = []) {
