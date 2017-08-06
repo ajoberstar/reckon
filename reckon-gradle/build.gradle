@@ -1,42 +1,52 @@
 plugins {
-    id 'groovy'
-    id 'java-gradle-plugin'
+  id 'groovy'
+  id 'java-gradle-plugin'
 }
 
 sourceCompatibility = '1.8'
 
 repositories {
-    jcenter()
+  jcenter()
 }
 
 dependencies {
-    compile gradleApi()
-    compile project(':reckon-core')
-    compile 'org.ajoberstar:grgit:2.0.0'
-    compile 'com.google.guava:guava:21.0'
-    compatTestCompile gradleTestKit()
-    compatTestCompile "org.spockframework:spock-core:1.1-groovy-2.4"
-    compatTestCompile 'org.ajoberstar:grgit:2.0.0'
+  // gradle
+  compile gradleApi()
+
+  // reckon
+  compile project(':reckon-core')
+
+  // git
+  compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+  compile "org.ajoberstar:grgit:$grgitVersion"
+  compatTestCompile "org.ajoberstar:grgit:$grgitVersion"
+
+  // util
+  compile 'com.google.guava:guava:[21.0,)'
+
+  // testing
+  compatTestCompile gradleTestKit()
+  compatTestCompile "org.spockframework:spock-core:1.1-groovy-2.4"
 }
 
 stutter {
-    supports '3.0', '3.1', '3.2', '3.2.1', '3.3', '3.4', '3.5', '3.5.1', '4.0', '4.0.1', '4.0.2', '4.1-rc-2'
+  supports '3.0', '3.1', '3.2', '3.2.1', '3.3', '3.4', '3.5', '3.5.1', '4.0', '4.0.1', '4.0.2', '4.1-rc-2'
 }
 
 pluginBundle {
-    website = 'https://github.com/ajoberstar/reckon'
-    vcsUrl = 'https://github.com/ajoberstar/reckon.git'
-    description = 'Infer a project\'s version from your Git repository'
-    plugins {
-        publishPlugin {
-            id = 'org.ajoberstar.reckon'
-            displayName = 'Reckon Plugin'
-            tags = ['semver', 'git']
-        }
+  website = 'https://github.com/ajoberstar/reckon'
+  vcsUrl = 'https://github.com/ajoberstar/reckon.git'
+  description = 'Infer a project\'s version from your Git repository'
+  plugins {
+    publishPlugin {
+      id = 'org.ajoberstar.reckon'
+      displayName = 'Reckon Plugin'
+      tags = ['semver', 'git']
     }
-    mavenCoordinates {
-        groupId = project.group
-        artifactId = project.name
-        version = project.version
-    }
+  }
+  mavenCoordinates {
+    groupId = project.group
+    artifactId = project.name
+    version = project.version
+  }
 }
