@@ -15,13 +15,20 @@
  */
 package org.ajoberstar.reckon.gradle;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 
 public class ReckonPlugin implements Plugin<Project> {
+  private static final String TAG_TASK = "reckonTagCreate";
+  private static final String PUSH_TASK = "reckonTagPush";
+
   @Override
   public void apply(Project project) {
     if (!project.equals(project.getRootProject())) {
@@ -37,7 +44,9 @@ public class ReckonPlugin implements Plugin<Project> {
             "org.ajoberstar.grgit",
             plugin -> {
               Grgit grgit = (Grgit) project.findProperty("grgit");
-              extension.setVcsInventory(extension.git(grgit));
+              if (grgit != null) {
+                extension.setVcsInventory(extension.git(grgit));
+              }
             });
 
     DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);
@@ -45,6 +54,47 @@ public class ReckonPlugin implements Plugin<Project> {
         prj -> {
           prj.setVersion(sharedVersion);
         });
+
+    Task tag = createTagTask(project, extension);
+    Task push = createPushTask(project, extension);
+    push.dependsOn(tag);
+  }
+
+  private Task createTagTask(Project project, ReckonExtension extension) {
+    Task task = project.getTasks().create(TAG_TASK);
+    task.setDescription("Tag version inferred by reckon.");
+    task.setGroup("publish");
+    task.onlyIf(
+        t -> {
+          // using the presence of build metadata as the indicator of taggable versions
+          return !project.getVersion().toString().contains("+");
+        });
+    task.doLast(
+        t -> {
+          Map<String, Object> args = new HashMap<>();
+          args.put("name", project.getVersion());
+          args.put("message", project.getVersion());
+          extension.getGrgit().getTag().add(args);
+        });
+    return task;
+  }
+
+  private Task createPushTask(Project project, ReckonExtension extension) {
+    Task task = project.getTasks().create(PUSH_TASK);
+    task.setDescription("Push version tag created by reckon.");
+    task.setGroup("publish");
+    task.onlyIf(
+        t -> {
+          // using the presence of build metadata as the indicator of taggable versions
+          return !project.getVersion().toString().contains("+");
+        });
+    task.doLast(
+        t -> {
+          Map<String, Object> args = new HashMap<>();
+          args.put("refsOrSpecs", Arrays.asList("refs/tags/" + project.getVersion().toString()));
+          extension.getGrgit().push(args);
+        });
+    return task;
   }
 
   private static class DelayedVersion {

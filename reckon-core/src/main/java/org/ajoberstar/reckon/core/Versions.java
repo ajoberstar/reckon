@@ -60,4 +60,23 @@ public final class Versions {
         throw new AssertionError("Invalid scope: " + scope);
     }
   }
+
+  public static Optional<Scope> inferScope(Version before, Version after) {
+    int major = after.getMajorVersion() - before.getMajorVersion();
+    int minor = after.getMinorVersion() - before.getMinorVersion();
+    int patch = after.getPatchVersion() - before.getPatchVersion();
+    if (major == 1 && after.getMinorVersion() == 0 && after.getPatchVersion() == 0) {
+      return Optional.of(Scope.MAJOR);
+    } else if (major == 0 && minor == 1 && after.getPatchVersion() == 0) {
+      return Optional.of(Scope.MINOR);
+    } else if (major == 0 && minor == 0 && patch == 1) {
+      return Optional.of(Scope.PATCH);
+    } else {
+      logger.debug(
+          "Invalid increment between the following versions. Cannot infer scope between: {} -> {}",
+          before,
+          after);
+      return Optional.empty();
+    }
+  }
 }

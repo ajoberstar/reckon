@@ -37,6 +37,7 @@ public class ReckonExtension {
   private static final String SNAPSHOT_PROP = "reckon.snapshot";
 
   private Project project;
+  private Grgit grgit;
   private VcsInventorySupplier vcsInventory;
   private NormalStrategy normal;
   private PreReleaseStrategy preRelease;
@@ -58,6 +59,7 @@ public class ReckonExtension {
   }
 
   public VcsInventorySupplier git(Grgit grgit) {
+    this.grgit = grgit;
     return new GitInventorySupplier(grgit.getRepository().getJgit().getRepository());
   }
 
@@ -84,7 +86,21 @@ public class ReckonExtension {
     return new SnapshotPreReleaseStrategy(supplier);
   }
 
+  Grgit getGrgit() {
+    return grgit;
+  }
+
   String reckonVersion() {
-    return Reckoner.reckon(vcsInventory, normal, preRelease);
+    if (vcsInventory == null) {
+      project.getLogger().warn("No VCS found/configured. Version will be 'unspecified'.");
+      return "unspecified";
+    } else if (normal == null || preRelease == null) {
+      throw new IllegalStateException(
+          "Must provide strategies for normal and preRelease on the reckon extension.");
+    } else {
+      String version = Reckoner.reckon(vcsInventory, normal, preRelease);
+      project.getLogger().warn("Reckoned version: {}", version);
+      return version;
+    }
   }
 }
