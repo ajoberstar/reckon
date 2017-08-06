@@ -43,7 +43,8 @@ public class ScopeNormalStrategy implements NormalStrategy {
     if (providedScope.isPresent()) {
       scope = providedScope.get();
     } else {
-      Optional<Scope> inferredScope = Versions.inferScope(inventory.getBaseNormal(), inventory.getBaseVersion());
+      Optional<Scope> inferredScope =
+          Versions.inferScope(inventory.getBaseNormal(), inventory.getBaseVersion());
       scope = inferredScope.orElse(Scope.MINOR);
     }
 

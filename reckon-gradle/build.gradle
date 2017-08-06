@@ -14,8 +14,9 @@ dependencies {
     compile project(':reckon-core')
     compile 'org.ajoberstar:grgit:2.0.0'
     compile 'com.google.guava:guava:21.0'
-    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
     compatTestCompile gradleTestKit()
+    compatTestCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+    compatTestCompile 'org.ajoberstar:grgit:2.0.0'
 }
 
 stutter {

@@ -72,7 +72,10 @@ public final class Versions {
     } else if (major == 0 && minor == 0 && patch == 1) {
       return Optional.of(Scope.PATCH);
     } else {
-      logger.debug("Invalid increment between the following versions. Cannot infer scope between: {} -> {}", before, after);
+      logger.debug(
+          "Invalid increment between the following versions. Cannot infer scope between: {} -> {}",
+          before,
+          after);
       return Optional.empty();
     }
   }
