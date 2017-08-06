@@ -38,9 +38,10 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
     this.defaultStage =
         stages
             .stream()
+            .filter(name -> !FINAL_STAGE.equals(name))
             .sorted()
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No stages provided."));
+            .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
     this.stageSupplier = stageSupplier;
   }
 

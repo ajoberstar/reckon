@@ -44,7 +44,7 @@ class StagePreReleaseStrategyTest extends Specification {
 
   def 'if target does not contain stage and stage is null, use the default stage and add num commits and commit id'() {
     expect:
-    strategy(null).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-dev.0.5+abcdef')
+    strategy(null).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-initial.0.5+abcdef')
   }
 
   def 'if target does not contain stage and stage is present, add num commits and commit id'() {
@@ -64,6 +64,6 @@ class StagePreReleaseStrategyTest extends Specification {
   }
 
   private StagePreReleaseStrategy strategy(String stage) {
-    return new StagePreReleaseStrategy(['dev', 'milestone', 'rc', 'final'] as Set, { Optional.ofNullable(stage) })
+    return new StagePreReleaseStrategy(['initial', 'milestone', 'rc', 'final'] as Set, { Optional.ofNullable(stage) })
   }
 }
