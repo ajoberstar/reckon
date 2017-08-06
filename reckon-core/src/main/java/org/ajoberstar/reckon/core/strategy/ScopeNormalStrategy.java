@@ -32,13 +32,20 @@ public class ScopeNormalStrategy implements NormalStrategy {
 
   @Override
   public Version reckonNormal(VcsInventory inventory) {
-    Scope scope =
+    Optional<Scope> providedScope =
         scopeSupplier
             .get()
             .filter(value -> !value.isEmpty())
             .map(String::toUpperCase)
-            .map(Scope::valueOf)
-            .orElse(Scope.MINOR);
+            .map(Scope::valueOf);
+
+    Scope scope;
+    if (providedScope.isPresent()) {
+      scope = providedScope.get();
+    } else {
+      Optional<Scope> inferredScope = Versions.inferScope(inventory.getBaseNormal(), inventory.getBaseVersion());
+      scope = inferredScope.orElse(Scope.MINOR);
+    }
 
     Version targetNormal = Versions.incrementNormal(inventory.getBaseNormal(), scope);
 

@@ -38,6 +38,36 @@ class ScopeNormalStrategyTest extends Specification {
     thrown(NullPointerException)
   }
 
+  def 'if supplier returns empty, scope defaults to minor if base version is base normal'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        null,
+        Version.valueOf('1.2.2'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    expect:
+    new ScopeNormalStrategy({ Optional.empty() }).reckonNormal(inventory) == Version.valueOf('1.3.0')
+  }
+
+  def 'if supplier returns empty, scope defaults to scope used by base version'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    expect:
+    new ScopeNormalStrategy({ Optional.empty() }).reckonNormal(inventory) == Version.valueOf('1.2.3')
+  }
+
   def 'if no conflict with parallel or claimed, incremented version is returned'() {
     given:
     def inventory = new VcsInventory(

@@ -52,4 +52,14 @@ class VersionsTest extends Specification {
     Versions.incrementNormal(Version.valueOf('1.2.3-rc.1'), Scope.MINOR) == Version.valueOf('1.3.0')
     Versions.incrementNormal(Version.valueOf('1.2.3-rc.1'), Scope.PATCH) == Version.valueOf('1.2.4')
   }
+
+  def 'inferScope correctly finds the scope'() {
+    expect:
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('1.2.4-milestone.1')) == Optional.of(Scope.PATCH)
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('1.3.0-milestone.1')) == Optional.of(Scope.MINOR)
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('2.0.0-milestone.1')) == Optional.of(Scope.MAJOR)
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('0.4.0')) == Optional.empty()
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('2.1.0')) == Optional.empty()
+    Versions.inferScope(Version.valueOf('1.2.3'), Version.valueOf('1.2.5')) == Optional.empty()
+  }
 }
