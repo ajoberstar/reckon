@@ -1,20 +1,27 @@
 plugins {
-    id 'groovy'
+  id 'groovy'
 }
 
 sourceCompatibility = '1.8'
 
 repositories {
-    jcenter()
+  jcenter()
 }
 
 dependencies {
-    compile 'com.github.zafarkhaja:java-semver:0.9.0'
-    compile 'org.eclipse.jgit:org.eclipse.jgit:4.8.0.201706111038-r'
-    compile 'org.slf4j:slf4j-api:1.7.25'
-    compile "org.codehaus.groovy:groovy-all:2.4.10"
-    compile 'org.apache.commons:commons-lang3:3.5'
-    testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
-    testCompile 'org.ajoberstar:grgit:2.0.0-rc.1'
-    testRuntime 'org.slf4j:slf4j-simple:1.7.25'
+  // logging
+  def slf4jVersion = '[1.7.25,1.8.0-alpha]' // wait until final 1.8.0 is out to upgrade
+  compile "org.slf4j:slf4j-api:$slf4jVersion"
+  testRuntime "org.slf4j:slf4j-simple:$slf4jVersion"
+
+  // git
+  compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+  testCompile "org.ajoberstar:grgit:$grgitVersion"
+
+  // util
+  compile 'org.apache.commons:commons-lang3:[3.5,4.0)'
+  compile 'com.github.zafarkhaja:java-semver:[0.9.0,)'
+
+  // testing
+  testCompile "org.spockframework:spock-core:1.1-groovy-2.4"
 }
