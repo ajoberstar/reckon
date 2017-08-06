@@ -27,8 +27,8 @@ import org.ajoberstar.reckon.core.Reckoner;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
 import org.ajoberstar.reckon.core.git.GitInventorySupplier;
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
-import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
 import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;
+import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
 import org.gradle.api.Project;
 
 public class ReckonExtension {

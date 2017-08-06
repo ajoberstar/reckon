@@ -15,11 +15,11 @@
  */
 package org.ajoberstar.reckon.gradle;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
