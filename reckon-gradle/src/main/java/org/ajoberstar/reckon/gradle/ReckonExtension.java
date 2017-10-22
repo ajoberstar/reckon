@@ -15,9 +15,11 @@
  */
 package org.ajoberstar.reckon.gradle;
 
+import com.github.zafarkhaja.semver.Version;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -73,8 +75,8 @@ public class ReckonExtension {
 
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    Supplier<Optional<String>> supplier =
-        () -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier =
+        (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
