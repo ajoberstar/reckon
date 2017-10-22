@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
@@ -81,8 +80,8 @@ public class ReckonExtension {
   }
 
   public PreReleaseStrategy snapshotFromProp() {
-    Supplier<Boolean> supplier =
-        () ->
+    BiFunction<VcsInventory, Version, Boolean> supplier =
+        (inventory, targetNormal) ->
             Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
                 .map(Object::toString)
                 .map(Boolean::parseBoolean)
