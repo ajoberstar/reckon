@@ -6,6 +6,7 @@
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
+                "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core"
             ],
             "locked": "0.9.0"
@@ -18,7 +19,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "23.0"
+            "locked": "23.2-jre"
         },
         "org.ajoberstar.reckon:reckon-core": {
             "firstLevelTransitive": [
@@ -45,10 +46,11 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "2.0.0"
+            "locked": "2.0.1"
         },
         "org.apache.commons:commons-lang3": {
             "firstLevelTransitive": [
+                "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
@@ -64,16 +66,18 @@
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
+                "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "4.8.0.201706111038-r"
+            "locked": "4.9.0.201710071750-r"
         },
         "org.slf4j:slf4j-api": {
             "firstLevelTransitive": [
+                "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",

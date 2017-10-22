@@ -15,15 +15,18 @@
  */
 package org.ajoberstar.reckon.gradle;
 
+import com.github.zafarkhaja.semver.Version;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.Reckoner;
+import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
 import org.ajoberstar.reckon.core.git.GitInventorySupplier;
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
@@ -64,21 +67,21 @@ public class ReckonExtension {
   }
 
   public NormalStrategy scopeFromProp() {
-    Supplier<Optional<String>> supplier =
-        () -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
+    Function<VcsInventory, Optional<String>> supplier =
+        ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
     return new ScopeNormalStrategy(supplier);
   }
 
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    Supplier<Optional<String>> supplier =
-        () -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier =
+        (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
   public PreReleaseStrategy snapshotFromProp() {
-    Supplier<Boolean> supplier =
-        () ->
+    BiFunction<VcsInventory, Version, Boolean> supplier =
+        (inventory, targetNormal) ->
             Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
                 .map(Object::toString)
                 .map(Boolean::parseBoolean)

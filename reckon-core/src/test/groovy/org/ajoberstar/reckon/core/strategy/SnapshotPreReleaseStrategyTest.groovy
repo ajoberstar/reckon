@@ -32,7 +32,7 @@ class SnapshotPreReleaseStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new SnapshotPreReleaseStrategy({ false }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0')
+    new SnapshotPreReleaseStrategy({ i, v -> false }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0')
   }
 
   def 'if snapshot is true, set pre-release to snapshto'() {
@@ -47,7 +47,7 @@ class SnapshotPreReleaseStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new SnapshotPreReleaseStrategy({ true }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
-    new SnapshotPreReleaseStrategy({ null }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
+    new SnapshotPreReleaseStrategy({ i, v -> true }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
+    new SnapshotPreReleaseStrategy({ i, v -> null }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
   }
 }

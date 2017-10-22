@@ -18,7 +18,7 @@ package org.ajoberstar.reckon.core.strategy;
 import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
@@ -31,9 +31,9 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
 
   private final Set<String> stages;
   private final String defaultStage;
-  private final Supplier<Optional<String>> stageSupplier;
+  private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
 
-  public StagePreReleaseStrategy(Set<String> stages, Supplier<Optional<String>> stageSupplier) {
+  public StagePreReleaseStrategy(Set<String> stages, BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
     this.stages = stages;
     this.defaultStage =
         stages
@@ -42,12 +42,12 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
             .sorted()
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
-    this.stageSupplier = stageSupplier;
+    this.stageCalc = stageCalc;
   }
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage = stageSupplier.get().orElse(null);
+    String stage = stageCalc.apply(inventory, targetNormal).orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
