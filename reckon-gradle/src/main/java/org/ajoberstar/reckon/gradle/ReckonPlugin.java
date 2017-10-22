@@ -63,7 +63,7 @@ public class ReckonPlugin implements Plugin<Project> {
   private Task createTagTask(Project project, ReckonExtension extension) {
     Task task = project.getTasks().create(TAG_TASK);
     task.setDescription("Tag version inferred by reckon.");
-    task.setGroup("publish");
+    task.setGroup("publishing");
     task.onlyIf(
         t -> {
           String version = project.getVersion().toString();
@@ -92,7 +92,7 @@ public class ReckonPlugin implements Plugin<Project> {
   private Task createPushTask(Project project, ReckonExtension extension, Task create) {
     Task task = project.getTasks().create(PUSH_TASK);
     task.setDescription("Push version tag created by reckon.");
-    task.setGroup("publish");
+    task.setGroup("publishing");
     task.onlyIf(t -> create.getDidWork());
     task.doLast(
         t -> {
