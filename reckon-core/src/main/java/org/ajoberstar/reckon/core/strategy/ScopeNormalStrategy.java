@@ -17,24 +17,24 @@ package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.Scope;
 import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.Versions;
 
 public class ScopeNormalStrategy implements NormalStrategy {
-  private final Supplier<Optional<String>> scopeSupplier;
+  private final Function<VcsInventory, Optional<String>> scopeCalc;
 
-  public ScopeNormalStrategy(Supplier<Optional<String>> scopeSupplier) {
-    this.scopeSupplier = scopeSupplier;
+  public ScopeNormalStrategy(Function<VcsInventory, Optional<String>> scopeCalc) {
+    this.scopeCalc = scopeCalc;
   }
 
   @Override
   public Version reckonNormal(VcsInventory inventory) {
     Optional<Scope> providedScope =
-        scopeSupplier
-            .get()
+        scopeCalc
+            .apply(inventory)
             .filter(value -> !value.isEmpty())
             .map(String::toUpperCase)
             .map(Scope::valueOf);
