@@ -56,7 +56,7 @@ public class ReckonPlugin implements Plugin<Project> {
         });
 
     Task tag = createTagTask(project, extension);
-    Task push = createPushTask(project, extension);
+    Task push = createPushTask(project, extension, tag);
     push.dependsOn(tag);
   }
 
@@ -89,11 +89,11 @@ public class ReckonPlugin implements Plugin<Project> {
     return task;
   }
 
-  private Task createPushTask(Project project, ReckonExtension extension) {
+  private Task createPushTask(Project project, ReckonExtension extension, Task create) {
     Task task = project.getTasks().create(PUSH_TASK);
     task.setDescription("Push version tag created by reckon.");
     task.setGroup("publish");
-    task.onlyIf(Task::dependsOnTaskDidWork);
+    task.onlyIf(t -> create.getDidWork());
     task.doLast(
         t -> {
           Map<String, Object> args = new HashMap<>();
