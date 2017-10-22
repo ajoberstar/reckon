@@ -30,7 +30,8 @@ public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    boolean isSnapshot = Optional.ofNullable(snapshotCalc.apply(inventory, targetNormal)).orElse(true);
+    boolean isSnapshot =
+        Optional.ofNullable(snapshotCalc.apply(inventory, targetNormal)).orElse(true);
     if (isSnapshot) {
       return targetNormal.setPreReleaseVersion("SNAPSHOT");
     } else {

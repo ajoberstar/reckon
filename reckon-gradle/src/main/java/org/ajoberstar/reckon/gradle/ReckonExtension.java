@@ -75,7 +75,8 @@ public class ReckonExtension {
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
     BiFunction<VcsInventory, Version, Optional<String>> supplier =
-        (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+        (inventory, targetNormal) ->
+            Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
