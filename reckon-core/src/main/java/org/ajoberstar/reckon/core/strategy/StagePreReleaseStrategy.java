@@ -33,7 +33,8 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
   private final String defaultStage;
   private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
 
-  public StagePreReleaseStrategy(Set<String> stages, BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
+  public StagePreReleaseStrategy(
+      Set<String> stages, BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
     this.stages = stages;
     this.defaultStage =
         stages
