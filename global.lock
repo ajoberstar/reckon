@@ -7,7 +7,12 @@
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core",
-                "org.ajoberstar.reckon:reckon-core"
+                "org.ajoberstar.reckon:reckon-core",
+                "org.ajoberstar.reckon:reckon-gradle",
+                "org.ajoberstar.reckon:reckon-gradle",
+                "org.ajoberstar.reckon:reckon-gradle",
+                "org.ajoberstar.reckon:reckon-gradle",
+                "org.ajoberstar.reckon:reckon-gradle"
             ],
             "locked": "0.9.0"
         },
@@ -19,7 +24,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "23.2-jre"
+            "locked": "24.0-jre"
         },
         "org.ajoberstar.reckon:reckon-core": {
             "firstLevelTransitive": [
@@ -46,7 +51,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "2.0.1"
+            "locked": "2.1.1"
         },
         "org.apache.commons:commons-lang3": {
             "firstLevelTransitive": [
@@ -57,7 +62,7 @@
                 "org.ajoberstar.reckon:reckon-core",
                 "org.ajoberstar.reckon:reckon-core"
             ],
-            "locked": "3.6"
+            "locked": "3.7"
         },
         "org.eclipse.jgit:org.eclipse.jgit": {
             "firstLevelTransitive": [
@@ -73,7 +78,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "4.9.0.201710071750-r"
+            "locked": "4.10.0.201712302008-r"
         },
         "org.slf4j:slf4j-api": {
             "firstLevelTransitive": [
