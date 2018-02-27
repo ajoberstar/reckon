@@ -18,7 +18,3 @@ allprojects {
 
 ext.grgitVersion = '[2.0.0,)'
 ext.jgitVersion = '[4.8.0,)'
-
-wrapper {
-  gradleVersion = '4.0.2'
-}
