@@ -47,6 +47,11 @@ class StagePreReleaseStrategyTest extends Specification {
     strategy(null).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-initial.0.5+abcdef')
   }
 
+  def 'if target does not contain stage and stage is an empty string, use the default stage and add num commits and commit id'() {
+    expect:
+    strategy('').reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-initial.0.5+abcdef')
+  }
+
   def 'if target does not contain stage and stage is present, add num commits and commit id'() {
     expect:
     strategy(null).reckonTargetVersion(inventory, Version.valueOf('1.2.3')) == Version.valueOf('1.2.3-milestone.2.5+abcdef')
