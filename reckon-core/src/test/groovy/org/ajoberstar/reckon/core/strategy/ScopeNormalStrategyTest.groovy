@@ -38,6 +38,24 @@ class ScopeNormalStrategyTest extends Specification {
     thrown(NullPointerException)
   }
 
+  def 'if scope supplier returns invalid scope, throw'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    when:
+    new ScopeNormalStrategy({ Optional.of("general") }).reckonNormal(inventory)
+    then:
+    def e = thrown(IllegalArgumentException)
+    e.getMessage() == 'Scope "general" is not one of: major, minor, patch'
+  }
+
   def 'if supplier returns empty, scope defaults to minor if base version is base normal'() {
     given:
     def inventory = new VcsInventory(
