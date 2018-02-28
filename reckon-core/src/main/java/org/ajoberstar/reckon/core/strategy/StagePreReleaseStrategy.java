@@ -48,10 +48,12 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage = stageCalc.apply(inventory, targetNormal)
-      .map(String::trim)
-      .filter(s -> !s.isEmpty())
-      .orElse(null);
+    String stage =
+        stageCalc
+            .apply(inventory, targetNormal)
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
