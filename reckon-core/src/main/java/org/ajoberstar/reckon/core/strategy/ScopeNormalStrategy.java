@@ -32,12 +32,9 @@ public class ScopeNormalStrategy implements NormalStrategy {
 
   @Override
   public Version reckonNormal(VcsInventory inventory) {
-    Optional<Scope> providedScope =
-        scopeCalc
-            .apply(inventory)
-            .filter(value -> !value.isEmpty())
-            .map(String::toUpperCase)
-            .map(Scope::valueOf);
+    Optional<Scope> providedScope = scopeCalc.apply(inventory)
+      .filter(value -> !value.isEmpty())
+      .map(Scope::from);
 
     Scope scope;
     if (providedScope.isPresent()) {

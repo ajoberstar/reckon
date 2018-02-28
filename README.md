@@ -52,7 +52,7 @@ Reckon is two things:
 - an API to infer your next version from a Git repository
 - applications of that API in various tools (initially, just Gradle)
 
-### Reckon Versioning
+### Reckon Version Scheme
 
 Reckon uses an opinionated subset of [SemVer](http://semver.org), meant to provide more structure around how the
 pre-release versions are managed.
@@ -73,9 +73,11 @@ There are three types of versions:
 - `<commits>` a positive integer indicating the number of commits since the last significant or final release was made
 - `<hash>` a full commit hash of the current HEAD
 
-NOTE: This approach is tuned to ensure it sorts correctly both with SemVer rules and Gradle's built in version sorting (which is subtly different).
+> **NOTE:** This approach is tuned to ensure it sorts correctly both with SemVer rules and Gradle's built in version sorting (which are subtly different).
+>
+> The version format is intentionally **not** configurable.
 
-### Maven Versioning
+### Snapshot Version Scheme
 
 Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
@@ -84,16 +86,9 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 | **final**    | `<major>.<minor>.<patch>`          | `1.2.3`          | A version ready for end-user consumption |
 | **snapshot** | `<major>.<minor>.<patch>-SNAPSHOT` | `1.3.0-SNAPSHOT` | An intermediate version before the final release is ready. |
 
-### Inferring the Version
+### More Information
 
-In order to infer the next version, reckon needs two pieces of input:
-
-- **scope** - one of `major`, `minor`, or `patch` (defaults to `minor`), indicating which component of the version should be incremented. If the previous version was 1.2.3, a scope of `minor` would result in 1.3.0.
-- **stage** - if not present,
-
-These inputs can be provided directly by the user or using a custom implementation that might detect them from elsewhere.
-
-Reckon will use the history of your repository to determine what version your changes are based on and the inputs above
+See [How Reckon Works](docs/index.md).
 
 ## How do I use it?
 
@@ -101,13 +96,11 @@ Reckon will use the history of your repository to determine what version your ch
 
 ### Gradle
 
-**NOTE:** This plugin only calculates a version, it will not tag it or otherwise modify your Git repository.
-
-Apply the plugin:
+#### Apply the plugin
 
 ```groovy
 plugins {
-  id 'org.ajoberstar.grgit' version '<version>'
+  id 'org.ajoberstar.grgit' version '<version>' // this is a required dependency unless you plan to implement your own VcsInventorySupplier
   id 'org.ajoberstar.reckon' version '<version>'
 }
 
@@ -118,11 +111,16 @@ reckon {
   // preRelease = snapshotFromProp()
 }
 ```
+
+#### Execute Gradle
+
 Execute Gradle providing the properties, as needed:
 
 * `reckon.scope` - one of `major`, `minor`, or `patch` (defaults to `minor`) to specify which component of the previous release should be incremented
 * `reckon.stage` - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
 * `reckon.snapshot` - (if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
+
+When Gradle executes, the version will be inferred as soon as something tries to access it. This will be output to the console (as below).
 
 ```
 ./gradlew build -Preckon.scope=minor -Preckon.stage=milestone
@@ -130,18 +128,16 @@ Reckoned version 1.3.0-milestone.1
 ...
 ```
 
-## How does it work?
+### Tagging and pushing your version
 
-### Axioms
+Reckon's Gradle plugin also provides two tasks:
 
-These are the rules that reckon presumes are true, both informing how it reads a repo's history and how it calculates the next version:
+- `reckonTagCreate` - Tags the current `HEAD` with the inferred version (the tag name will be the literal version, without a `v` prefix).
+- `reckonTagPush` (depends on `reckonTagCreate`) - Pushes the tag to your branches upstream remote.
 
-1. **NO duplicates.** A single version MUST not be produced from two different commits.
-1. **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
-1. **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
-1. **Two branches MUST NOT create tagged pre-releases for the same targeted final version.**
-    * If the branches have a shared merge base the version being inferred must skip the targeted final version and increment a second time.
-    * If no shared merge base the inference should fail.
+```
+./gradlew reckonTagPush
+```
 
 ## Contributing
 
