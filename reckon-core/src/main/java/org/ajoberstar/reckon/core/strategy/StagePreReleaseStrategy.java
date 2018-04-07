@@ -48,6 +48,12 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
       return targetNormal;
     }
 
+    // rebuild behavior
+    if (inventory.isClean() && inventory.getCurrentVersion().isPresent() && stage == null) {
+      Version current = inventory.getCurrentVersion().get();
+      return current;
+    }
+
     Version targetBase = targetNormal.equals(Versions.getNormal(inventory.getBaseVersion())) ? inventory.getBaseVersion() : targetNormal;
 
     String baseStageName;

@@ -7,21 +7,27 @@ import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.VcsInventory;
 
 public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
-  private final BiFunction<VcsInventory, Version, Boolean> snapshotCalc;
+  private final BiFunction<VcsInventory, Version, Optional<Boolean>> snapshotCalc;
 
-  public SnapshotPreReleaseStrategy(BiFunction<VcsInventory, Version, Boolean> snapshotCalc) {
+  public SnapshotPreReleaseStrategy(BiFunction<VcsInventory, Version, Optional<Boolean>> snapshotCalc) {
     this.snapshotCalc = snapshotCalc;
   }
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    boolean isSnapshot = Optional.ofNullable(snapshotCalc.apply(inventory, targetNormal)).orElse(true);
-    if (isSnapshot) {
-      return targetNormal.setPreReleaseVersion("SNAPSHOT");
-    } else if (!inventory.isClean()) {
-      throw new IllegalStateException("Cannot release a final version without a clean repo.");
+    Optional<Boolean> maybeSnapshot = snapshotCalc.apply(inventory, targetNormal);
+
+    if (inventory.isClean() && inventory.getCurrentVersion().isPresent() && !maybeSnapshot.isPresent()) {
+      // rebuild
+      return inventory.getCurrentVersion().get();
     } else {
-      return targetNormal;
+      if (maybeSnapshot.orElse(true)) {
+        return targetNormal.setPreReleaseVersion("SNAPSHOT");
+      } else if (!inventory.isClean()) {
+        throw new IllegalStateException("Cannot release a final version without a clean repo.");
+      } else {
+        return targetNormal;
+      }
     }
   }
 }

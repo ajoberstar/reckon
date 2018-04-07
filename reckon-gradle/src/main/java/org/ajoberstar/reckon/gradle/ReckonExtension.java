@@ -63,10 +63,9 @@ public class ReckonExtension {
   }
 
   public PreReleaseStrategy snapshotFromProp() {
-    BiFunction<VcsInventory, Version, Boolean> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
+    BiFunction<VcsInventory, Version, Optional<Boolean>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
         .map(Object::toString)
-        .map(Boolean::parseBoolean)
-        .orElse(true);
+        .map(Boolean::parseBoolean);
     return new SnapshotPreReleaseStrategy(supplier);
   }
 
