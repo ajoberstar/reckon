@@ -160,7 +160,7 @@ class GitInventorySupplierTest extends Specification {
     def emptyGrgit = Grgit.init(dir: Files.createTempDirectory('repo2').toFile())
     def emptySupplier = new GitInventorySupplier(emptyGrgit.repository.jgit.repository)
     expect:
-    emptySupplier.getInventory() == new VcsInventory(null, null, null, null, 0, null, null)
+    emptySupplier.getInventory() == new VcsInventory(null, true, null, null, null, 0, null, null)
   }
 
   def setupSpec() {

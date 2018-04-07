@@ -1,8 +1,14 @@
 plugins {
-    id 'org.ajoberstar.defaults' version '0.8.3'
+    id 'org.ajoberstar.defaults' version '0.9.0'
+    id 'org.ajoberstar.stutter' version '0.3.0-rc.2' apply false
+    // TODO remove when Gradle dependency locking is available
+    id 'nebula.dependency-lock' version '5.0.4' apply false
 }
 
 allprojects {
+  // TODO remove when Gradle dependency locking is available
+  apply plugin: 'nebula.dependency-lock'
+
   group = 'org.ajoberstar.reckon'
 
   plugins.withId('java') {

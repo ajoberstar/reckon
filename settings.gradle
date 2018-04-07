@@ -1,2 +1,4 @@
+rootProject.name = 'reckon'
+
 include 'reckon-core'
 include 'reckon-gradle'

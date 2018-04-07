@@ -1,18 +1,3 @@
-/*
- * Copyright 2015-2017 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
@@ -32,15 +17,13 @@ public class ScopeNormalStrategy implements NormalStrategy {
 
   @Override
   public Version reckonNormal(VcsInventory inventory) {
-    Optional<Scope> providedScope =
-        scopeCalc.apply(inventory).filter(value -> !value.isEmpty()).map(Scope::from);
+    Optional<Scope> providedScope = scopeCalc.apply(inventory).filter(value -> !value.isEmpty()).map(Scope::from);
 
     Scope scope;
     if (providedScope.isPresent()) {
       scope = providedScope.get();
     } else {
-      Optional<Scope> inferredScope =
-          Versions.inferScope(inventory.getBaseNormal(), inventory.getBaseVersion());
+      Optional<Scope> inferredScope = Versions.inferScope(inventory.getBaseNormal(), inventory.getBaseVersion());
       scope = inferredScope.orElse(Scope.MINOR);
     }
 
@@ -52,8 +35,7 @@ public class ScopeNormalStrategy implements NormalStrategy {
     }
 
     if (inventory.getClaimedVersions().contains(targetNormal)) {
-      throw new IllegalStateException(
-          "Reckoned target normal version " + targetNormal + " has already been released.");
+      throw new IllegalStateException("Reckoned target normal version " + targetNormal + " has already been released.");
     }
 
     return targetNormal;

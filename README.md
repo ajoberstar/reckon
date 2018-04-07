@@ -1,8 +1,7 @@
 # reckon
 
 [![Download](https://api.bintray.com/packages/ajoberstar/maven/reckon/images/download.svg)](https://bintray.com/ajoberstar/maven/reckon/_latestVersion)
-[![Travis](https://img.shields.io/travis/ajoberstar/reckon.svg?style=flat-square)](https://travis-ci.org/ajoberstar/reckon)
-[![GitHub license](https://img.shields.io/github/license/ajoberstar/reckon.svg?style=flat-square)](https://github.com/ajoberstar/reckon/blob/master/LICENSE)
+[![CircleCI](https://circleci.com/gh/ajoberstar/reckon.svg?style=svg)](https://circleci.com/gh/ajoberstar/reckon)
 
 ## Why do you care?
 

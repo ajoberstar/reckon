@@ -38,6 +38,7 @@ class BaseCompatTest extends Specification {
     def remoteDir = tempDir.newFolder('remote')
     remote = Grgit.init(dir: remoteDir)
 
+    remoteFile('.gitignore') << '.gradle/\nbuild/\n'
     remoteFile('master.txt') << 'contents here'
     remote.add(patterns: ['.'])
     remote.commit(message: 'first commit')
@@ -91,7 +92,7 @@ task printVersion {
 
   def 'if reckoned version has build metadata no tag created'() {
     given:
-    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
 plugins {
@@ -104,6 +105,8 @@ reckon {
   preRelease = stageFromProp('alpha','beta', 'final')
 }
 """
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
     when:
     def result = build('reckonTagPush')
     then:
@@ -114,7 +117,7 @@ reckon {
 
   def 'if reckoned version has no build metadata tag created and pushed'() {
     given:
-    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
 plugins {
@@ -127,6 +130,8 @@ reckon {
   preRelease = stageFromProp('alpha','beta', 'final')
 }
 """
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha')
     then:
@@ -140,7 +145,7 @@ reckon {
   def 'if reckoned version is rebuild, skip tag and push'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
-    local.tag.add(name: '1.1.0', message: '1.1.0')
+
 
     buildFile << """
 plugins {
@@ -153,6 +158,9 @@ reckon {
   preRelease = stageFromProp('alpha','beta', 'final')
 }
 """
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    local.tag.add(name: '1.1.0', message: '1.1.0')
     when:
     def result = build('reckonTagPush')
     then:
