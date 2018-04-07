@@ -40,6 +40,10 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
       throw new IllegalArgumentException(message);
     }
 
+    if (stage != null && !inventory.isClean()) {
+      throw new IllegalStateException("Cannot release a final or significant stage without a clean repo.");
+    }
+
     if (FINAL_STAGE.equals(stage)) {
       return targetNormal;
     }
@@ -58,9 +62,13 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
     }
 
     if (stage == null) {
+      String buildMetadata = inventory.getCommitId()
+          .map(sha -> inventory.isClean() ? sha : sha + ".uncommitted")
+          .orElse("uncommitted");
+
       return targetBase
           .setPreReleaseVersion(baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
-          .setBuildMetadata(inventory.getCommitId().orElse("uncommitted"));
+          .setBuildMetadata(buildMetadata);
     } else if (stage.equals(baseStageName)) {
       int num = baseStageNum > 0 ? baseStageNum + 1 : 1;
       return targetBase.setPreReleaseVersion(stage + "." + num);

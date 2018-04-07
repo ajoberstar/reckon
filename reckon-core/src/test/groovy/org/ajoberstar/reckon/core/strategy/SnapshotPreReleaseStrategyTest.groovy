@@ -33,10 +33,10 @@ class SnapshotPreReleaseStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new SnapshotPreReleaseStrategy({ i, v -> false }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0')
+    new SnapshotPreReleaseStrategy({ i, v -> false }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0'
   }
 
-  def 'if snapshot is true, set pre-release to snapshto'() {
+  def 'if snapshot is true, set pre-release to snapshot'() {
     given:
     def inventory = new VcsInventory(
         'abcdef',
@@ -49,7 +49,25 @@ class SnapshotPreReleaseStrategyTest extends Specification {
         [] as Set
         )
     expect:
-    new SnapshotPreReleaseStrategy({ i, v -> true }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
-    new SnapshotPreReleaseStrategy({ i, v -> null }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-SNAPSHOT')
+    new SnapshotPreReleaseStrategy({ i, v -> true }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0-SNAPSHOT'
+    new SnapshotPreReleaseStrategy({ i, v -> null }).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0-SNAPSHOT'
+  }
+
+  def 'if repo has uncommitted changes, fail if snapshot is false'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        false,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    when:
+    new SnapshotPreReleaseStrategy({ i, v -> false }).reckonTargetVersion(inventory, Version.valueOf('2.0.0'))
+    then:
+    thrown(IllegalStateException)
   }
 }

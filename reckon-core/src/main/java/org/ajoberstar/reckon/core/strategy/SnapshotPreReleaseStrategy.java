@@ -18,6 +18,8 @@ public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
     boolean isSnapshot = Optional.ofNullable(snapshotCalc.apply(inventory, targetNormal)).orElse(true);
     if (isSnapshot) {
       return targetNormal.setPreReleaseVersion("SNAPSHOT");
+    } else if (!inventory.isClean()) {
+      throw new IllegalStateException("Cannot release a final version without a clean repo.");
     } else {
       return targetNormal;
     }
