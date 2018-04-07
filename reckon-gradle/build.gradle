@@ -43,6 +43,7 @@ stutter {
   }
   java(10) {
     compatibleRange '4.1'
+    incompatible '4.7-rc-1' // See https://github.com/gradle/gradle/issues/4973
   }
 }
 
