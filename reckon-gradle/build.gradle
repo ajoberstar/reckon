@@ -38,7 +38,9 @@ stutter {
   java(8) {
     compatibleRange '3.0'
   }
-
+  java(9) {
+    compatibleRange '4.2.1'
+  }
   java(10) {
     compatibleRange '4.1'
   }
