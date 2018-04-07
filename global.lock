@@ -24,7 +24,14 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "24.0-jre"
+            "locked": "24.1-jre"
+        },
+        "junit:junit": {
+            "firstLevelTransitive": [
+                "org.ajoberstar.reckon:reckon-core",
+                "org.ajoberstar.reckon:reckon-core"
+            ],
+            "locked": "4.12"
         },
         "org.ajoberstar.reckon:reckon-core": {
             "firstLevelTransitive": [

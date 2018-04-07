@@ -27,7 +27,9 @@ dependencies {
 
   // testing
   compatTestCompile gradleTestKit()
-  compatTestCompile "org.spockframework:spock-core:1.1-groovy-2.4"
+  compatTestCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+  compatTestCompile 'org.codehaus.groovy:groovy-all:2.4.15'
+  compatTestCompile 'junit:junit:4.12'
 }
 
 stutter {
