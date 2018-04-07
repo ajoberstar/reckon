@@ -6,7 +6,7 @@ defaults: &defaults
           - v1-gradle-{{ .Revision }}
     - run:
         name: Compile and test
-        command: ./gradlew clean check
+        command: ./gradlew clean check --continue
     - store_test_results:
         path: build/test-results
         when: always
