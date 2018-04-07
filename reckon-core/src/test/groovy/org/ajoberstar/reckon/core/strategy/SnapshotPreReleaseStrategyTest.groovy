@@ -24,6 +24,7 @@ class SnapshotPreReleaseStrategyTest extends Specification {
     given:
     def inventory = new VcsInventory(
         'abcdef',
+        true,
         null,
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.2'),
@@ -39,6 +40,7 @@ class SnapshotPreReleaseStrategyTest extends Specification {
     given:
     def inventory = new VcsInventory(
         'abcdef',
+        true,
         null,
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.2'),

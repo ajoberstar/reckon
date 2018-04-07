@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class VcsInventory {
   private final String commitId;
+  private final boolean clean;
   private final Version currentVersion;
   private final int commitsSinceBase;
   private final Version baseVersion;
@@ -35,6 +36,7 @@ public final class VcsInventory {
 
   public VcsInventory(
       String commitId,
+      boolean clean,
       Version currentVersion,
       Version baseVersion,
       Version baseNormal,
@@ -47,6 +49,7 @@ public final class VcsInventory {
     }
 
     this.commitId = commitId;
+    this.clean = clean;
     this.currentVersion = currentVersion;
     this.baseVersion = Optional.ofNullable(baseVersion).orElse(Versions.VERSION_0);
     this.baseNormal = Optional.ofNullable(baseNormal).orElse(Versions.VERSION_0);
@@ -63,6 +66,10 @@ public final class VcsInventory {
 
   public Optional<String> getCommitId() {
     return Optional.ofNullable(commitId);
+  }
+
+  public boolean isClean() {
+    return clean;
   }
 
   public Optional<Version> getCurrentVersion() {

@@ -21,6 +21,7 @@ import spock.lang.Specification
 class ReckonerTest extends Specification {
   VcsInventory inventory = new VcsInventory(
   'abcdef',
+  true,
   null,
   Version.valueOf('1.2.3-milestone.1'),
   Version.valueOf('1.2.2'),
@@ -61,6 +62,7 @@ class ReckonerTest extends Specification {
     given:
     VcsInventory inventory2 = new VcsInventory(
         'abcdef',
+        true,
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.2'),
@@ -80,6 +82,7 @@ class ReckonerTest extends Specification {
     given:
     VcsInventory inventory2 = new VcsInventory(
         'abcdef',
+        true,
         Version.valueOf('2.0.0-milestone.1'),
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.2'),
@@ -99,6 +102,7 @@ class ReckonerTest extends Specification {
     given:
     VcsInventory inventory2 = new VcsInventory(
         'abcdef',
+        true,
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.3-milestone.1'),
         Version.valueOf('1.2.2'),

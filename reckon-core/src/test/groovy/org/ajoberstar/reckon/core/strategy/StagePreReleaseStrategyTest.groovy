@@ -22,6 +22,7 @@ import spock.lang.Specification
 class StagePreReleaseStrategyTest extends Specification {
   VcsInventory inventory = new VcsInventory(
   'abcdef',
+  true,
   null,
   Version.valueOf('1.2.3-milestone.2'),
   Version.valueOf('1.2.2'),
@@ -72,6 +73,7 @@ class StagePreReleaseStrategyTest extends Specification {
     given:
     def inventoryUncommitted = new VcsInventory(
       null,
+      false,
       null,
       Version.valueOf('1.2.3-milestone.2'),
       Version.valueOf('1.2.2'),

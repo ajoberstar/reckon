@@ -34,6 +34,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -73,7 +75,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
-        return new VcsInventory(null, null, null, null, 0, null, null);
+        return new VcsInventory(null, isClean(), null, null, null, 0, null, null);
       }
 
       logger.debug("Found HEAD commit {}", headObjectId);
@@ -112,6 +114,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
 
       return new VcsInventory(
           headObjectId.getName(),
+          isClean(),
           currentVersion,
           baseVersion.getVersion(),
           baseNormal.getVersion(),
@@ -120,6 +123,16 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
           claimedVersions);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
+    }
+  }
+
+  private boolean isClean() {
+    try {
+      return new Git(repo).status().call().isClean();
+    } catch (GitAPIException e) {
+      logger.error("Failed to determine status of repository.", e);
+      // TODO should this throw up?
+      return false;
     }
   }
 
