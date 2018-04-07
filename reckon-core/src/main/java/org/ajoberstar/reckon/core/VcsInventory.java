@@ -61,8 +61,8 @@ public final class VcsInventory {
             .orElse(Collections.emptySet());
   }
 
-  public String getCommitId() {
-    return commitId;
+  public Optional<String> getCommitId() {
+    return Optional.ofNullable(commitId);
   }
 
   public Optional<Version> getCurrentVersion() {

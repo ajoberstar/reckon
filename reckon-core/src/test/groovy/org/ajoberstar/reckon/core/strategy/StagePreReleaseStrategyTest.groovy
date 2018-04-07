@@ -68,6 +68,22 @@ class StagePreReleaseStrategyTest extends Specification {
     strategy('rc').reckonTargetVersion(inventory, Version.valueOf('2.0.0')) == Version.valueOf('2.0.0-rc.1')
   }
 
+  def 'if repo has no commits, show build metadata as uncommitted'() {
+    given:
+    def inventoryUncommitted = new VcsInventory(
+      null,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    strategy(null).reckonTargetVersion(inventoryUncommitted, Version.valueOf('1.2.3')) == Version.valueOf('1.2.3-milestone.2.5+uncommitted')
+
+  }
+
   private StagePreReleaseStrategy strategy(String stage) {
     return new StagePreReleaseStrategy(['initial', 'milestone', 'rc', 'final'] as Set, { i, v -> Optional.ofNullable(stage) })
   }

@@ -84,7 +84,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
       return targetBase
           .setPreReleaseVersion(
               baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
-          .setBuildMetadata(inventory.getCommitId());
+          .setBuildMetadata(inventory.getCommitId().orElse("uncommitted"));
     } else if (stage.equals(baseStageName)) {
       int num = baseStageNum > 0 ? baseStageNum + 1 : 1;
       return targetBase.setPreReleaseVersion(stage + "." + num);
