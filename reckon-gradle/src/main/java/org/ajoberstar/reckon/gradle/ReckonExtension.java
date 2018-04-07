@@ -1,18 +1,3 @@
-/*
- * Copyright 2015-2017 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.ajoberstar.reckon.gradle;
 
 import com.github.zafarkhaja.semver.Version;
@@ -67,26 +52,21 @@ public class ReckonExtension {
   }
 
   public NormalStrategy scopeFromProp() {
-    Function<VcsInventory, Optional<String>> supplier =
-        ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
+    Function<VcsInventory, Optional<String>> supplier = ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
     return new ScopeNormalStrategy(supplier);
   }
 
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    BiFunction<VcsInventory, Version, Optional<String>> supplier =
-        (inventory, targetNormal) ->
-            Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
   public PreReleaseStrategy snapshotFromProp() {
-    BiFunction<VcsInventory, Version, Boolean> supplier =
-        (inventory, targetNormal) ->
-            Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
-                .map(Object::toString)
-                .map(Boolean::parseBoolean)
-                .orElse(true);
+    BiFunction<VcsInventory, Version, Boolean> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
+        .map(Object::toString)
+        .map(Boolean::parseBoolean)
+        .orElse(true);
     return new SnapshotPreReleaseStrategy(supplier);
   }
 
@@ -99,8 +79,7 @@ public class ReckonExtension {
       project.getLogger().warn("No VCS found/configured. Version will be 'unspecified'.");
       return "unspecified";
     } else if (normal == null || preRelease == null) {
-      throw new IllegalStateException(
-          "Must provide strategies for normal and preRelease on the reckon extension.");
+      throw new IllegalStateException("Must provide strategies for normal and preRelease on the reckon extension.");
     } else {
       String version = Reckoner.reckon(vcsInventory, normal, preRelease);
       project.getLogger().warn("Reckoned version: {}", version);

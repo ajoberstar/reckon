@@ -1,18 +1,3 @@
-/*
- * Copyright 2015-2017 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.ajoberstar.reckon.core.strategy;
 
 import com.github.zafarkhaja.semver.Version;
@@ -33,27 +18,22 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
   private final String defaultStage;
   private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
 
-  public StagePreReleaseStrategy(
-      Set<String> stages, BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
+  public StagePreReleaseStrategy(Set<String> stages, BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
     this.stages = stages;
-    this.defaultStage =
-        stages
-            .stream()
-            .filter(name -> !FINAL_STAGE.equals(name))
-            .sorted()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
+    this.defaultStage = stages.stream()
+        .filter(name -> !FINAL_STAGE.equals(name))
+        .sorted()
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
     this.stageCalc = stageCalc;
   }
 
   @Override
   public Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage =
-        stageCalc
-            .apply(inventory, targetNormal)
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .orElse(null);
+    String stage = stageCalc.apply(inventory, targetNormal)
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
@@ -64,10 +44,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
       return targetNormal;
     }
 
-    Version targetBase =
-        targetNormal.equals(Versions.getNormal(inventory.getBaseVersion()))
-            ? inventory.getBaseVersion()
-            : targetNormal;
+    Version targetBase = targetNormal.equals(Versions.getNormal(inventory.getBaseVersion())) ? inventory.getBaseVersion() : targetNormal;
 
     String baseStageName;
     int baseStageNum;
@@ -82,8 +59,7 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
 
     if (stage == null) {
       return targetBase
-          .setPreReleaseVersion(
-              baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
+          .setPreReleaseVersion(baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
           .setBuildMetadata(inventory.getCommitId().orElse("uncommitted"));
     } else if (stage.equals(baseStageName)) {
       int num = baseStageNum > 0 ? baseStageNum + 1 : 1;
