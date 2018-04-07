@@ -1,0 +1,91 @@
+defaults: &defaults
+  steps:
+    - checkout
+    - restore_cache:
+        keys:
+          - v1-gradle-{{ .Revision }}
+    - run:
+        name: Compile and test
+        command: ./gradlew clean check
+    - store_test_results:
+        path: build/test-results
+        when: always
+branches-and-tags: &branches-and-tags
+  filters:
+    tags:
+      only: /^\d+\.\d+\.\d+(?:-.+)?$/
+tags-only: &tags-only
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^\d+\.\d+\.\d+(?:-.+)?$/
+
+version: 2
+jobs:
+  cache-dependencies:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-gradle-{{ .Revision }}
+      - run:
+          name: Download dependencies
+          command: ./gradlew dependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-gradle-{{ .Revision }}
+  build-java-8:
+    <<: *defaults
+    docker:
+      - image: circleci/openjdk:8-jdk
+  build-java-9:
+    <<: *defaults
+    docker:
+      - image: circleci/openjdk:9-jdk
+  build-java-10:
+    <<: *defaults
+    docker:
+      - image: circleci/openjdk:10-jdk
+  publish:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-gradle-{{ .Revision }}
+      - run:
+          name: Decrypt Gradle properties
+          command: openssl enc -d -aes256 -base64 -in gradle.properties.enc -out ~/.gradle/gradle.properties -pass 'pass:$GRADLE_PROPS_KEY'
+      - run:
+          name: Publish Artifacts
+          command: ./gradlew publish publishPlugins gitPublishPush
+workflows:
+  version: 2
+  main:
+    jobs:
+      - cache-dependencies:
+          <<: *branches-and-tags
+      - build-java-8:
+          <<: *branches-and-tags
+          requires:
+            - cache-dependencies
+      - build-java-9:
+          <<: *branches-and-tags
+          requires:
+            - cache-dependencies
+      - build-java-10:
+          <<: *branches-and-tags
+          requires:
+            - cache-dependencies
+      - publish:
+          <<: *tags-only
+          requires:
+            - build-java-8
+            - build-java-9
+            - build-java-10
+          context: ajoberstar
