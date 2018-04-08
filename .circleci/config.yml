@@ -8,7 +8,7 @@ defaults: &defaults
         keys:
           - v1-gradle-caches-{{ checksum "global.lock" }}
     - attach_workspace:
-        at: '~'
+        at: '.'
     - run:
         name: Compile and test
         command: ./gradlew clean check --continue
@@ -16,10 +16,6 @@ defaults: &defaults
         paths:
           - '~/.gradle/caches'
         key: v1-gradle-caches-{{ checksum "global.lock" }}
-    - persist_to_workspace:
-        root: '~'
-        paths:
-          - '.gradle/wrapper'
     - store_test_results:
         path: '~/gradle-test-results'
         when: always
@@ -56,12 +52,12 @@ jobs:
           name: Diff lock files
           command: git --no-pager diff
       - persist_to_workspace:
-          root: '~'
+          root: '.'
           paths:
-            - 'project/global.lock'
-            - 'project/.stutter/'
-            - 'project/*/.stutter/'
-            - 'project/*/*/.stutter/'
+            - 'global.lock'
+            - '.stutter/'
+            - '*/.stutter/'
+            - '*/*/.stutter/'
   build-java-8:
     <<: *defaults
     docker:
