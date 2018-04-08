@@ -6,19 +6,22 @@ defaults: &defaults
     - checkout
     - restore_cache:
         keys:
-          - v1-gradle-{{ .Revision }}
+          - v1-gradle-caches-{{ checksum 'global.lock' }}
     - attach_workspace:
-        at: .
+        at: '~'
     - run:
         name: Compile and test
         command: ./gradlew clean check --continue
     - save_cache:
         paths:
-          - ~/.gradle/caches
-          - ~/.gradle/wrapper
-        key: v1-gradle-{{ .Revision }}
+          - '~/.gradle/caches'
+        key: v1-gradle-caches-{{ checksum 'global.lock' }}
+    - persist_to_workspace:
+        root: '~'
+        paths:
+          - '~/.gradle/wrapper'
     - store_test_results:
-        path: ~/gradle-test-results
+        path: '~/gradle-test-results'
         when: always
 branches-and-tags: &branches-and-tags
   filters:
@@ -43,6 +46,9 @@ jobs:
       - image: ajoberstar/circleci-openjdk-gradle:8-jdk
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-gradle-caches-{{ checksum 'global.lock' }}
       - run:
           name: Update locks
           command: ./gradlew generateGlobalLock saveGlobalLock stutterWriteLocks
@@ -50,12 +56,12 @@ jobs:
           name: Diff lock files
           command: git --no-pager diff
       - persist_to_workspace:
-          root: .
+          root: '~'
           paths:
-            - 'global.lock'
-            - '.stutter'
-            - '*/.stutter'
-            - '*/*/.stutter'
+            - '~/project/global.lock'
+            - '~/project/.stutter/'
+            - '~/project/*/.stutter/'
+            - '~/project/*/*/.stutter/'
   build-java-8:
     <<: *defaults
     docker:
@@ -75,7 +81,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-gradle-{{ .Revision }}
+            - v1-gradle-caches-{{ checksum 'global.lock' }}
       - run:
           name: Decrypt Gradle properties
           command: openssl enc -d -aes256 -base64 -in gradle.properties.enc -out gradle.properties -pass 'pass:$GRADLE_PROPS_KEY'
