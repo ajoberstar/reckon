@@ -19,7 +19,7 @@ defaults: &defaults
     - persist_to_workspace:
         root: '~'
         paths:
-          - '~/.gradle/wrapper'
+          - '.gradle/wrapper'
     - store_test_results:
         path: '~/gradle-test-results'
         when: always
@@ -58,10 +58,10 @@ jobs:
       - persist_to_workspace:
           root: '~'
           paths:
-            - '~/project/global.lock'
-            - '~/project/.stutter/'
-            - '~/project/*/.stutter/'
-            - '~/project/*/*/.stutter/'
+            - 'project/global.lock'
+            - 'project/.stutter/'
+            - 'project/*/.stutter/'
+            - 'project/*/*/.stutter/'
   build-java-8:
     <<: *defaults
     docker:
