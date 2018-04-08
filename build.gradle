@@ -1,6 +1,5 @@
 plugins {
-    id 'org.ajoberstar.defaults' version '0.9.0'
-    id 'org.ajoberstar.stutter' version '0.3.0-rc.2' apply false
+    id 'org.ajoberstar.defaults' version '0.10.0-milestone.11'
     // TODO remove when Gradle dependency locking is available
     id 'nebula.dependency-lock' version '5.0.4' apply false
 }
