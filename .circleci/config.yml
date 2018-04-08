@@ -17,6 +17,8 @@ defaults: &defaults
         when: always
 branches-and-tags: &branches-and-tags
   filters:
+    branches:
+      ignore: gh-pages
     tags:
       only: /^\d+\.\d+\.\d+(?:-.+)?$/
 tags-only: &tags-only
