@@ -107,7 +107,7 @@ jobs:
             - v1-gradle-{{ .Revision }}
       - run:
           name: Decrypt Gradle properties
-          command: openssl enc -d -aes256 -base64 -in gradle.properties.enc -out ~/.gradle/gradle.properties -pass 'pass:$GRADLE_PROPS_KEY'
+          command: openssl enc -d -aes256 -base64 -in gradle.properties.enc -out gradle.properties -pass 'pass:$GRADLE_PROPS_KEY'
       - run:
           name: Publish Artifacts
           command: ./gradlew publish publishPlugins
