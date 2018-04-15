@@ -25,60 +25,164 @@ In order to infer the next version, reckon needs two pieces of input:
 
 These inputs can be provided directly by the user or using a custom implementation that might detect them from elsewhere.
 
-### Inference
+## Examples
 
-Reckon will use the history of your repository to determine what version your changes are based on and the inputs above will indicate how the version should be incremented from that previous one.
+This is a continuous example of how the inference algorithm works in practice with the Gradle plugin.
 
-### Gathering inventory from Git
+```groovy
+plugins {
+  id 'org.ajoberstar.reckon' version '<version>'
+  // other plugins
+}
 
-The first step is gathering information about your repository.
+// ...
+reckon {
+  normal = scopeFromProp()
+  preRelease = stageFromProp('beta', 'rc', 'final')
+}
+// ...
+```
 
-- **commitId** - the ID of the current `HEAD`, if any
-- **clean** - whether or not the repository has any uncommitted changes
-- **currentVersion** - the highest precedence version tagged on the current `HEAD`, if any. (e.g. if the `HEAD` is tagged with 1.0.0-rc.1 and 1.0.0, the `currentVersion` is 1.0.0)
-- **baseVersion** - the topologically nearest version in this history of the current `HEAD`. Walk backwards from the `HEAD` following all parents along the way. Stop at the first tagged version you find on all paths. If more than one tagged version is found, the highest precedence one is used. (e.g. if 2.0.0-beta.1 and 1.4.1 are found and 1.4.1, 2.0.0-beta.1 is used)
-- **baseNormal** - the topologically nearest _final_ version in the history of the current `HEAD`. The same logic is used as for `baseVersion`, but only final versions are considered.
-- **parallelNormals** - any normal version being developed on another branch. Any tagged version that is not in the history of the current `HEAD` is included, but only the normal component is used. (e.g. if another branch has 2.0.0-beta.1 tagged, 2.0.0 is considered a parallel version)
-- **claimedVersions** - any tagged version within the repository
+**You have some changes in the repository, but no commits yet.**
 
-### Reckoning version
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-beta.0.0+uncommitted
+```
 
-#### Apply the scope to get a target normal version
+This used the default of `minor` scope and `beta` stage (`beta` is the first stage alphabetically). Since you have some changes in your repo that aren't committed, indicate that in the build
 
-Based on the inventory determined above, and something supplying which **scope** (i.e. `major`, `minor`, or `patch`) should be used to increment the version, determine what normal version your current head is targeting.
+**Now make a commit, but run the same Gradle command.**
 
-From Gradle the supplier will typically be a project property: `reckon.scope`.
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb
+```
 
-1. Which **scope**?
-  - If the scope is supplied explicitly (e.g. via `reckon.scope`), use that.
-  - Else if your `baseVersion` is a significant version, reuse its scope. (e.g. if `baseNormal` is 1.0.0 and `baseVersion` is 1.0.1-rc.1, use `patch`)
-  - Else use `minor`
-1. Increment the `baseNormal` based on the **scope**. (e.g. `major` for 1.0.0 results in 2.0.0)
-1. If the resulting normal version is in `parallelNormals`, increment again using the same scope. This is meant to let you concurrently develop two normal versions.
-1. If the resulting normal version is already claimed, fail inference. You cannot re-release a version or release a pre-release for an existing final.
-1. You're done
+The version now shows 1 commit since a normal has been released, and the full commit hash in the build metadata.
 
-#### Apply the stage to get a target version (stage)
+**Now make some more changes, but don't commit them**
 
-**NOTE:** If using snapshot, skip to next section.
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted
+```
 
-Based on the inventory and target normal determined above, and something supplying which **stage** (e.g. `rc` or `final`) should be used to increment the pre-release component of the version, determine the version your current head is targeting.
+The version hasn't changed except to indicate that you have uncommitted changes.
 
-1. Which **stage** and **final/significant** or **insignificant**?
-  - If the stage is supplied explicitly (e.g. via `reckon.stage`), use that to create a final/significant version.
-    - If the repository is not clean, inference will fail.
-  - Else if `baseVersion` targeted the same normal as determined above (e.g. `baseVersion` is 1.2.3-rc.1 and target normal was 1.2.3), use it's stage (e.g. `rc`) to create an insignificant version.
-  - Else use the default stage (whichever valid stage is first lexicographically). (e.g. for `beta`, `rc`, `final`, `beta` would be the default) to create an insignificant version
-1. If the stage is `final`, return the target normal unchanged.
-1. If the repository is clean, `currentVersion` is present, and no stage is provided, consider this a rebuild and return the `currentVersion` unchanged.
-1. If creating a significant version and `baseVersion` had the same stage, increment the number. Otherwise use 1. (e.g. `baseVersion` of 1.2.3-beta.1. With stage of `beta`, 1.2.3-beta.2. With stage of `rc`, 1.2.3-rc.1)
-1. If creating an insignificant version and `baseVersion` is not a normal, append the number of commits to the `baseVersion` version and add build metadata indicating the current commit and whether the repo contains uncommitted changes. (e.g. `baseVersion` is 1.2.3-beta.1, results in 1.2.3-beta.1.12+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted)
-1. If creating an insignificant version and `baseVersion` is a normal, append the number of commits to the normal version and add build metadata indicating the current commit and whether the repo contains uncommitted changes. (e.g. `baseVersion` is 1.2.3-beta.1, results in 1.2.3-beta.1.12+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted)
+**Now commit this and let's release a minor version beta**
 
-#### Apply the stage to get a target version (snapshot)
+You can specify the scope or leave it off, since `minor` is the default.
 
-**NOTE:** If not using snapshot, see previous section.
+```
+$ ./gradlew build reckonTagPush -Preckon.scope=minor -Preckon.stage=beta
+$ ./gradlew build reckonTagPush -Preckon.stage=beta
+Reckoned version: 0.1.0-beta.1
+```
+Note that you no longer have a count of commits or a commit hash, since this is a significant version that will result in a tag.
 
-Based on the inventory and target normal determined above, and something supplying which **stage** (e.g. `snapshot` or `final`) should be used to increment the pre-release component of the version, determine the version your current head is targeting.
+**Now just run the build again**
 
-_More details later_
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-beta.1
+```
+
+The current `HEAD` is tagged and you haven't changed anything, or indicated you wanted a different version by providing scope or stage. Reckon assumes you just want to rebuild the existing version.
+
+**Make a bunch more commits and build again**
+
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-beta.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb
+```
+
+We're back to an insignificant version, since you didn't indicate a stage. Again we get the commit count and hash.
+
+**Release another beta**
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=beta
+Reckoned version: 0.1.0-beta.2
+```
+
+While you already could have left the scope of with the default of `minor`, you can also leave it off because you just want to continue development towards the _target_ normal version you've been working on.
+
+**Release this commit as an rc**
+
+You've decided there's enough features in this release, and you're ready to treat it as a release-candidate.
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=rc
+Reckoned version: 0.1.0-rc.1
+```
+
+Note that the count after the stage resets to 1.
+
+**Make a bug fix but don't commit it yet**
+
+```
+$ ./gradlew build
+Reckoned version: 0.1.0-rc.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted
+```
+
+Note that the commit count does not reset (since it's based on commits since the last normal).
+
+**Commit the change and release another rc**
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=rc
+Reckoned version: 0.1.0-rc.2
+```
+
+**Release this as a final**
+
+You've decided there aren't any bugs in this release and you're ready to make it official.
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=final
+Reckoned version: 0.1.0
+```
+
+**Make this the 1.0.0**
+
+You've decided this is feature complete and you're ready to make your 1.0.0 release.
+
+```
+$ ./gradlew build reckonTagPush -Preckon.scope=major -Preckon.stage=final
+Reckoned version: 1.0.0
+```
+
+**Make some commits and build**
+
+```
+$ ./gradlew build
+Reckoned version: 1.1.0-beta.0.4+7836cf7469dd00fe1035ea14ef1faaa7452cc5e0
+```
+
+Note that `minor` was again used as a default, same with `beta`, and that your commit count reset since a normal was released.
+
+**Release this as a patch rc**
+
+```
+$ ./gradlew build reckonTagPush -Preckon.scope=patch -Preckon.stage=rc
+Reckoned version: 1.0.1-rc.1
+```
+
+**Release as a final patch**
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=final
+Reckoned version: 1.0.1
+```
+
+While the default is usually `minor`, if you're already developing towards a `patch` or `major` those will be used as defaults instead.
+
+**Make some changes but don't commit them and run again**
+
+```
+$ ./gradlew build reckonTagPush -Preckon.stage=final
+Reckoned version: 1.0.1-beta.0.0+c306b0d062ac78cc28170a607c6f8ddc5e99cf70.uncommitted
+```
+
+Normally if your `HEAD` is already tagged, that version is used as a rebuild. However, if your repo is dirty, it knows it's not a rebuild.
