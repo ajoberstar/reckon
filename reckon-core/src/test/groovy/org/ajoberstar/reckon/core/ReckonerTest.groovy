@@ -168,7 +168,7 @@ class ReckonerTest extends Specification {
     )
     expect:
     reckonStage(inventory2, 'minor', 'final') == '1.3.0'
-    reckonSnapshot(inventory2, 'major', false) == '2.0.0'
+    reckonSnapshot(inventory2, 'major', 'final') == '2.0.0'
   }
 
   def 'if current version is present and normal, repo is clean, not allowed to release an incremented pre-release stage'() {
@@ -202,7 +202,7 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     when:
-    reckonSnapshot(inventory2, null, true)
+    reckonSnapshot(inventory2, null, 'snapshot')
     then:
     thrown(IllegalStateException)
   }
@@ -229,9 +229,9 @@ class ReckonerTest extends Specification {
     return Reckoner.reckon({ -> inventory }, normal, preRelease)
   }
 
-  private String reckonSnapshot(inventory, scope, snapshot) {
+  private String reckonSnapshot(inventory, scope, stage) {
     ScopeNormalStrategy normal = new ScopeNormalStrategy({ i -> Optional.ofNullable(scope) })
-    SnapshotPreReleaseStrategy preRelease = new SnapshotPreReleaseStrategy({ i, v -> Optional.ofNullable(snapshot) })
+    SnapshotPreReleaseStrategy preRelease = new SnapshotPreReleaseStrategy({ i, v -> Optional.ofNullable(stage) })
     return Reckoner.reckon({ -> inventory }, normal, preRelease)
   }
 }

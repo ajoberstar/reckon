@@ -27,7 +27,7 @@ class CompositeBuildCompatTest extends Specification {
     build2File = projectFile(project2Dir, 'build.gradle')
 
     def grgit1 = Grgit.init(dir: project1Dir)
-    projectFile(project1Dir, 'file.txt') << 'stuff'
+    projectFile(project1Dir, 'settings.gradle') << 'rootProject.name = "project1"'
     projectFile(project1Dir, '.gitignore') << '.gradle\nbuild\n'
     build1File << '''\
 plugins {
@@ -52,7 +52,7 @@ task printVersion {
     grgit1.close()
 
     def grgit2 = Grgit.init(dir: project2Dir)
-    projectFile(project2Dir, 'file.txt') << 'stuff'
+    projectFile(project2Dir, 'settings.gradle') << 'rootProject.name = "project2"'
     projectFile(project2Dir, '.gitignore') << '.gradle\nbuild\n'
     build2File << '''\
 plugins {
