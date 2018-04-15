@@ -87,7 +87,7 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
 ### More Information
 
-See [How Reckon Works](docs/index.md).
+See [How Reckon Works](docs/index.md), which includes examples of how reckon will behave in various scenarios.
 
 ## How do I use it?
 
