@@ -20,7 +20,7 @@ import org.ajoberstar.reckon.core.VcsInventory
 import spock.lang.Specification
 
 class SnapshotPreReleaseStrategyTest extends Specification {
-  def 'if snapshot is false, return the target normal'() {
+  def 'if stage supplier returns an invalid stage, throw'() {
     given:
     def inventory = new VcsInventory(
       'abcdef',
@@ -32,11 +32,13 @@ class SnapshotPreReleaseStrategyTest extends Specification {
       [] as Set,
       [] as Set
     )
-    expect:
-    strategy(false).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0'
+    when:
+    strategy('not').reckonTargetVersion(inventory, Version.valueOf('2.0.0'))
+    then:
+    thrown(IllegalArgumentException)
   }
 
-  def 'if snapshot is true, set pre-release to snapshot'() {
+  def 'if stage is final, return the target normal'() {
     given:
     def inventory = new VcsInventory(
       'abcdef',
@@ -49,11 +51,27 @@ class SnapshotPreReleaseStrategyTest extends Specification {
       [] as Set
     )
     expect:
-    strategy(true).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0-SNAPSHOT'
+    strategy('final').reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0'
+  }
+
+  def 'if stage is snapshot or null, set pre-release to snapshot'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    strategy('snapshot').reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0-SNAPSHOT'
     strategy(null).reckonTargetVersion(inventory, Version.valueOf('2.0.0')).toString() == '2.0.0-SNAPSHOT'
   }
 
-  def 'if repo has uncommitted changes, fail if snapshot is false'() {
+  def 'if repo has uncommitted changes, fail if stage is final'() {
     given:
     def inventory = new VcsInventory(
       'abcdef',
@@ -66,12 +84,12 @@ class SnapshotPreReleaseStrategyTest extends Specification {
       [] as Set
     )
     when:
-    strategy(false).reckonTargetVersion(inventory, Version.valueOf('2.0.0'))
+    strategy('final').reckonTargetVersion(inventory, Version.valueOf('2.0.0'))
     then:
     thrown(IllegalStateException)
   }
 
-  private SnapshotPreReleaseStrategy strategy(snapshot) {
-    return new SnapshotPreReleaseStrategy({ i, v -> Optional.ofNullable(snapshot) })
+  private SnapshotPreReleaseStrategy strategy(stage) {
+    return new SnapshotPreReleaseStrategy({ i, v -> Optional.ofNullable(stage) })
   }
 }

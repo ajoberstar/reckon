@@ -9,7 +9,7 @@
 
 Most build tools and release systems require you to hardcode a version number into
 a file in your source repository. This results in commit messages like "Bumping
-version number.". Even if you don't have to do this manually, your release plugin
+version number". Even if you don't have to do this manually, your release plugin
 probably modifies your build file and commits the new version.
 
 Git already contains tags with a version number pointing to a
@@ -41,7 +41,7 @@ For example, this API's scheme includes 3 stages:
 
 - **final** (e.g. 1.0.0) the fully-tested version ready for end-user consumption
 - **rc** (e.g. 1.1.0-rc.1) release candidates, versions believed to be ready for release after final testing
-- **milestone** (e.g. 1.1.0-milestone.4) versions containing a significant piece of functionality on the road
+- **beta** (e.g. 1.1.0-beta.4) versions containing a significant piece of functionality on the road
 to the next version
 
 ## What is it?
@@ -51,7 +51,7 @@ Reckon is two things:
 - an API to infer your next version from a Git repository
 - applications of that API in various tools (initially, just Gradle)
 
-### Reckon Version Scheme
+### Stage Version Scheme
 
 Reckon uses an opinionated subset of [SemVer](http://semver.org), meant to provide more structure around how the
 pre-release versions are managed.
@@ -115,9 +115,11 @@ reckon {
 
 Execute Gradle providing the properties, as needed:
 
-* `reckon.scope` - one of `major`, `minor`, or `patch` (defaults to `minor`) to specify which component of the previous release should be incremented
-* `reckon.stage` - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
-* `reckon.snapshot` - (if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
+- `reckon.scope` - one of `major`, `minor`, or `patch` (defaults to `minor`) to specify which component of the previous release should be incremented
+- `reckon.stage`
+  - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
+  - (if you used `snapshotFromProp`) either `snapshot` or `final` (defaults to `snapshot`) to specify what phase of development you are in
+- `reckon.snapshot` - (**deprecated**, if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
 
 When Gradle executes, the version will be inferred as soon as something tries to access it. This will be output to the console (as below).
 
@@ -136,6 +138,12 @@ Reckon's Gradle plugin also provides two tasks:
 
 ```
 ./gradlew reckonTagPush
+```
+
+It's suggested you add dependencies to these tasks to ensure your project is in the right state before tagging it. For example:
+
+```
+reckonTagCreate.dependsOn check
 ```
 
 ## Contributing

@@ -52,21 +52,37 @@ public class ReckonExtension {
   }
 
   public NormalStrategy scopeFromProp() {
-    Function<VcsInventory, Optional<String>> supplier = ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
+    Function<VcsInventory, Optional<String>> supplier = inventory -> findProperty(SCOPE_PROP);
     return new ScopeNormalStrategy(supplier);
   }
 
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> findProperty(STAGE_PROP);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
   public PreReleaseStrategy snapshotFromProp() {
-    BiFunction<VcsInventory, Version, Optional<Boolean>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
-        .map(Object::toString)
-        .map(Boolean::parseBoolean);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> {
+      Optional<String> stageProp = findProperty(STAGE_PROP);
+      Optional<String> snapshotProp = findProperty(SNAPSHOT_PROP)
+          .map(Boolean::parseBoolean)
+          .map(isSnapshot -> isSnapshot ? "snapshot" : "final");
+
+      snapshotProp.ifPresent(val -> {
+        project.getLogger().warn("Property {} is deprecated and will be removed in 1.0.0. Use {} set to one of [snapshot, final].", SNAPSHOT_PROP, STAGE_PROP);
+      });
+
+      return stageProp.isPresent() ? stageProp : snapshotProp;
+    };
     return new SnapshotPreReleaseStrategy(supplier);
+  }
+
+  private Optional<String> findProperty(String name) {
+    return Optional.ofNullable(project.findProperty(name))
+        // composite builds have a parent Gradle build and can't trust the values of these properties
+        .filter(value -> project.getGradle().getParent() == null)
+        .map(Object::toString);
   }
 
   Grgit getGrgit() {
