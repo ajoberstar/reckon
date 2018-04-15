@@ -52,18 +52,26 @@ public class ReckonExtension {
   }
 
   public NormalStrategy scopeFromProp() {
-    Function<VcsInventory, Optional<String>> supplier = ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP)).map(Object::toString);
+    Function<VcsInventory, Optional<String>> supplier = ignored -> Optional.ofNullable(project.findProperty(SCOPE_PROP))
+        // composite builds have a parent Gradle build and can't trust the values of these properties
+        .filter(value -> project.getGradle().getParent() == null)
+        .map(Object::toString);
     return new ScopeNormalStrategy(supplier);
   }
 
   public PreReleaseStrategy stageFromProp(String... stages) {
     Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP)).map(Object::toString);
+    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(STAGE_PROP))
+        // composite builds have a parent Gradle build and can't trust the values of these properties
+        .filter(value -> project.getGradle().getParent() == null)
+        .map(Object::toString);
     return new StagePreReleaseStrategy(stageSet, supplier);
   }
 
   public PreReleaseStrategy snapshotFromProp() {
     BiFunction<VcsInventory, Version, Optional<Boolean>> supplier = (inventory, targetNormal) -> Optional.ofNullable(project.findProperty(SNAPSHOT_PROP))
+        // composite builds have a parent Gradle build and can't trust the values of these properties
+        .filter(value -> project.getGradle().getParent() == null)
         .map(Object::toString)
         .map(Boolean::parseBoolean);
     return new SnapshotPreReleaseStrategy(supplier);
