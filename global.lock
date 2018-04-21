@@ -58,7 +58,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "2.2.0-rc.1"
+            "locked": "2.2.0"
         },
         "org.apache.commons:commons-lang3": {
             "firstLevelTransitive": [
