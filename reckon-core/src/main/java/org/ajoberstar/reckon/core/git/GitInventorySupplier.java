@@ -1,6 +1,5 @@
 package org.ajoberstar.reckon.core.git;
 
-import com.github.zafarkhaja.semver.Version;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Comparator;
@@ -12,6 +11,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
 import org.ajoberstar.reckon.core.Versions;

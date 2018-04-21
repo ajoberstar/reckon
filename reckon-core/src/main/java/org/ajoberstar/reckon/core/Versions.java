@@ -1,8 +1,9 @@
 package org.ajoberstar.reckon.core;
 
+import java.util.Optional;
+
 import com.github.zafarkhaja.semver.ParseException;
 import com.github.zafarkhaja.semver.Version;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

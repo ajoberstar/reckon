@@ -1,11 +1,12 @@
 package org.ajoberstar.reckon.core.strategy;
 
-import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.Versions;

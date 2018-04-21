@@ -1,9 +1,10 @@
 package org.ajoberstar.reckon.core;
 
-import com.github.zafarkhaja.semver.Version;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+
+import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;

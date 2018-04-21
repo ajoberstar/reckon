@@ -1,8 +1,9 @@
 package org.ajoberstar.reckon.core.strategy;
 
-import com.github.zafarkhaja.semver.Version;
 import java.util.Optional;
 import java.util.function.Function;
+
+import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.Scope;
 import org.ajoberstar.reckon.core.VcsInventory;

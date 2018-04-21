@@ -1,12 +1,13 @@
 package org.ajoberstar.reckon.gradle;
 
-import com.github.zafarkhaja.semver.Version;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
