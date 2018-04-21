@@ -28,8 +28,8 @@
         },
         "junit:junit": {
             "firstLevelTransitive": [
-                "org.ajoberstar.reckon:reckon-core",
-                "org.ajoberstar.reckon:reckon-core"
+                "org.ajoberstar.reckon:reckon-gradle",
+                "org.ajoberstar.reckon:reckon-gradle"
             ],
             "locked": "4.12"
         },
@@ -58,7 +58,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "2.1.1"
+            "locked": "2.2.0-rc.1"
         },
         "org.apache.commons:commons-lang3": {
             "firstLevelTransitive": [
@@ -85,7 +85,7 @@
                 "org.ajoberstar.reckon:reckon-gradle",
                 "org.ajoberstar.reckon:reckon-gradle"
             ],
-            "locked": "4.10.0.201712302008-r"
+            "locked": "4.11.0.201803080745-r"
         },
         "org.slf4j:slf4j-api": {
             "firstLevelTransitive": [
