@@ -54,7 +54,7 @@ pluginBundle {
     publishPlugin {
       id = 'org.ajoberstar.reckon'
       displayName = 'Reckon Plugin'
-      tags = ['semver', 'git']
+      tags = ['semver', 'git', 'version', 'versioning']
     }
   }
   mavenCoordinates {
