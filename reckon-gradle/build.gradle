@@ -41,9 +41,6 @@ stutter {
   java(9) {
     compatibleRange '4.2.1'
   }
-  java(10) {
-    compatibleRange '4.1'
-  }
 }
 
 pluginBundle {
