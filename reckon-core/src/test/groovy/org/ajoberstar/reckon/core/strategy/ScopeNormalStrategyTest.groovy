@@ -21,6 +21,22 @@ import org.ajoberstar.reckon.core.VcsInventory
 import spock.lang.Specification
 
 class ScopeNormalStrategyTest extends Specification {
+  def 'rebuilding claimed version succeeds, if repo is clean'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('0.0.0'),
+      Version.valueOf('0.0.0'),
+      1,
+      [] as Set,
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
+      )
+    expect:
+    new ScopeNormalStrategy({ Optional.empty() }).reckonNormal(inventory).toString() == '0.1.0'
+  }
+
   def 'if scope supplier returns null, throw'() {
     given:
     def inventory = new VcsInventory(
