@@ -2,9 +2,6 @@ package org.ajoberstar.reckon.core
 
 import spock.lang.Specification
 import spock.lang.Unroll
-import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
-import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
-import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;
 
 class ReckonerTest extends Specification {
   def 'if version is claimed, throw'() {
@@ -19,40 +16,8 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.3.0')] as Set,
       [Version.valueOf('2.0.0-rc.1')] as Set
     )
-
-    VcsInventorySupplier inventorySupplier = Mock()
-    inventorySupplier.getInventory() >> inventory
-    NormalStrategy normal = Mock()
-    normal.reckonNormal(inventory) >> Version.valueOf('2.0.0')
-    PreReleaseStrategy preRelease = Mock()
-    preRelease.reckonTargetVersion(inventory, Version.valueOf('2.0.0')) >> Version.valueOf('2.0.0-rc.1')
     when:
-    Reckoner.reckon(inventorySupplier, normal, preRelease)
-    then:
-    thrown(IllegalStateException)
-  }
-
-  def 'if version is not greater than base, throw'() {
-    given:
-    VcsInventory inventory = new VcsInventory(
-      'abcdef',
-      true,
-      null,
-      Version.valueOf('1.2.3-milestone.1'),
-      Version.valueOf('1.2.2'),
-      1,
-      [Version.valueOf('1.3.0')] as Set,
-      [Version.valueOf('2.0.0-rc.1')] as Set
-    )
-
-    VcsInventorySupplier inventorySupplier = Mock()
-    inventorySupplier.getInventory() >> inventory
-    NormalStrategy normal = Mock()
-    normal.reckonNormal(inventory) >> Version.valueOf('1.0.0')
-    PreReleaseStrategy preRelease = Mock()
-    preRelease.reckonTargetVersion(inventory, Version.valueOf('1.0.0')) >> Version.valueOf('1.0.0-rc.1')
-    when:
-    Reckoner.reckon(inventorySupplier, normal, preRelease)
+    reckonStage(inventory, 'major', 'rc')
     then:
     thrown(IllegalStateException)
   }
@@ -564,14 +529,22 @@ class ReckonerTest extends Specification {
   }
 
   private String reckonStage(inventory, scope, stage) {
-    ScopeNormalStrategy normal = new ScopeNormalStrategy({ i -> Optional.ofNullable(scope) })
-    StagePreReleaseStrategy preRelease = new StagePreReleaseStrategy(['beta', 'milestone', 'rc', 'final'] as Set, { i, v -> Optional.ofNullable(stage) })
-    return Reckoner.reckon({ -> inventory }, normal, preRelease)
+    return Reckoner.builder()
+      .vcs { -> inventory }
+      .scopeCalc { i -> Optional.ofNullable(scope) }
+      .stages('beta', 'milestone', 'rc', 'final')
+      .stageCalc { i, v -> Optional.ofNullable(stage) }
+      .build()
+      .reckon();
   }
 
   private String reckonSnapshot(inventory, scope, stage) {
-    ScopeNormalStrategy normal = new ScopeNormalStrategy({ i -> Optional.ofNullable(scope) })
-    SnapshotPreReleaseStrategy preRelease = new SnapshotPreReleaseStrategy({ i, v -> Optional.ofNullable(stage) })
-    return Reckoner.reckon({ -> inventory }, normal, preRelease)
+    return Reckoner.builder()
+      .vcs { -> inventory }
+      .scopeCalc { i -> Optional.ofNullable(scope) }
+      .snapshots()
+      .stageCalc { i, v -> Optional.ofNullable(stage) }
+      .build()
+      .reckon();
   }
 }
