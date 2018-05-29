@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.core
 
 import spock.lang.Specification
+import spock.lang.Unroll
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
 import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
 import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;
@@ -58,7 +59,7 @@ class ReckonerTest extends Specification {
 
   def 'if target version is normal, current version is ignored'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
         'abcdef',
         true,
         Version.valueOf('1.2.3-milestone.1'),
@@ -69,12 +70,12 @@ class ReckonerTest extends Specification {
         [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
         )
     expect:
-    reckonStage(inventory2, 'major', 'final') == '2.0.0'
+    reckonStage(inventory, 'major', 'final') == '2.0.0'
   }
 
   def 'if current version is present and pre-release, repo is clean, and no input provided, this is a rebuild'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3-milestone.1'),
@@ -85,12 +86,12 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
     )
     expect:
-    reckonStage(inventory2, null, null) == '1.2.3-milestone.1'
+    reckonStage(inventory, null, null) == '1.2.3-milestone.1'
   }
 
   def 'if current version is present and normal, repo is clean, and no input provided, this is a rebuild'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3'),
@@ -101,13 +102,13 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
     )
     expect:
-    reckonStage(inventory2, null, null) == '1.2.3'
-    reckonSnapshot(inventory2, null, null) == '1.2.3'
+    reckonStage(inventory, null, null) == '1.2.3'
+    reckonSnapshot(inventory, null, null) == '1.2.3'
   }
 
   def 'if current version is present and pre-release, repo is dirty, and no input provided, this is not a rebuild'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       false,
       Version.valueOf('1.2.3-milestone.1'),
@@ -118,12 +119,12 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
     )
     expect:
-    reckonStage(inventory2, null, null) == '1.2.3-milestone.1.1+abcdef.uncommitted'
+    reckonStage(inventory, null, null) == '1.2.3-milestone.1.1+abcdef.uncommitted'
   }
 
   def 'if current version is present and normal, repo is dirty, and no input provided, this is not a rebuild'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       false,
       Version.valueOf('1.2.3'),
@@ -134,13 +135,13 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     expect:
-    reckonStage(inventory2, null, null) == '1.3.0-beta.0.1+abcdef.uncommitted'
-    reckonSnapshot(inventory2, null, null) == '1.3.0-SNAPSHOT'
+    reckonStage(inventory, null, null) == '1.3.0-beta.0.1+abcdef.uncommitted'
+    reckonSnapshot(inventory, null, null) == '1.3.0-SNAPSHOT'
   }
 
   def 'if current version is present and normal, repo is clean, allowed to release an incremented final'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3'),
@@ -151,13 +152,13 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     expect:
-    reckonStage(inventory2, 'minor', 'final') == '1.3.0'
-    reckonSnapshot(inventory2, 'major', 'final') == '2.0.0'
+    reckonStage(inventory, 'minor', 'final') == '1.3.0'
+    reckonSnapshot(inventory, 'major', 'final') == '2.0.0'
   }
 
   def 'if current version is present and normal, repo is clean, not allowed to release an incremented pre-release stage'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3'),
@@ -168,14 +169,14 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     when:
-    reckonStage(inventory2, null, 'rc')
+    reckonStage(inventory, null, 'rc')
     then:
     thrown(IllegalStateException)
   }
 
   def 'if current version is present and normal, repo is clean, not allowed to release an incremented snapshot'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3'),
@@ -186,14 +187,14 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     when:
-    reckonSnapshot(inventory2, null, 'snapshot')
+    reckonSnapshot(inventory, null, 'snapshot')
     then:
     thrown(IllegalStateException)
   }
 
   def 'if current version is present and pre-release, repo is clean, allowed to release a higher normal pre-release'() {
     given:
-    VcsInventory inventory2 = new VcsInventory(
+    VcsInventory inventory = new VcsInventory(
       'abcdef',
       true,
       Version.valueOf('1.2.3-milestone.1'),
@@ -204,12 +205,367 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
     )
     expect:
-    reckonStage(inventory2, 'minor', 'rc') == '1.3.0-rc.1'
+    reckonStage(inventory, 'minor', 'rc') == '1.3.0-rc.1'
+  }
+
+    def 'rebuilding claimed version succeeds, if repo is clean'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('0.0.0'),
+      Version.valueOf('0.0.0'),
+      1,
+      [] as Set,
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
+      )
+    expect:
+    reckonStage(inventory, null, null) == '0.1.0'
+  }
+
+  def 'if scope supplier returns invalid scope, throw'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    when:
+    reckonStage(inventory, 'general', 'beta')
+    then:
+    def e = thrown(IllegalArgumentException)
+    e.getMessage() == 'Scope "general" is not one of: major, minor, patch'
+  }
+
+  def 'if supplier returns empty, scope defaults to minor if base version is base normal'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.2'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    expect:
+    reckonStage(inventory, null, 'final') == '1.3.0'
+  }
+
+  def 'if supplier returns empty, scope defaults to scope used by base version'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    expect:
+    reckonStage(inventory, null, 'final') == '1.2.3'
+  }
+
+  def 'if no conflict with parallel or claimed, incremented version is returned'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [] as Set
+        )
+    expect:
+    reckonStage(inventory, 'major', 'final') == '2.0.0'
+  }
+
+  def 'if incremented version is in the parallel normals, increment again'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [Version.valueOf('2.0.0')] as Set,
+        [] as Set
+        )
+    expect:
+    reckonStage(inventory, 'major', 'final') == '3.0.0'
+  }
+
+  def 'if target normal is in the claimed versions, throw'() {
+    given:
+    def inventory = new VcsInventory(
+        'abcdef',
+        true,
+        null,
+        Version.valueOf('1.2.3-milestone.1'),
+        Version.valueOf('1.2.2'),
+        1,
+        [] as Set,
+        [Version.valueOf('2.0.0')] as Set
+        )
+    when:
+    reckonStage(inventory, 'major', 'final')
+    then:
+    thrown(IllegalStateException)
+  }
+
+  def 'if stage supplier returns an invalid stage, throw'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    when:
+    reckonStage(inventory, 'major', 'not')
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'final stage will return the target normal'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, 'major', 'final') == '2.0.0'
+  }
+
+  def 'if target does not contain stage and stage is null, use the default stage and add num commits and commit id'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, 'major', null) == '2.0.0-beta.0.5+abcdef'
+  }
+
+  def 'if target does not contain stage and stage is an empty string, use the default stage and add num commits and commit id'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, 'major', '') == '2.0.0-beta.0.5+abcdef'
+  }
+
+  def 'if target does not contain stage and stage is present, add num commits and commit id'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+abcdef'
+  }
+
+  def 'if target contains stage and stage matches, increment'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, null, 'milestone') == '1.2.3-milestone.3'
+  }
+
+  def 'if target contains stage and stage differs, start from 1'() {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, null, 'rc') == '1.2.3-rc.1'
+    reckonStage(inventory, 'major', 'rc') == '2.0.0-rc.1'
+  }
+
+  def 'if repo has no commits, show build metadata as uncommitted'() {
+    given:
+    def inventory = new VcsInventory(
+      null,
+      false,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+uncommitted'
+
+  }
+
+  def 'if repo has uncommitted changes, show build metadata as uncommitted'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      false,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+abcdef.uncommitted'
+  }
+
+  @Unroll
+  def 'if repo has uncommitted changes, fail when calculating a #stage stage'(String stage) {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      false,
+      null,
+      Version.valueOf('1.2.3-milestone.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    when:
+    reckonStage(inventory, null, stage)
+    then:
+    thrown(IllegalStateException)
+    where:
+    stage << ['rc', 'final']
+  }
+
+  def 'if stage supplier returns an invalid stage, throw'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    when:
+    reckonSnapshot(inventory, 'major', 'not')
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'if stage is final, return the target normal'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonSnapshot(inventory, 'major', 'final') == '2.0.0'
+  }
+
+  def 'if stage is snapshot or null, set pre-release to snapshot'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonSnapshot(inventory, 'major', 'snapshot') == '2.0.0-SNAPSHOT'
+    reckonSnapshot(inventory, 'major', null) == '2.0.0-SNAPSHOT'
+  }
+
+  def 'if repo has uncommitted changes, fail if stage is final'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      false,
+      null,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    when:
+    reckonSnapshot(inventory, 'major', 'final')
+    then:
+    thrown(IllegalStateException)
   }
 
   private String reckonStage(inventory, scope, stage) {
     ScopeNormalStrategy normal = new ScopeNormalStrategy({ i -> Optional.ofNullable(scope) })
-    StagePreReleaseStrategy preRelease = new StagePreReleaseStrategy(['beta', 'rc', 'final'] as Set, { i, v -> Optional.ofNullable(stage) })
+    StagePreReleaseStrategy preRelease = new StagePreReleaseStrategy(['beta', 'milestone', 'rc', 'final'] as Set, { i, v -> Optional.ofNullable(stage) })
     return Reckoner.reckon({ -> inventory }, normal, preRelease)
   }
 
