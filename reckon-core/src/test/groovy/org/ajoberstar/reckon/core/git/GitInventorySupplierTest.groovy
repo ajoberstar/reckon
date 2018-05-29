@@ -19,7 +19,7 @@ import java.nio.file.Files
 import java.security.SecureRandom
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.reckon.core.VcsInventory
-import org.ajoberstar.reckon.core.Versions
+import org.ajoberstar.reckon.core.Version
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -43,28 +43,28 @@ class GitInventorySupplierTest extends Specification {
     given:
     checkout('head-single-tag')
     expect:
-    supplier.getInventory().currentVersion == Versions.valueOf('0.1.0-milestone.1')
+    supplier.getInventory().currentVersion == Version.parse('0.1.0-milestone.1')
   }
 
   def 'if multiple tagged version on HEAD, the max is current version'() {
     given:
     checkout('head-multi-tag')
     expect:
-    supplier.getInventory().currentVersion == Versions.valueOf('0.1.0')
+    supplier.getInventory().currentVersion == Version.parse('0.1.0')
   }
 
   def 'if no tagged finals in HEAD\'s history, base normal is 0.0.0'() {
     given:
     checkout('final-unreachable')
     expect:
-    supplier.getInventory().baseNormal == Versions.valueOf('0.0.0').get()
+    supplier.getInventory().baseNormal == Version.parse('0.0.0').get()
   }
 
   def 'if tagged finals in HEAD\'s history, base normal is max of finals which have no other final between them and HEAD'() {
     given:
     checkout('final-reachable')
     expect:
-    supplier.getInventory().baseNormal == Versions.valueOf('1.0.0').get()
+    supplier.getInventory().baseNormal == Version.parse('1.0.0').get()
   }
 
   def 'if tagged finals on head, base normal and version are same as current version'() {
@@ -81,14 +81,14 @@ class GitInventorySupplierTest extends Specification {
     given:
     checkout('version-unreachable')
     expect:
-    supplier.getInventory().baseVersion == Versions.valueOf('0.0.0').get()
+    supplier.getInventory().baseVersion == Version.parse('0.0.0').get()
   }
 
   def 'if tagged versions in HEAD\'s history, base version is max of versions which have no other version between them and HEAD'() {
     given:
     checkout('version-reachable')
     expect:
-    supplier.getInventory().baseVersion == Versions.valueOf('0.3.0-milestone.1').get()
+    supplier.getInventory().baseVersion == Version.parse('0.3.0-milestone.1').get()
   }
 
   def 'if tagged versions on head, base version is same as current version'() {
@@ -139,19 +139,19 @@ class GitInventorySupplierTest extends Specification {
     given:
     checkout('parallel-untagged-since-merge')
     expect:
-    supplier.getInventory().parallelNormals == [Versions.valueOf('0.2.0').get()] as Set
+    supplier.getInventory().parallelNormals == [Version.parse('0.2.0').get()] as Set
   }
 
   def 'all tagged versions treated as claimed versions'() {
     expect:
     supplier.getInventory().claimedVersions == [
-      Versions.valueOf('0.1.0-milestone.1').get(),
-      Versions.valueOf('0.1.0-rc.1').get(),
-      Versions.valueOf('0.1.0').get(),
-      Versions.valueOf('0.2.0-rc.1').get(),
-      Versions.valueOf('0.3.0-milestone.1').get(),
-      Versions.valueOf('0.3.0').get(),
-      Versions.valueOf('1.0.0').get()
+      Version.parse('0.1.0-milestone.1').get(),
+      Version.parse('0.1.0-rc.1').get(),
+      Version.parse('0.1.0').get(),
+      Version.parse('0.2.0-rc.1').get(),
+      Version.parse('0.3.0-milestone.1').get(),
+      Version.parse('0.3.0').get(),
+      Version.parse('1.0.0').get()
     ] as Set
   }
 

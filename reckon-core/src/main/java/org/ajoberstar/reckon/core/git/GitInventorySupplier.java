@@ -12,10 +12,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
-import org.ajoberstar.reckon.core.Versions;
+import org.ajoberstar.reckon.core.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -47,7 +46,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     this.repo = repo;
     this.tagParser = ref -> {
       String tagName = Repository.shortenRefName(ref.getName());
-      return tagSelector.apply(tagName).flatMap(Versions::valueOf);
+      return tagSelector.apply(tagName).flatMap(Version::parse);
     };
   }
 
@@ -158,7 +157,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     return builder.build()
         .flatMap(List::stream)
         .max(Comparator.comparing(TaggedVersion::getVersion))
-        .orElse(new TaggedVersion(Versions.VERSION_0, null));
+        .orElse(new TaggedVersion(Version.IDENTITY, null));
   }
 
   private Set<TaggedVersion> findParallelCandidates(RevWalk walk, RevCommit head, Set<TaggedVersion> candidates) {
@@ -198,7 +197,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
           && !taggedSinceMergeBase
           && !mergeBase.equals(head)
           && !mergeBase.equals(candidate.getCommit())) {
-        return Optional.of(Versions.getNormal(candidate.getVersion()));
+        return Optional.of(candidate.getVersion().getNormal());
       } else {
         return Optional.empty();
       }
@@ -225,7 +224,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     }
 
     public boolean isNormal() {
-      return Versions.isNormal(version);
+      return version.isFinal();
     }
 
     @Override

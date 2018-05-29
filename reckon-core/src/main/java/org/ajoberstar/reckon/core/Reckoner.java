@@ -1,7 +1,5 @@
 package org.ajoberstar.reckon.core;
 
-import com.github.zafarkhaja.semver.Version;
-
 public final class Reckoner {
   private Reckoner() {
     // do not instantiate
@@ -21,7 +19,7 @@ public final class Reckoner {
     }
 
     inventory.getCurrentVersion().ifPresent(current -> {
-      if (inventory.isClean() && Versions.isNormal(current) && !Versions.isNormal(reckoned)) {
+      if (inventory.isClean() && current.isFinal() && !reckoned.isFinal()) {
         throw new IllegalStateException("Cannot re-release a final version " + current + " as a pre-release: " + reckoned);
       }
     });

@@ -15,9 +15,9 @@
  */
 package org.ajoberstar.reckon.core.strategy
 
-import com.github.zafarkhaja.semver.Version
 import org.ajoberstar.reckon.core.Scope
 import org.ajoberstar.reckon.core.VcsInventory
+import org.ajoberstar.reckon.core.Version
 import spock.lang.Specification
 
 class ScopeNormalStrategyTest extends Specification {

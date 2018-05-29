@@ -3,13 +3,11 @@ package org.ajoberstar.reckon.core.strategy;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.VcsInventory;
-import org.ajoberstar.reckon.core.Versions;
+import org.ajoberstar.reckon.core.Version;
 
 public final class StagePreReleaseStrategy implements PreReleaseStrategy {
   public static final String FINAL_STAGE = "final";
@@ -55,32 +53,20 @@ public final class StagePreReleaseStrategy implements PreReleaseStrategy {
       return current;
     }
 
-    Version targetBase = targetNormal.equals(Versions.getNormal(inventory.getBaseVersion())) ? inventory.getBaseVersion() : targetNormal;
-
-    String baseStageName;
-    int baseStageNum;
-    Matcher matcher = STAGE_REGEX.matcher(targetBase.getPreReleaseVersion());
-    if (matcher.find()) {
-      baseStageName = matcher.group("name");
-      baseStageNum = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
-    } else {
-      baseStageName = defaultStage;
-      baseStageNum = 0;
-    }
+    Version targetBase = targetNormal.equals(inventory.getBaseVersion().getNormal()) ? inventory.getBaseVersion() : targetNormal;
+    String baseStageName = targetBase.getStage().map(Version.Stage::getName).orElse(defaultStage);
+    int baseStageNum = targetBase.getStage().map(Version.Stage::getNum).orElse(0);
 
     if (stage == null) {
       String buildMetadata = inventory.getCommitId()
           .map(sha -> inventory.isClean() ? sha : sha + ".uncommitted")
           .orElse("uncommitted");
 
-      return targetBase
-          .setPreReleaseVersion(baseStageName + "." + baseStageNum + "." + inventory.getCommitsSinceBase())
-          .setBuildMetadata(buildMetadata);
+      return Version.valueOf(String.format("%s-%s.%d.%d+%s", targetBase.getNormal(), baseStageName, baseStageNum, inventory.getCommitsSinceBase(), buildMetadata));
     } else if (stage.equals(baseStageName)) {
-      int num = baseStageNum > 0 ? baseStageNum + 1 : 1;
-      return targetBase.setPreReleaseVersion(stage + "." + num);
+      return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), baseStageName, baseStageNum + 1));
     } else {
-      return targetBase.setPreReleaseVersion(stage + ".1");
+      return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), stage, 1));
     }
   }
 }

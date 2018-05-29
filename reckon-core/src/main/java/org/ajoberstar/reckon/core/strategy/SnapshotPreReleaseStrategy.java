@@ -3,9 +3,9 @@ package org.ajoberstar.reckon.core.strategy;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.VcsInventory;
+import org.ajoberstar.reckon.core.Version;
 
 public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
   public static final String FINAL_STAGE = "final";
@@ -27,7 +27,7 @@ public final class SnapshotPreReleaseStrategy implements PreReleaseStrategy {
     } else {
       String stage = maybeStage.orElse(SNAPSHOT_STAGE);
       if (stage.equals(SNAPSHOT_STAGE)) {
-        return targetNormal.setPreReleaseVersion("SNAPSHOT");
+        return Version.valueOf(targetNormal + "-SNAPSHOT");
       } else if (!stage.equals(FINAL_STAGE)) {
         throw new IllegalArgumentException(String.format("Stage \"%s\" is not one of: [snapshot, final]", stage));
       } else if (!inventory.isClean()) {

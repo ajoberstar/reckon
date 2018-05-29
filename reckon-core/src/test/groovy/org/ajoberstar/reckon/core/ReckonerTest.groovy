@@ -15,7 +15,6 @@
  */
 package org.ajoberstar.reckon.core
 
-import com.github.zafarkhaja.semver.Version
 import spock.lang.Specification
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
 import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;

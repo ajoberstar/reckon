@@ -7,13 +7,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.zafarkhaja.semver.Version;
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.reckon.core.NormalStrategy;
 import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.Reckoner;
 import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
+import org.ajoberstar.reckon.core.Version;
 import org.ajoberstar.reckon.core.git.GitInventorySupplier;
 import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
 import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;

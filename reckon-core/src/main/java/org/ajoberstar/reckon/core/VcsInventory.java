@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,8 +35,8 @@ public final class VcsInventory {
     this.commitId = commitId;
     this.clean = clean;
     this.currentVersion = currentVersion;
-    this.baseVersion = Optional.ofNullable(baseVersion).orElse(Versions.VERSION_0);
-    this.baseNormal = Optional.ofNullable(baseNormal).orElse(Versions.VERSION_0);
+    this.baseVersion = Optional.ofNullable(baseVersion).orElse(Version.IDENTITY);
+    this.baseNormal = Optional.ofNullable(baseNormal).orElse(Version.IDENTITY);
     this.commitsSinceBase = commitsSinceBase;
     this.parallelNormals = Optional.ofNullable(parallelNormals)
         .map(Collections::unmodifiableSet)
