@@ -25,7 +25,7 @@ public class ReckonPlugin implements Plugin<Project> {
     project.getPluginManager().withPlugin("org.ajoberstar.grgit", plugin -> {
       Grgit grgit = (Grgit) project.findProperty("grgit");
       if (grgit != null) {
-        extension.setVcsInventory(extension.git(grgit));
+        extension.git(grgit);
       }
     });
 

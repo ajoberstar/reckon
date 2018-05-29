@@ -72,7 +72,7 @@ task printVersion {
     when:
     def result = buildAndFail('printVersion')
     then:
-    result.output.contains('Must provide strategies for normal and preRelease on the reckon extension.')
+    result.output.contains('Must provide a scope supplier.')
   }
 
   def 'if reckoned version has build metadata no tag created'() {
@@ -86,8 +86,8 @@ plugins {
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('alpha','beta', 'final')
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
 }
 """
     local.add(patterns: ['build.gradle'])
@@ -111,8 +111,8 @@ plugins {
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('alpha','beta', 'final')
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
 }
 """
     local.add(patterns: ['build.gradle'])
@@ -139,8 +139,8 @@ plugins {
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('alpha','beta', 'final')
+  scopeFromProp()
+  stageFromProp('alpha', 'beta', 'final')
 }
 """
     local.add(patterns: ['build.gradle'])

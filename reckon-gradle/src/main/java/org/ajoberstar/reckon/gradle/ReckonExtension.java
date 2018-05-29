@@ -1,23 +1,10 @@
 package org.ajoberstar.reckon.gradle;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.ajoberstar.grgit.Grgit;
-import org.ajoberstar.reckon.core.NormalStrategy;
-import org.ajoberstar.reckon.core.PreReleaseStrategy;
 import org.ajoberstar.reckon.core.Reckoner;
-import org.ajoberstar.reckon.core.VcsInventory;
 import org.ajoberstar.reckon.core.VcsInventorySupplier;
-import org.ajoberstar.reckon.core.Version;
-import org.ajoberstar.reckon.core.git.GitInventorySupplier;
-import org.ajoberstar.reckon.core.strategy.ScopeNormalStrategy;
-import org.ajoberstar.reckon.core.strategy.SnapshotPreReleaseStrategy;
-import org.ajoberstar.reckon.core.strategy.StagePreReleaseStrategy;
 import org.gradle.api.Project;
 
 public class ReckonExtension {
@@ -27,44 +14,51 @@ public class ReckonExtension {
 
   private Project project;
   private Grgit grgit;
-  private VcsInventorySupplier vcsInventory;
-  private NormalStrategy normal;
-  private PreReleaseStrategy preRelease;
+  private Reckoner.Builder reckoner;
 
   public ReckonExtension(Project project) {
     this.project = project;
+    this.reckoner = Reckoner.builder();
   }
 
-  public void setVcsInventory(VcsInventorySupplier vcsInventory) {
-    this.vcsInventory = vcsInventory;
+  @Deprecated
+  public void setVcsInventory(VcsInventorySupplier inventorySupplier) {
+    project.getLogger().warn("reckon.vcsInventory = <vcs> is deprecated and will be removed in 1.0.0. Call reckon.git instead.");
+    this.reckoner.vcs(inventorySupplier);
   }
 
-  public void setNormal(NormalStrategy normal) {
-    this.normal = normal;
+  @Deprecated
+  public void setNormal(ReckonExtension ext) {
+    project.getLogger().warn("reckon.normal = scopeFromProp() is deprecated and will be removed in 1.0.0. Call reckon.scopeFromProp() instead.");
+    // no op
   }
 
-  public void setPreRelease(PreReleaseStrategy preRelease) {
-    this.preRelease = preRelease;
+  @Deprecated
+  public void setPreRelease(ReckonExtension ext) {
+    project.getLogger().warn("reckon.preRelease = stageFromProp() or snapshotFromProp() is deprecated and will be removed in 1.0.0. Call reckon.stageFromProp() or reckon.snapshotFromProp() instead.");
+    // no op
   }
 
-  public VcsInventorySupplier git(Grgit grgit) {
+  public ReckonExtension git(Grgit grgit) {
     this.grgit = grgit;
-    return new GitInventorySupplier(grgit.getRepository().getJgit().getRepository());
+    this.reckoner.git(grgit.getRepository().getJgit().getRepository());
+    return this;
   }
 
-  public NormalStrategy scopeFromProp() {
-    Function<VcsInventory, Optional<String>> supplier = inventory -> findProperty(SCOPE_PROP);
-    return new ScopeNormalStrategy(supplier);
+  public ReckonExtension scopeFromProp() {
+    this.reckoner.scopeCalc(inventory -> findProperty(SCOPE_PROP));
+    return this;
   }
 
-  public PreReleaseStrategy stageFromProp(String... stages) {
-    Set<String> stageSet = Arrays.stream(stages).collect(Collectors.toSet());
-    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> findProperty(STAGE_PROP);
-    return new StagePreReleaseStrategy(stageSet, supplier);
+  public ReckonExtension stageFromProp(String... stages) {
+    this.reckoner.stages(stages);
+    this.reckoner.stageCalc((inventory, targetNormal) -> findProperty(STAGE_PROP));
+    return this;
   }
 
-  public PreReleaseStrategy snapshotFromProp() {
-    BiFunction<VcsInventory, Version, Optional<String>> supplier = (inventory, targetNormal) -> {
+  public ReckonExtension snapshotFromProp() {
+    this.reckoner.snapshots();
+    this.reckoner.stageCalc((inventory, targetNormal) -> {
       Optional<String> stageProp = findProperty(STAGE_PROP);
       Optional<String> snapshotProp = findProperty(SNAPSHOT_PROP)
           .map(Boolean::parseBoolean)
@@ -75,8 +69,8 @@ public class ReckonExtension {
       });
 
       return stageProp.isPresent() ? stageProp : snapshotProp;
-    };
-    return new SnapshotPreReleaseStrategy(supplier);
+    });
+    return this;
   }
 
   private Optional<String> findProperty(String name) {
@@ -91,13 +85,11 @@ public class ReckonExtension {
   }
 
   String reckonVersion() {
-    if (vcsInventory == null) {
+    if (grgit == null) {
       project.getLogger().warn("No VCS found/configured. Version will be 'unspecified'.");
       return "unspecified";
-    } else if (normal == null || preRelease == null) {
-      throw new IllegalStateException("Must provide strategies for normal and preRelease on the reckon extension.");
     } else {
-      String version = Reckoner.reckon(vcsInventory, normal, preRelease);
+      String version = reckoner.build().reckon().toString();
       project.getLogger().warn("Reckoned version: {}", version);
       return version;
     }

@@ -1,12 +1,16 @@
 package org.ajoberstar.reckon.core;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.ajoberstar.reckon.core.git.GitInventorySupplier;
+import org.eclipse.jgit.lib.Repository;
 
 public final class Reckoner {
   public static final String FINAL_STAGE = "final";
@@ -66,7 +70,7 @@ public final class Reckoner {
       targetNormal = targetNormal.incrementNormal(scope);
     }
 
-    if (inventory.getClaimedVersions().contains(targetNormal)) {
+    if (inventory.getClaimedVersions().contains(targetNormal) && !inventory.getCurrentVersion().filter(targetNormal::equals).isPresent()) {
       throw new IllegalStateException("Reckoned target normal version " + targetNormal + " has already been released.");
     }
 
@@ -133,6 +137,11 @@ public final class Reckoner {
       return this;
     }
 
+    public Builder git(Repository repo) {
+      this.inventorySupplier = new GitInventorySupplier(repo);
+      return this;
+    }
+
     public Builder scopeCalc(Function<VcsInventory, Optional<String>> scopeCalc) {
       this.scopeCalc = scopeCalc;
       return this;
@@ -160,6 +169,10 @@ public final class Reckoner {
     }
 
     public Reckoner build() {
+      Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
+      Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
+      Objects.requireNonNull(stages, "Must provide set of stages.");
+      Objects.requireNonNull(stageCalc, "Must provide a stage supplier.");
       return new Reckoner(inventorySupplier, scopeCalc, stageCalc, stages, defaultStage);
     }
   }

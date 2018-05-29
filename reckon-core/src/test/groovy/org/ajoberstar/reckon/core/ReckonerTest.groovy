@@ -178,7 +178,7 @@ class ReckonerTest extends Specification {
     def inventory = new VcsInventory(
       'abcdef',
       true,
-      null,
+      Version.valueOf('0.1.0'),
       Version.valueOf('0.0.0'),
       Version.valueOf('0.0.0'),
       1,
