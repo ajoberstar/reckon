@@ -102,7 +102,6 @@ reckon {
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
   }
 
-
   def 'if reckoned version is SNAPSHOT no tag created'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
@@ -127,7 +126,7 @@ reckon {
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
   }
 
-  def 'if reckoned version has no build metadata tag created and pushed'() {
+  def 'if reckoned version is significant tag created and pushed'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
@@ -177,6 +176,34 @@ reckon {
     result.output.contains('Reckoned version: 1.1.0')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
+  }
+
+  def 'old syntax of extension does not fail'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  normal = scopeFromProp()
+  preRelease = stageFromProp('alpha','beta', 'final')
+}
+
+task printVersion {
+  doLast  {
+    println project.version
+  }
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('printVersion')
+    then:
+    result.output.contains('Reckoned version: 1.1.0-alpha.0')
   }
 
   private BuildResult build(String... args = []) {
