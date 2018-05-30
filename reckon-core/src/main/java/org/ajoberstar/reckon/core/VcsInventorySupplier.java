@@ -1,6 +1,6 @@
 package org.ajoberstar.reckon.core;
 
 @FunctionalInterface
-public interface VcsInventorySupplier {
+interface VcsInventorySupplier {
   VcsInventory getInventory();
 }

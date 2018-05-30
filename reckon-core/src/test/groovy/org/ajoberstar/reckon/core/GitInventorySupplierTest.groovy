@@ -1,10 +1,8 @@
-package org.ajoberstar.reckon.core.git
+package org.ajoberstar.reckon.core
 
 import java.nio.file.Files
 import java.security.SecureRandom
 import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.reckon.core.VcsInventory
-import org.ajoberstar.reckon.core.Version
 import spock.lang.Shared
 import spock.lang.Specification
 

@@ -20,26 +20,22 @@ public class ReckonPlugin implements Plugin<Project> {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    ReckonExtension extension = project.getExtensions().create("reckon", ReckonExtension.class, project);
+    project.getPluginManager().apply("org.ajoberstar.grgit");
 
-    project.getPluginManager().withPlugin("org.ajoberstar.grgit", plugin -> {
-      Grgit grgit = (Grgit) project.findProperty("grgit");
-      if (grgit != null) {
-        extension.git(grgit);
-      }
-    });
+    Grgit grgit = (Grgit) project.findProperty("grgit");
+    ReckonExtension extension = project.getExtensions().create("reckon", ReckonExtension.class, project, grgit);
 
     DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);
     project.allprojects(prj -> {
       prj.setVersion(sharedVersion);
     });
 
-    Task tag = createTagTask(project, extension);
-    Task push = createPushTask(project, extension, tag);
+    Task tag = createTagTask(project, extension, grgit);
+    Task push = createPushTask(project, extension, grgit, tag);
     push.dependsOn(tag);
   }
 
-  private Task createTagTask(Project project, ReckonExtension extension) {
+  private Task createTagTask(Project project, ReckonExtension extension, Grgit grgit) {
     Task task = project.getTasks().create(TAG_TASK);
     task.setDescription("Tag version inferred by reckon.");
     task.setGroup("publishing");
@@ -48,7 +44,7 @@ public class ReckonPlugin implements Plugin<Project> {
       // using the presence of build metadata as the indicator of taggable versions
       boolean insignificant = version.contains("+");
       // rebuilds shouldn't trigger a new tag
-      boolean alreadyTagged = extension.getGrgit().getTag().list().stream()
+      boolean alreadyTagged = grgit.getTag().list().stream()
           .anyMatch(tag -> tag.getName().equals(version));
       return !(insignificant || alreadyTagged);
     });
@@ -56,12 +52,12 @@ public class ReckonPlugin implements Plugin<Project> {
       Map<String, Object> args = new HashMap<>();
       args.put("name", project.getVersion());
       args.put("message", project.getVersion());
-      extension.getGrgit().getTag().add(args);
+      grgit.getTag().add(args);
     });
     return task;
   }
 
-  private Task createPushTask(Project project, ReckonExtension extension, Task create) {
+  private Task createPushTask(Project project, ReckonExtension extension, Grgit grgit, Task create) {
     Task task = project.getTasks().create(PUSH_TASK);
     task.setDescription("Push version tag created by reckon.");
     task.setGroup("publishing");
@@ -69,7 +65,7 @@ public class ReckonPlugin implements Plugin<Project> {
     task.doLast(t -> {
       Map<String, Object> args = new HashMap<>();
       args.put("refsOrSpecs", Arrays.asList("refs/tags/" + project.getVersion().toString()));
-      extension.getGrgit().push(args);
+      grgit.push(args);
     });
     return task;
   }

@@ -33,12 +33,16 @@ class BaseCompatTest extends Specification {
     remote.commit(message: 'second commit')
   }
 
-  def 'if no git repo found, version is unspecified'() {
+  def 'if no git repo found, version is defaulted'() {
     given:
     buildFile << """
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
 }
 
 task printVersion {
@@ -50,7 +54,7 @@ task printVersion {
     when:
     def result = build('printVersion', '-q')
     then:
-    result.output.normalize() == 'No git repository found for :. Accessing grgit will cause an NPE.\nunspecified\n'
+    result.output.normalize() == 'No git repository found for :. Accessing grgit will cause an NPE.\n0.1.0-alpha.0.0+uncommitted\n'
   }
 
   def 'if no strategies specified, build fails'() {
@@ -59,7 +63,6 @@ task printVersion {
 
     buildFile << """
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -81,7 +84,6 @@ task printVersion {
 
     buildFile << """
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -106,7 +108,6 @@ reckon {
 
     buildFile << """
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -134,7 +135,6 @@ reckon {
 
     buildFile << """
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 

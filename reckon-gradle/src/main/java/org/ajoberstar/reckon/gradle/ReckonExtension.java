@@ -3,8 +3,9 @@ package org.ajoberstar.reckon.gradle;
 import java.util.Optional;
 
 import org.ajoberstar.grgit.Grgit;
+import org.ajoberstar.grgit.Repository;
 import org.ajoberstar.reckon.core.Reckoner;
-import org.ajoberstar.reckon.core.VcsInventorySupplier;
+import org.eclipse.jgit.api.Git;
 import org.gradle.api.Project;
 
 public class ReckonExtension {
@@ -13,18 +14,17 @@ public class ReckonExtension {
   private static final String SNAPSHOT_PROP = "reckon.snapshot";
 
   private Project project;
-  private Grgit grgit;
   private Reckoner.Builder reckoner;
 
-  public ReckonExtension(Project project) {
+  public ReckonExtension(Project project, Grgit grgit) {
     this.project = project;
     this.reckoner = Reckoner.builder();
-  }
-
-  @Deprecated
-  public void setVcsInventory(VcsInventorySupplier inventorySupplier) {
-    project.getLogger().warn("reckon.vcsInventory = <vcs> is deprecated and will be removed in 1.0.0. Call reckon.git instead.");
-    this.reckoner.vcs(inventorySupplier);
+    org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
+        .map(Grgit::getRepository)
+        .map(Repository::getJgit)
+        .map(Git::getRepository)
+        .orElse(null);
+    this.reckoner.git(repo);
   }
 
   @Deprecated
@@ -37,12 +37,6 @@ public class ReckonExtension {
   public void setPreRelease(ReckonExtension ext) {
     project.getLogger().warn("reckon.preRelease = stageFromProp() or snapshotFromProp() is deprecated and will be removed in 1.0.0. Call reckon.stageFromProp() or reckon.snapshotFromProp() instead.");
     // no op
-  }
-
-  public ReckonExtension git(Grgit grgit) {
-    this.grgit = grgit;
-    this.reckoner.git(grgit.getRepository().getJgit().getRepository());
-    return this;
   }
 
   public ReckonExtension scopeFromProp() {
@@ -80,18 +74,9 @@ public class ReckonExtension {
         .map(Object::toString);
   }
 
-  Grgit getGrgit() {
-    return grgit;
-  }
-
   String reckonVersion() {
-    if (grgit == null) {
-      project.getLogger().warn("No VCS found/configured. Version will be 'unspecified'.");
-      return "unspecified";
-    } else {
-      String version = reckoner.build().reckon().toString();
-      project.getLogger().warn("Reckoned version: {}", version);
-      return version;
-    }
+    String version = reckoner.build().reckon().toString();
+    project.getLogger().warn("Reckoned version: {}", version);
+    return version;
   }
 }

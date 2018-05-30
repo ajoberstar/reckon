@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core.git;
+package org.ajoberstar.reckon.core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -12,9 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ajoberstar.reckon.core.VcsInventory;
-import org.ajoberstar.reckon.core.VcsInventorySupplier;
-import org.ajoberstar.reckon.core.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -32,7 +29,7 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class GitInventorySupplier implements VcsInventorySupplier {
+final class GitInventorySupplier implements VcsInventorySupplier {
   private static final Logger logger = LoggerFactory.getLogger(GitInventorySupplier.class);
 
   private final Repository repo;

@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -9,7 +10,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ajoberstar.reckon.core.git.GitInventorySupplier;
 import org.eclipse.jgit.lib.Repository;
 
 public final class Reckoner {
@@ -132,13 +132,17 @@ public final class Reckoner {
     private Set<String> stages;
     private String defaultStage;
 
-    public Builder vcs(VcsInventorySupplier inventorySupplier) {
+    Builder vcs(VcsInventorySupplier inventorySupplier) {
       this.inventorySupplier = inventorySupplier;
       return this;
     }
 
     public Builder git(Repository repo) {
-      this.inventorySupplier = new GitInventorySupplier(repo);
+      if (repo == null) {
+        this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
+      } else {
+        this.inventorySupplier = new GitInventorySupplier(repo);
+      }
       return this;
     }
 
