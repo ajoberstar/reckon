@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core.git;
+package org.ajoberstar.reckon.core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -12,10 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.zafarkhaja.semver.Version;
-import org.ajoberstar.reckon.core.VcsInventory;
-import org.ajoberstar.reckon.core.VcsInventorySupplier;
-import org.ajoberstar.reckon.core.Versions;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -33,7 +29,12 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class GitInventorySupplier implements VcsInventorySupplier {
+/**
+ * Supplies an inventory of a Git repository.
+ *
+ * This is intentionally package private.
+ */
+final class GitInventorySupplier implements VcsInventorySupplier {
   private static final Logger logger = LoggerFactory.getLogger(GitInventorySupplier.class);
 
   private final Repository repo;
@@ -47,13 +48,15 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     this.repo = repo;
     this.tagParser = ref -> {
       String tagName = Repository.shortenRefName(ref.getName());
-      return tagSelector.apply(tagName).flatMap(Versions::valueOf);
+      return tagSelector.apply(tagName).flatMap(Version::parse);
     };
   }
 
   @Override
   public VcsInventory getInventory() {
+    // share this walk throughout to benefit from its caching
     try (RevWalk walk = new RevWalk(repo)) {
+      // saves on some performance as we don't really need the commit bodys
       walk.setRetainBody(false);
 
       ObjectId headObjectId = repo.getRefDatabase().getRef("HEAD").getObjectId();
@@ -108,7 +111,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     try {
       return new Git(repo).status().call().isClean();
     } catch (GitAPIException e) {
-      logger.error("Failed to determine status of repository.", e);
+      logger.error("Failed to determine status of repository. Assuming not clean.", e);
       // TODO should this throw up?
       return false;
     }
@@ -132,6 +135,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
   private Optional<TaggedVersion> findCurrent(RevCommit head, Stream<TaggedVersion> versions) {
     return versions
         .filter(version -> version.getCommit().equals(head))
+        // if multiple tags on the head commit, we want the highest precedence one
         .max(Comparator.comparing(TaggedVersion::getVersion));
   }
 
@@ -157,8 +161,11 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
 
     return builder.build()
         .flatMap(List::stream)
+        // if multiple versions are topologically equivalent (no version tag between them and the head on
+        // their branch of history) ensure we pick the highest precedence one. Since we include its history,
+        // inference must consider that the base
         .max(Comparator.comparing(TaggedVersion::getVersion))
-        .orElse(new TaggedVersion(Versions.VERSION_0, null));
+        .orElse(new TaggedVersion(Version.IDENTITY, null));
   }
 
   private Set<TaggedVersion> findParallelCandidates(RevWalk walk, RevCommit head, Set<TaggedVersion> candidates) {
@@ -198,7 +205,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
           && !taggedSinceMergeBase
           && !mergeBase.equals(head)
           && !mergeBase.equals(candidate.getCommit())) {
-        return Optional.of(Versions.getNormal(candidate.getVersion()));
+        return Optional.of(candidate.getVersion().getNormal());
       } else {
         return Optional.empty();
       }
@@ -225,7 +232,7 @@ public final class GitInventorySupplier implements VcsInventorySupplier {
     }
 
     public boolean isNormal() {
-      return Versions.isNormal(version);
+      return version.isFinal();
     }
 
     @Override

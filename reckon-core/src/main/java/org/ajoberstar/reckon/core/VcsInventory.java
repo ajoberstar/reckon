@@ -4,12 +4,14 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * An inventory of the state of your VCS and the versions tagged within it.
+ */
 public final class VcsInventory {
   private final String commitId;
   private final boolean clean;
@@ -20,7 +22,10 @@ public final class VcsInventory {
   private final Set<Version> parallelNormals;
   private final Set<Version> claimedVersions;
 
-  public VcsInventory(
+  /**
+   * This is intentionally package private.
+   */
+  VcsInventory(
       String commitId,
       boolean clean,
       Version currentVersion,
@@ -36,8 +41,8 @@ public final class VcsInventory {
     this.commitId = commitId;
     this.clean = clean;
     this.currentVersion = currentVersion;
-    this.baseVersion = Optional.ofNullable(baseVersion).orElse(Versions.VERSION_0);
-    this.baseNormal = Optional.ofNullable(baseNormal).orElse(Versions.VERSION_0);
+    this.baseVersion = Optional.ofNullable(baseVersion).orElse(Version.IDENTITY);
+    this.baseNormal = Optional.ofNullable(baseNormal).orElse(Version.IDENTITY);
     this.commitsSinceBase = commitsSinceBase;
     this.parallelNormals = Optional.ofNullable(parallelNormals)
         .map(Collections::unmodifiableSet)
@@ -47,34 +52,59 @@ public final class VcsInventory {
         .orElse(Collections.emptySet());
   }
 
+  /**
+   * The ID of the current commit, if any, in the active branch of the repository.
+   */
   public Optional<String> getCommitId() {
     return Optional.ofNullable(commitId);
   }
 
+  /**
+   * Whether the repository has any uncommitted changes.
+   */
   public boolean isClean() {
     return clean;
   }
 
+  /**
+   * Gets the version tagged on the current commit of the repository, if any.
+   */
   public Optional<Version> getCurrentVersion() {
     return Optional.ofNullable(currentVersion);
   }
 
+  /**
+   * Number of commits between the current commmit and the base normal version tag.
+   */
   public int getCommitsSinceBase() {
     return commitsSinceBase;
   }
 
+  /**
+   * The most recent (based on ancestry, not time) tagged version from the current commit. May be a
+   * pre-release version, but could be the same as baseNormal.
+   */
   public Version getBaseVersion() {
     return baseVersion;
   }
 
+  /**
+   * The most recent (based on ancestry, not time) tagged final version from the current commit.
+   */
   public Version getBaseNormal() {
     return baseNormal;
   }
 
+  /**
+   * Any normal versions under development in other branches.
+   */
   public Set<Version> getParallelNormals() {
     return parallelNormals;
   }
 
+  /**
+   * Any versions that have already been released or otherwise claimed.
+   */
   public Set<Version> getClaimedVersions() {
     return claimedVersions;
   }

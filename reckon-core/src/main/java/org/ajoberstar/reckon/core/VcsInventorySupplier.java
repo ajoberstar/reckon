@@ -1,6 +1,9 @@
 package org.ajoberstar.reckon.core;
 
+/**
+ * This is intentionally package private.
+ */
 @FunctionalInterface
-public interface VcsInventorySupplier {
+interface VcsInventorySupplier {
   VcsInventory getInventory();
 }

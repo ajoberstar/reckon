@@ -51,12 +51,14 @@ Reckon is two things:
 - an API to infer your next version from a Git repository
 - applications of that API in various tools (initially, just Gradle)
 
+Two schemes are provided to manage pre-release information.
+
+- _Stages_ for a more structured approach which is a subset of [SemVer](http://semver.org).
+- _Snapshots_ for the classic Maven approach to pre-release versions.
+
 ### Stage Version Scheme
 
-Reckon uses an opinionated subset of [SemVer](http://semver.org), meant to provide more structure around how the
-pre-release versions are managed.
-
-There are three types of versions:
+There are three types of stages:
 
 | Type              | Scheme                                                   | Example                                                 | Description |
 |-------------------|----------------------------------------------------------|---------------------------------------------------------|-------------|
@@ -85,10 +87,6 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 | **final**    | `<major>.<minor>.<patch>`          | `1.2.3`          | A version ready for end-user consumption |
 | **snapshot** | `<major>.<minor>.<patch>-SNAPSHOT` | `1.3.0-SNAPSHOT` | An intermediate version before the final release is ready. |
 
-### More Information
-
-See [How Reckon Works](docs/index.md), which includes examples of how reckon will behave in various scenarios.
-
 ## How do I use it?
 
 **NOTE:** Check the [Release Notes](https://github.com/ajoberstar/reckon/releases) for details on compatibility and changes.
@@ -99,15 +97,14 @@ See [How Reckon Works](docs/index.md), which includes examples of how reckon wil
 
 ```groovy
 plugins {
-  id 'org.ajoberstar.grgit' version '<version>' // this is a required dependency unless you plan to implement your own VcsInventorySupplier
   id 'org.ajoberstar.reckon' version '<version>'
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('milestone', 'rc', 'final')
-  // alternately
-  // preRelease = snapshotFromProp()
+  scopeFromProp()
+  stageFromProp('milestone', 'rc', 'final')
+  // alternative to stageFromProp
+  // snapshotFromProp()
 }
 ```
 
@@ -119,7 +116,7 @@ Execute Gradle providing the properties, as needed:
 - `reckon.stage`
   - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
   - (if you used `snapshotFromProp`) either `snapshot` or `final` (defaults to `snapshot`) to specify what phase of development you are in
-- `reckon.snapshot` - (**deprecated**, if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
+- `reckon.snapshot` - **deprecated** (if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
 
 When Gradle executes, the version will be inferred as soon as something tries to access it. This will be output to the console (as below).
 
@@ -145,6 +142,10 @@ It's suggested you add dependencies to these tasks to ensure your project is in 
 ```
 reckonTagCreate.dependsOn check
 ```
+
+### Examples
+
+See [How Reckon Works](docs/index.md), which includes examples of how reckon will behave in various scenarios.
 
 ## Contributing
 
