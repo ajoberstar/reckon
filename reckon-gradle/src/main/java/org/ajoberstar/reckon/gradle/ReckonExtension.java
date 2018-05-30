@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.grgit.Repository;
 import org.ajoberstar.reckon.core.Reckoner;
+import org.ajoberstar.reckon.core.Version;
 import org.eclipse.jgit.api.Git;
 import org.gradle.api.Project;
 
@@ -74,8 +75,8 @@ public class ReckonExtension {
         .map(Object::toString);
   }
 
-  String reckonVersion() {
-    String version = reckoner.build().reckon().toString();
+  Version reckonVersion() {
+    Version version = reckoner.build().reckon();
     project.getLogger().warn("Reckoned version: {}", version);
     return version;
   }

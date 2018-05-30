@@ -7,6 +7,7 @@ import java.util.Map;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.ajoberstar.grgit.Grgit;
+import org.ajoberstar.reckon.core.Version;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -40,13 +41,13 @@ public class ReckonPlugin implements Plugin<Project> {
     task.setDescription("Tag version inferred by reckon.");
     task.setGroup("publishing");
     task.onlyIf(t -> {
-      String version = project.getVersion().toString();
-      // using the presence of build metadata as the indicator of taggable versions
-      boolean insignificant = version.contains("+");
+      Version version = ((DelayedVersion) project.getVersion()).getVersion();
+
       // rebuilds shouldn't trigger a new tag
       boolean alreadyTagged = grgit.getTag().list().stream()
-          .anyMatch(tag -> tag.getName().equals(version));
-      return !(insignificant || alreadyTagged);
+          .anyMatch(tag -> tag.getName().equals(version.toString()));
+
+      return version.isSignificant() && !alreadyTagged;
     });
     task.doLast(t -> {
       Map<String, Object> args = new HashMap<>();
@@ -71,15 +72,19 @@ public class ReckonPlugin implements Plugin<Project> {
   }
 
   private static class DelayedVersion {
-    private final Supplier<String> reckoner;
+    private final Supplier<Version> reckoner;
 
-    public DelayedVersion(Supplier<String> reckoner) {
+    public DelayedVersion(Supplier<Version> reckoner) {
       this.reckoner = Suppliers.memoize(reckoner);
+    }
+
+    public Version getVersion() {
+      return reckoner.get();
     }
 
     @Override
     public String toString() {
-      return reckoner.get();
+      return reckoner.get().toString();
     }
   }
 }
