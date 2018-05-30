@@ -35,7 +35,7 @@ public final class Reckoner {
 
   /**
    * Infers the version that reflects the current state of your repository.
-   * 
+   *
    * @return the reckoned version
    */
   public Version reckon() {
@@ -45,6 +45,10 @@ public final class Reckoner {
 
     if (inventory.getClaimedVersions().contains(reckoned) && !inventory.getCurrentVersion().map(reckoned::equals).orElse(false)) {
       throw new IllegalStateException("Reckoned version " + reckoned + " has already been released.");
+    }
+
+    if (inventory.getClaimedVersions().contains(targetNormal) && !inventory.getCurrentVersion().filter(targetNormal::equals).isPresent() && reckoned.isSignificant()) {
+      throw new IllegalStateException("Reckoned target normal version " + targetNormal + " has already been released.");
     }
 
     if (inventory.getBaseVersion().compareTo(reckoned) > 0) {
@@ -76,10 +80,6 @@ public final class Reckoner {
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal)) {
       targetNormal = targetNormal.incrementNormal(scope);
-    }
-
-    if (inventory.getClaimedVersions().contains(targetNormal) && !inventory.getCurrentVersion().filter(targetNormal::equals).isPresent()) {
-      throw new IllegalStateException("Reckoned target normal version " + targetNormal + " has already been released.");
     }
 
     return targetNormal;
@@ -147,7 +147,7 @@ public final class Reckoner {
 
     /**
      * Use the given JGit repository to infer the state of Git.
-     * 
+     *
      * @param repo repository that the version should be inferred from
      * @return this builder
      */
@@ -162,7 +162,7 @@ public final class Reckoner {
 
     /**
      * Use the given function to determine what scope should be used when inferring the version.
-     * 
+     *
      * @param scopeCalc the function that provides the scope
      * @return this builder
      */
@@ -173,7 +173,7 @@ public final class Reckoner {
 
     /**
      * Use the given stages as valid options during inference.
-     * 
+     *
      * @param stages the valid stages
      * @return this builder
      */
@@ -189,7 +189,7 @@ public final class Reckoner {
 
     /**
      * Use only the {@code snapshot} and {@code final} stages. Alternative to calling {@code stages()}.
-     * 
+     *
      * @return this builder
      */
     public Builder snapshots() {
@@ -201,7 +201,7 @@ public final class Reckoner {
     /**
      * Use the given function to determine what staged should be used when inferring the version. This
      * must return a version contained in {@code stages()}.
-     * 
+     *
      * @param stageCalc the function that provides the stage
      * @return this builder
      */
@@ -212,7 +212,7 @@ public final class Reckoner {
 
     /**
      * Builds the reckoner.
-     * 
+     *
      * @return the reckoner
      */
     public Reckoner build() {

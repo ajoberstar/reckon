@@ -189,6 +189,40 @@ class ReckonerTest extends Specification {
     reckonStage(inventory, null, null) == '0.1.0'
   }
 
+   def 'if target normal claimed, but building insignificant, succeed'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('0.0.0'),
+      Version.valueOf('0.0.0'),
+      1,
+      [] as Set,
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
+      )
+    expect:
+    reckonStage(inventory, null, null) == '0.1.0-beta.0.1+abcdef'
+  }
+
+  def 'if target normal claimed, and building significant, throw'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('0.0.0'),
+      Version.valueOf('0.0.0'),
+      1,
+      [] as Set,
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
+      )
+    when:
+    reckonStage(inventory, null, 'rc')
+    then:
+    thrown(IllegalStateException)
+  }
+
   def 'if scope supplier returns invalid scope, throw'() {
     given:
     def inventory = new VcsInventory(
