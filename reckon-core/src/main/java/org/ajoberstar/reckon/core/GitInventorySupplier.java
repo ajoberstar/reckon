@@ -29,6 +29,11 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Supplies an inventory of a Git repository.
+ *
+ * This is intentionally package private.
+ */
 final class GitInventorySupplier implements VcsInventorySupplier {
   private static final Logger logger = LoggerFactory.getLogger(GitInventorySupplier.class);
 
@@ -49,7 +54,9 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
   @Override
   public VcsInventory getInventory() {
+    // share this walk throughout to benefit from its caching
     try (RevWalk walk = new RevWalk(repo)) {
+      // saves on some performance as we don't really need the commit bodys
       walk.setRetainBody(false);
 
       ObjectId headObjectId = repo.getRefDatabase().getRef("HEAD").getObjectId();
@@ -104,7 +111,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
     try {
       return new Git(repo).status().call().isClean();
     } catch (GitAPIException e) {
-      logger.error("Failed to determine status of repository.", e);
+      logger.error("Failed to determine status of repository. Assuming not clean.", e);
       // TODO should this throw up?
       return false;
     }
@@ -128,6 +135,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   private Optional<TaggedVersion> findCurrent(RevCommit head, Stream<TaggedVersion> versions) {
     return versions
         .filter(version -> version.getCommit().equals(head))
+        // if multiple tags on the head commit, we want the highest precedence one
         .max(Comparator.comparing(TaggedVersion::getVersion));
   }
 
@@ -153,6 +161,9 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
     return builder.build()
         .flatMap(List::stream)
+        // if multiple versions are topologically equivalent (no version tag between them and the head on
+        // their branch of history) ensure we pick the highest precedence one. Since we include its history,
+        // inference must consider that the base
         .max(Comparator.comparing(TaggedVersion::getVersion))
         .orElse(new TaggedVersion(Version.IDENTITY, null));
   }

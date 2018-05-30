@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.jgit.lib.Repository;
 
+/**
+ * Primary interface to Reckon. Use {@code builder} to get to an instance of {@code Reckoner}.
+ */
 public final class Reckoner {
   public static final String FINAL_STAGE = "final";
   public static final String SNAPSHOT_STAGE = "snapshot";
@@ -30,6 +33,11 @@ public final class Reckoner {
     this.defaultStage = defaultStage;
   }
 
+  /**
+   * Infers the version that reflects the current state of your repository.
+   * 
+   * @return the reckoned version
+   */
   public Version reckon() {
     VcsInventory inventory = inventorySupplier.getInventory();
     Version targetNormal = reckonNormal(inventory);
@@ -137,6 +145,12 @@ public final class Reckoner {
       return this;
     }
 
+    /**
+     * Use the given JGit repository to infer the state of Git.
+     * 
+     * @param repo repository that the version should be inferred from
+     * @return this builder
+     */
     public Builder git(Repository repo) {
       if (repo == null) {
         this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
@@ -146,11 +160,23 @@ public final class Reckoner {
       return this;
     }
 
+    /**
+     * Use the given function to determine what scope should be used when inferring the version.
+     * 
+     * @param scopeCalc the function that provides the scope
+     * @return this builder
+     */
     public Builder scopeCalc(Function<VcsInventory, Optional<String>> scopeCalc) {
       this.scopeCalc = scopeCalc;
       return this;
     }
 
+    /**
+     * Use the given stages as valid options during inference.
+     * 
+     * @param stages the valid stages
+     * @return this builder
+     */
     public Builder stages(String... stages) {
       this.stages = Arrays.stream(stages).collect(Collectors.toSet());
       this.defaultStage = this.stages.stream()
@@ -161,17 +187,34 @@ public final class Reckoner {
       return this;
     }
 
+    /**
+     * Use only the {@code snapshot} and {@code final} stages. Alternative to calling {@code stages()}.
+     * 
+     * @return this builder
+     */
     public Builder snapshots() {
       this.stages = Stream.of(Reckoner.FINAL_STAGE, Reckoner.SNAPSHOT_STAGE).collect(Collectors.toSet());
       this.defaultStage = Reckoner.SNAPSHOT_STAGE;
       return this;
     }
 
+    /**
+     * Use the given function to determine what staged should be used when inferring the version. This
+     * must return a version contained in {@code stages()}.
+     * 
+     * @param stageCalc the function that provides the stage
+     * @return this builder
+     */
     public Builder stageCalc(BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
       this.stageCalc = stageCalc;
       return this;
     }
 
+    /**
+     * Builds the reckoner.
+     * 
+     * @return the reckoner
+     */
     public Reckoner build() {
       Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
       Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
