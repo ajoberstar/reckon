@@ -1,8 +1,6 @@
 # How Reckon Works
 
-## Inference Algorithm
-
-### Axioms
+## Axioms
 
 These are the rules that reckon presumes are true, both informing how it reads a repo's history and how it calculates the next version:
 
@@ -16,7 +14,7 @@ These are the rules that reckon presumes are true, both informing how it reads a
 1. **Final versions MUST NOT be re-released as a pre-release.** Once you release a final version (e.g. 1.2.3), that same commit cannot be re-released as a pre-release (e.g. 1.3.0-beta.1). However, the commit can be re-released as a final (e.g. 1.3.0).
 1. **Final and significant versions MUST be released from a clean repo.** If there are any uncommitted changes, the version will not be treated as a final or significant.
 
-### Inputs
+## Inputs
 
 In order to infer the next version, reckon needs two pieces of input:
 
@@ -37,13 +35,13 @@ plugins {
 
 // ...
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('beta', 'rc', 'final')
+  scopeFromProp()
+  stageFromProp('beta', 'rc', 'final')
 }
 // ...
 ```
 
-**You have some changes in the repository, but no commits yet.**
+### You have some changes in the repository, but no commits yet
 
 ```
 $ ./gradlew build
@@ -52,7 +50,7 @@ Reckoned version: 0.1.0-beta.0.0+uncommitted
 
 This used the default of `minor` scope and `beta` stage (`beta` is the first stage alphabetically). Since you have some changes in your repo that aren't committed, indicate that in the build
 
-**Now make a commit, but run the same Gradle command.**
+### Now make a commit, but run the same Gradle command
 
 ```
 $ ./gradlew build
@@ -61,7 +59,7 @@ Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb
 
 The version now shows 1 commit since a normal has been released, and the full commit hash in the build metadata.
 
-**Now make some more changes, but don't commit them**
+### Now make some more changes, but don't commit them
 
 ```
 $ ./gradlew build
@@ -70,7 +68,7 @@ Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncomm
 
 The version hasn't changed except to indicate that you have uncommitted changes.
 
-**Now commit this and let's release a minor version beta**
+### Now commit this and let's release a minor version beta
 
 You can specify the scope or leave it off, since `minor` is the default.
 
@@ -81,7 +79,7 @@ Reckoned version: 0.1.0-beta.1
 ```
 Note that you no longer have a count of commits or a commit hash, since this is a significant version that will result in a tag.
 
-**Now just run the build again**
+### Now just run the build again
 
 ```
 $ ./gradlew build
@@ -90,7 +88,7 @@ Reckoned version: 0.1.0-beta.1
 
 The current `HEAD` is tagged and you haven't changed anything, or indicated you wanted a different version by providing scope or stage. Reckon assumes you just want to rebuild the existing version.
 
-**Make a bunch more commits and build again**
+### Make a bunch more commits and build again
 
 ```
 $ ./gradlew build
@@ -99,7 +97,7 @@ Reckoned version: 0.1.0-beta.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb
 
 We're back to an insignificant version, since you didn't indicate a stage. Again we get the commit count and hash.
 
-**Release another beta**
+### Release another beta
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.stage=beta
@@ -108,7 +106,7 @@ Reckoned version: 0.1.0-beta.2
 
 While you already could have left the scope of with the default of `minor`, you can also leave it off because you just want to continue development towards the _target_ normal version you've been working on.
 
-**Release this commit as an rc**
+### Release this commit as an rc
 
 You've decided there's enough features in this release, and you're ready to treat it as a release-candidate.
 
@@ -119,7 +117,7 @@ Reckoned version: 0.1.0-rc.1
 
 Note that the count after the stage resets to 1.
 
-**Make a bug fix but don't commit it yet**
+### Make a bug fix but don't commit it yet
 
 ```
 $ ./gradlew build
@@ -128,14 +126,14 @@ Reckoned version: 0.1.0-rc.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommit
 
 Note that the commit count does not reset (since it's based on commits since the last normal).
 
-**Commit the change and release another rc**
+### Commit the change and release another rc
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.stage=rc
 Reckoned version: 0.1.0-rc.2
 ```
 
-**Release this as a final**
+### Release this as a final
 
 You've decided there aren't any bugs in this release and you're ready to make it official.
 
@@ -144,7 +142,7 @@ $ ./gradlew build reckonTagPush -Preckon.stage=final
 Reckoned version: 0.1.0
 ```
 
-**Make this the 1.0.0**
+### Make this the 1.0.0
 
 You've decided this is feature complete and you're ready to make your 1.0.0 release.
 
@@ -153,7 +151,7 @@ $ ./gradlew build reckonTagPush -Preckon.scope=major -Preckon.stage=final
 Reckoned version: 1.0.0
 ```
 
-**Make some commits and build**
+### Make some commits and build
 
 ```
 $ ./gradlew build
@@ -162,14 +160,14 @@ Reckoned version: 1.1.0-beta.0.4+7836cf7469dd00fe1035ea14ef1faaa7452cc5e0
 
 Note that `minor` was again used as a default, same with `beta`, and that your commit count reset since a normal was released.
 
-**Release this as a patch rc**
+### Release this as a patch rc
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.scope=patch -Preckon.stage=rc
 Reckoned version: 1.0.1-rc.1
 ```
 
-**Release as a final patch**
+### Release as a final patch
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.stage=final
@@ -178,7 +176,7 @@ Reckoned version: 1.0.1
 
 While the default is usually `minor`, if you're already developing towards a `patch` or `major` those will be used as defaults instead.
 
-**Make some changes but don't commit them and run again**
+### Make some changes but don't commit them and run again
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.stage=final
