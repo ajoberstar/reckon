@@ -1,5 +1,5 @@
 plugins {
-    id 'org.ajoberstar.defaults' version '0.12.0-rc.2'
+    id 'org.ajoberstar.defaults' version '0.12.0-rc.3'
 }
 
 allprojects {
