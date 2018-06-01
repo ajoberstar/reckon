@@ -3,7 +3,7 @@ plugins {
   id 'java-gradle-plugin'
 }
 
-sourceCompatibility = '1.8'
+sourceCompatibility = 8
 
 repositories {
   jcenter()
@@ -33,6 +33,7 @@ dependencies {
 }
 
 stutter {
+  sparse = true
   includeActiveRc = true
 
   java(8) {

@@ -2,3 +2,6 @@ rootProject.name = 'reckon'
 
 include 'reckon-core'
 include 'reckon-gradle'
+
+enableFeaturePreview('STABLE_PUBLISHING')
+enableFeaturePreview('IMPROVED_POM_SUPPORT')

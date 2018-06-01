@@ -2,7 +2,7 @@ plugins {
   id 'groovy'
 }
 
-sourceCompatibility = '1.8'
+sourceCompatibility = 8
 
 repositories {
   jcenter()
@@ -10,9 +10,8 @@ repositories {
 
 dependencies {
   // logging
-  def slf4jVersion = '[1.7.25,1.8.0-alpha]' // wait until final 1.8.0 is out to upgrade
-  compile "org.slf4j:slf4j-api:$slf4jVersion"
-  testRuntime "org.slf4j:slf4j-simple:$slf4jVersion"
+  compile 'org.slf4j:slf4j-api:[1.7.25,1.8.0-alpha)' // wait until final 1.8.0 is out to upgrade
+  testRuntime 'org.slf4j:slf4j-simple:[1.7.25,1.8.0-alpha)'
 
   // git
   compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
