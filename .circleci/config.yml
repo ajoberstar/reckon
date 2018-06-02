@@ -22,7 +22,8 @@ defaults: &defaults
 branches-and-tags: &branches-and-tags
   filters:
     branches:
-      ignore: gh-pages
+      ignore:
+        - gh-pages
     tags:
       only: /^\d+\.\d+\.\d+(?:-.+)?$/
 tags-only: &tags-only
@@ -47,7 +48,7 @@ jobs:
             - v2-gradle-caches-{{ checksum "reckon-core/gradle/dependency-locks/runtimeClasspath.lockfile" }}-{{ checksum "reckon-gradle/gradle/dependency-locks/runtimeClasspath.lockfile" }}
       - run:
           name: Update locks
-          command: ./gradlew generateGlobalLock saveGlobalLock stutterWriteLocks
+          command: ./gradlew stutterWriteLocks lock --write-locks
       - run:
           name: Diff lock files
           command: git --no-pager diff
