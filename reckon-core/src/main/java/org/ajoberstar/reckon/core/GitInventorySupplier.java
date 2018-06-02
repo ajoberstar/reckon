@@ -120,8 +120,8 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   private Set<TaggedVersion> getTaggedVersions(RevWalk walk) throws IOException {
     Set<TaggedVersion> versions = new HashSet<>();
 
-    for (Ref ref : repo.getRefDatabase().getRefs(Constants.R_TAGS).values()) {
-      Ref tag = repo.peel(ref);
+    for (Ref ref : repo.getRefDatabase().getRefsByPrefix(Constants.R_TAGS)) {
+      Ref tag = repo.getRefDatabase().peel(ref);
       // only annotated tags return a peeled object id
       ObjectId objectId = tag.getPeeledObjectId() == null ? tag.getObjectId() : tag.getPeeledObjectId();
       RevCommit commit = walk.parseCommit(objectId);

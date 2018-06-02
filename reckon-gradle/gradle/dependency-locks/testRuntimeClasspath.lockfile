@@ -26,5 +26,5 @@ org.apache.httpcomponents:httpcore:4.4.4
 org.checkerframework:checker-qual:2.0.0
 org.codehaus.mojo:animal-sniffer-annotations:1.14
 org.eclipse.jgit:org.eclipse.jgit.ui:4.11.0.201803080745-r
-org.eclipse.jgit:org.eclipse.jgit:4.11.0.201803080745-r
+org.eclipse.jgit:org.eclipse.jgit:5.0.0.201805301535-rc2
 org.slf4j:slf4j-api:1.7.25
