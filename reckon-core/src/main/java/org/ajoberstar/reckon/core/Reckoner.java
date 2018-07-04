@@ -100,6 +100,7 @@ public final class Reckoner {
     String stage = stageCalc.apply(inventory, targetNormal)
         .map(String::trim)
         .filter(s -> !s.isEmpty())
+        .map(String::toLowerCase)
         .orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
@@ -191,7 +192,9 @@ public final class Reckoner {
      * @return this builder
      */
     public Builder stages(String... stages) {
-      this.stages = Arrays.stream(stages).collect(Collectors.toSet());
+      this.stages = Arrays.stream(stages)
+          .map(String::toLowerCase)
+          .collect(Collectors.toSet());
       this.defaultStage = this.stages.stream()
           .filter(name -> !FINAL_STAGE.equals(name))
           .sorted()

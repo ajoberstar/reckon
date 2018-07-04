@@ -18,6 +18,34 @@ class ReckonerTest extends Specification {
     thrown(IllegalArgumentException)
   }
 
+  @Unroll
+  def 'stages are lowercased'(String stage) {
+    given:
+    VcsInventory inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.3-beta.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [Version.valueOf('1.3.0')] as Set,
+      [Version.valueOf('2.0.0-rc.1')] as Set
+    )
+    when:
+    Reckoner.builder()
+      .clock(CLOCK)
+      .vcs { -> inventory }
+      .scopeCalc { i -> Optional.empty() }
+      .stages('beTA', 'miLEStone', 'RC', 'Final')
+      .stageCalc { i, v -> Optional.ofNullable(stage) }
+      .build()
+      .reckon()
+    then:
+    notThrown(IllegalArgumentException)
+    where:
+    stage << ['BeTa', 'Milestone', 'rc', 'fINal']
+  }
+
   def 'if version is claimed, throw'() {
     given:
     VcsInventory inventory = new VcsInventory(
