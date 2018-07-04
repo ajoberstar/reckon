@@ -42,7 +42,7 @@ For example, this API's scheme includes 3 stages:
 - **final** (e.g. 1.0.0) the fully-tested version ready for end-user consumption
 - **rc** (e.g. 1.1.0-rc.1) release candidates, versions believed to be ready for release after final testing
 - **beta** (e.g. 1.1.0-beta.4) versions containing a significant piece of functionality on the road
-to the next version
+  to the next version
 
 ## What is it?
 
@@ -60,11 +60,11 @@ Two schemes are provided to manage pre-release information.
 
 There are three types of stages:
 
-| Type              | Scheme                                                   | Example                                                 | Description |
-|-------------------|----------------------------------------------------------|---------------------------------------------------------|-------------|
-| **final**         | `<major>.<minor>.<patch>`                                | `1.2.3`                                                 | A version ready for end-user consumption |
-| **significant**   | `<major>.<minor>.<patch>-<stage>.<num>`                  | `1.3.0-rc.1`                                            | A version indicating an important stage has been reached on the way to the next final release (e.g. alpha, beta, rc, milestone) |
-| **insignificant** | `<major>.<minor>.<patch>-<stage>.<num>.<commits>+<hash>` | `1.3.0-rc.1.8+3bb416187b0a478677b274ae29fb4deb664acda3` | A general build in-between significant releases. |
+| Type              | Scheme                                                                | Example                | Description                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **final**         | `<major>.<minor>.<patch>`                                             | `1.2.3`                | A version ready for end-user consumption                                                                                        |
+| **significant**   | `<major>.<minor>.<patch>-<stage>.<num>`                               | `1.3.0-rc.1`           | A version indicating an important stage has been reached on the way to the next final release (e.g. alpha, beta, rc, milestone) |
+| **insignificant** | `<major>.<minor>.<patch>-<stage>.<num>.<commits>+<hash or timestamp>` | `1.3.0-rc.1.8+3bb4161` | A general build in-between significant releases.                                                                                |
 
 - `<major>` a postive integer incremented when incompatible API changes are made
 - `<minor>` a positive integer incremented when functionality is added while preserving backwards-compatibility
@@ -72,7 +72,7 @@ There are three types of stages:
 - `<stage>` an alphabetical identifier indicating a level of maturity on the way to a final release. They should make logical sense to a human, but alphabetical order **must** be the indicator of maturity to ensure they sort correctly. (e.g. milestone, rc, snapshot would not make sense because snapshot would sort after rc)
 - `<num>` a positive integer incremented when a significant release is made
 - `<commits>` a positive integer indicating the number of commits since the last significant or final release was made
-- `<hash>` a full commit hash of the current HEAD
+- `<hash or timestamp>` if the repo is clean, an abbreviated commit hash of the current HEAD, otherwise a UTC timestamp
 
 > **NOTE:** This approach is tuned to ensure it sorts correctly both with SemVer rules and Gradle's built in version sorting (which are subtly different).
 >
@@ -82,9 +82,9 @@ There are three types of stages:
 
 Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
-| Type         | Scheme                             | Example          | Description |
-|--------------|------------------------------------|------------------|-------------|
-| **final**    | `<major>.<minor>.<patch>`          | `1.2.3`          | A version ready for end-user consumption |
+| Type         | Scheme                             | Example          | Description                                                |
+| ------------ | ---------------------------------- | ---------------- | ---------------------------------------------------------- |
+| **final**    | `<major>.<minor>.<patch>`          | `1.2.3`          | A version ready for end-user consumption                   |
 | **snapshot** | `<major>.<minor>.<patch>-SNAPSHOT` | `1.3.0-SNAPSHOT` | An intermediate version before the final release is ready. |
 
 ## How do I use it?

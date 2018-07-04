@@ -4,15 +4,15 @@
 
 These are the rules that reckon presumes are true, both informing how it reads a repo's history and how it calculates the next version:
 
-1. **Existing version tags MUST be SemVer compliant or they will be ignored**. Any existing tags you want to be considered by the algorithm **must** be SemVer compliant strings (optionally, prefixed with `v`). i.e. `v2.3.0` and `1.0.4-beta.1+abcde` **are** compliant, `1.0` **is not** (only 2 segments).
-1. **NO duplicates version in the history.** A single version MUST not be produced from two different commits.
-1. **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
-1. **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
-1. **Two branches MUST NOT create tagged pre-releases for the same targeted final version.**
-    * If the branches have a shared merge base the version being inferred must skip the targeted final version and increment a second time.
-    * If no shared merge base the inference should fail.
-1. **Final versions MUST NOT be re-released as a pre-release.** Once you release a final version (e.g. 1.2.3), that same commit cannot be re-released as a pre-release (e.g. 1.3.0-beta.1). However, the commit can be re-released as a final (e.g. 1.3.0).
-1. **Final and significant versions MUST be released from a clean repo.** If there are any uncommitted changes, the version will not be treated as a final or significant.
+1.  **Existing version tags MUST be SemVer compliant or they will be ignored**. Any existing tags you want to be considered by the algorithm **must** be SemVer compliant strings (optionally, prefixed with `v`). i.e. `v2.3.0` and `1.0.4-beta.1+abcde` **are** compliant, `1.0` **is not** (only 2 segments).
+1.  **NO duplicates version in the history.** A single version MUST not be produced from two different commits.
+1.  **Version numbers MUST increase.** If version X's commit is an ancestor of version Y's commit, X < Y.
+1.  **NO skipping final versions.** Final versions MUST increase using only the rules from [SemVer 6, 7, 8](http://semver.org/spec/v2.0.0.html). e.g. If X=1.2.3, Y must be one of 1.2.4, 1.3.0, 2.0.0.
+1.  **Two branches MUST NOT create tagged pre-releases for the same targeted final version.**
+    - If the branches have a shared merge base the version being inferred must skip the targeted final version and increment a second time.
+    - If no shared merge base the inference should fail.
+1.  **Final versions MUST NOT be re-released as a pre-release.** Once you release a final version (e.g. 1.2.3), that same commit cannot be re-released as a pre-release (e.g. 1.3.0-beta.1). However, the commit can be re-released as a final (e.g. 1.3.0).
+1.  **Final and significant versions MUST be released from a clean repo.** If there are any uncommitted changes, the version will not be treated as a final or significant.
 
 ## Inputs
 
@@ -45,28 +45,28 @@ reckon {
 
 ```
 $ ./gradlew build
-Reckoned version: 0.1.0-beta.0.0+uncommitted
+Reckoned version: 0.1.0-beta.0.0+20180704T171826Z
 ```
 
-This used the default of `minor` scope and `beta` stage (`beta` is the first stage alphabetically). Since you have some changes in your repo that aren't committed, indicate that in the build
+This used the default of `minor` scope and `beta` stage (`beta` is the first stage alphabetically). Since you have some changes in your repo that aren't committed, we use a timestamp instead of commit hash.
 
 ### Now make a commit, but run the same Gradle command
 
 ```
 $ ./gradlew build
-Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb
+Reckoned version: 0.1.0-beta.0.1+e06c68a
 ```
 
-The version now shows 1 commit since a normal has been released, and the full commit hash in the build metadata.
+The version now shows 1 commit since a normal has been released, and the abbreviated commit hash in the build metadata.
 
 ### Now make some more changes, but don't commit them
 
 ```
 $ ./gradlew build
-Reckoned version: 0.1.0-beta.0.1+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted
+Reckoned version: 0.1.0-beta.0.1+20180704T171826Z
 ```
 
-The version hasn't changed except to indicate that you have uncommitted changes.
+The version hasn't changed except to switch to a timestamp in the build metadata, since it's not a clean commit.
 
 ### Now commit this and let's release a minor version beta
 
@@ -77,6 +77,7 @@ $ ./gradlew build reckonTagPush -Preckon.scope=minor -Preckon.stage=beta
 $ ./gradlew build reckonTagPush -Preckon.stage=beta
 Reckoned version: 0.1.0-beta.1
 ```
+
 Note that you no longer have a count of commits or a commit hash, since this is a significant version that will result in a tag.
 
 ### Now just run the build again
@@ -92,7 +93,7 @@ The current `HEAD` is tagged and you haven't changed anything, or indicated you 
 
 ```
 $ ./gradlew build
-Reckoned version: 0.1.0-beta.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb
+Reckoned version: 0.1.0-beta.1.8+e06c68a
 ```
 
 We're back to an insignificant version, since you didn't indicate a stage. Again we get the commit count and hash.
@@ -121,7 +122,7 @@ Note that the count after the stage resets to 1.
 
 ```
 $ ./gradlew build
-Reckoned version: 0.1.0-rc.1.8+e06c68a863eb6ceaf889ee5802f478c10c1464bb.uncommitted
+Reckoned version: 0.1.0-rc.1.8+20180704T171826Z
 ```
 
 Note that the commit count does not reset (since it's based on commits since the last normal).
@@ -155,7 +156,7 @@ Reckoned version: 1.0.0
 
 ```
 $ ./gradlew build
-Reckoned version: 1.1.0-beta.0.4+7836cf7469dd00fe1035ea14ef1faaa7452cc5e0
+Reckoned version: 1.1.0-beta.0.4+7836cf7
 ```
 
 Note that `minor` was again used as a default, same with `beta`, and that your commit count reset since a normal was released.
@@ -180,7 +181,7 @@ While the default is usually `minor`, if you're already developing towards a `pa
 
 ```
 $ ./gradlew build reckonTagPush -Preckon.stage=final
-Reckoned version: 1.0.1-beta.0.0+c306b0d062ac78cc28170a607c6f8ddc5e99cf70.uncommitted
+Reckoned version: 1.0.1-beta.0.0+20180704T171826Z
 ```
 
 Normally if your `HEAD` is already tagged, that version is used as a rebuild. However, if your repo is dirty, it knows it's not a rebuild.
