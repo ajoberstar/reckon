@@ -50,6 +50,10 @@ public final class Reckoner {
     Version targetNormal = reckonNormal(inventory);
     Version reckoned = reckonTargetVersion(inventory, targetNormal);
 
+    if (reckoned.isSignificant() && !inventory.isClean()) {
+      throw new IllegalStateException("Cannot release a final or significant stage without a clean repo.");
+    }
+
     if (inventory.getClaimedVersions().contains(reckoned) && !inventory.getCurrentVersion().map(reckoned::equals).orElse(false)) {
       throw new IllegalStateException("Reckoned version " + reckoned + " has already been released.");
     }
@@ -101,10 +105,6 @@ public final class Reckoner {
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
       throw new IllegalArgumentException(message);
-    }
-
-    if (stage != null && !inventory.isClean()) {
-      throw new IllegalStateException("Cannot release a final or significant stage without a clean repo.");
     }
 
     if (FINAL_STAGE.equals(stage)) {

@@ -500,6 +500,22 @@ class ReckonerTest extends Specification {
     stage << ['rc', 'final']
   }
 
+  def 'if repo has uncommitted changes, succeed when calculating a snapshot'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      false,
+      null,
+      Version.valueOf('1.2.2'),
+      Version.valueOf('1.2.2'),
+      5,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    reckonSnapshot(inventory, null, 'snapshot') == '1.3.0-SNAPSHOT'
+  }
+
   def 'if stage supplier returns an invalid stage, throw'() {
     given:
     def inventory = new VcsInventory(
