@@ -197,6 +197,11 @@ public final class Reckoner {
           .sorted()
           .findFirst()
           .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
+
+      if (this.stages.contains(SNAPSHOT_STAGE)) {
+        throw new IllegalArgumentException("Snapshots are not supported in stage mode.");
+      }
+
       return this;
     }
 

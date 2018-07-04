@@ -11,6 +11,13 @@ class ReckonerTest extends Specification {
   private static final Clock CLOCK = Clock.fixed(Instant.ofEpochSecond(1530724706), ZoneId.of('UTC'))
   private static final String TIMESTAMP = '20180704T171826Z'
 
+  def 'if snapshot provided to stages builder, throw'() {
+    when:
+    Reckoner.builder().stages('snapshot', 'beta', 'final')
+    then:
+    thrown(IllegalArgumentException)
+  }
+
   def 'if version is claimed, throw'() {
     given:
     VcsInventory inventory = new VcsInventory(
