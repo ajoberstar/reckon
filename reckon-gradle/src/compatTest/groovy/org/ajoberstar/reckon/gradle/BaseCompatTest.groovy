@@ -54,7 +54,8 @@ task printVersion {
     when:
     def result = build('printVersion', '-q')
     then:
-    result.output.normalize() == 'No git repository found for :. Accessing grgit will cause an NPE.\n0.1.0-alpha.0.0+uncommitted\n'
+    // version will end with a timestamp, so don't try to validate the whole thing
+    result.output.normalize().startsWith('No git repository found for :. Accessing grgit will cause an NPE.\n0.1.0-alpha.0.0+')
   }
 
   def 'if no strategies specified, build fails'() {

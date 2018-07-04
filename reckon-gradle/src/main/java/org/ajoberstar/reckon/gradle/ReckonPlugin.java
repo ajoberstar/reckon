@@ -13,8 +13,8 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 
 public class ReckonPlugin implements Plugin<Project> {
-  private static final String TAG_TASK = "reckonTagCreate";
-  private static final String PUSH_TASK = "reckonTagPush";
+  public static final String TAG_TASK = "reckonTagCreate";
+  public static final String PUSH_TASK = "reckonTagPush";
 
   @Override
   public void apply(Project project) {

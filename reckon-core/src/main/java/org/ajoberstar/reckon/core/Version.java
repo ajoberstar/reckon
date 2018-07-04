@@ -33,7 +33,7 @@ public final class Version implements Comparable<Version> {
 
   /**
    * This is intentionally package private.
-   * 
+   *
    * @return the internal JSemver version
    */
   com.github.zafarkhaja.semver.Version getVersion() {
@@ -75,7 +75,7 @@ public final class Version implements Comparable<Version> {
 
   /**
    * Increments this version using the given scope to get a new normal version.
-   * 
+   *
    * @param scope the scope to increment the version by
    * @return incremented version, with only the normal component
    */
@@ -155,18 +155,23 @@ public final class Version implements Comparable<Version> {
   /**
    * Gets the version represented by the given string. If the version is not SemVer compliant, an
    * exception will be thrown. Use {@code parse} if you don't trust that your input is valid.
-   * 
+   *
    * @param versionString version to parse
    * @return the version
    */
   public static Version valueOf(String versionString) {
-    return new Version(com.github.zafarkhaja.semver.Version.valueOf(versionString));
+    try {
+      return new Version(com.github.zafarkhaja.semver.Version.valueOf(versionString));
+    } catch (IllegalArgumentException | ParseException e) {
+      String message = String.format("Invalid version \"%s\": %s", versionString, e.getMessage());
+      throw new IllegalArgumentException(message, e);
+    }
   }
 
   /**
    * Gets the version represented by the given string, if it's SemVer compliant. If not, an empty
    * Optional will be returned.
-   * 
+   *
    * @param versionString version to parse
    * @return the version or an empty optional, if the string wasn't SemVer compliant
    */
