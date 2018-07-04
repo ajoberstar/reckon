@@ -1,9 +1,16 @@
 package org.ajoberstar.reckon.core
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class ReckonerTest extends Specification {
+  private static final Clock CLOCK = Clock.fixed(Instant.ofEpochSecond(1530724706), ZoneId.of('UTC'))
+  private static final String TIMESTAMP = '20180704T171826Z'
+
   def 'if version is claimed, throw'() {
     given:
     VcsInventory inventory = new VcsInventory(
@@ -84,7 +91,7 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
     )
     expect:
-    reckonStage(inventory, null, null) == '1.2.3-milestone.1.1+abcdef.uncommitted'
+    reckonStage(inventory, null, null) == "1.2.3-milestone.1.1+${TIMESTAMP}"
   }
 
   def 'if current version is present and normal, repo is dirty, and no input provided, this is not a rebuild'() {
@@ -100,7 +107,7 @@ class ReckonerTest extends Specification {
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
     expect:
-    reckonStage(inventory, null, null) == '1.3.0-beta.0.1+abcdef.uncommitted'
+    reckonStage(inventory, null, null) == "1.3.0-beta.0.1+${TIMESTAMP}"
     reckonSnapshot(inventory, null, null) == '1.3.0-SNAPSHOT'
   }
 
@@ -452,7 +459,7 @@ class ReckonerTest extends Specification {
       [] as Set
     )
     expect:
-    reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+uncommitted'
+    reckonStage(inventory, null, null) == "1.2.3-milestone.2.5+${TIMESTAMP}"
 
   }
 
@@ -469,7 +476,7 @@ class ReckonerTest extends Specification {
       [] as Set
     )
     expect:
-    reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+abcdef.uncommitted'
+    reckonStage(inventory, null, null) == "1.2.3-milestone.2.5+${TIMESTAMP}"
   }
 
   @Unroll
@@ -564,6 +571,7 @@ class ReckonerTest extends Specification {
 
   private String reckonStage(inventory, scope, stage) {
     return Reckoner.builder()
+      .clock(CLOCK)
       .vcs { -> inventory }
       .scopeCalc { i -> Optional.ofNullable(scope) }
       .stages('beta', 'milestone', 'rc', 'final')
@@ -574,6 +582,7 @@ class ReckonerTest extends Specification {
 
   private String reckonSnapshot(inventory, scope, stage) {
     return Reckoner.builder()
+      .clock(CLOCK)
       .vcs { -> inventory }
       .scopeCalc { i -> Optional.ofNullable(scope) }
       .snapshots()

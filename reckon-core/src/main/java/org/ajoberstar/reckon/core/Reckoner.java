@@ -1,5 +1,8 @@
 package org.ajoberstar.reckon.core;
 
+import java.time.Clock;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
@@ -19,13 +22,17 @@ public final class Reckoner {
   public static final String FINAL_STAGE = "final";
   public static final String SNAPSHOT_STAGE = "snapshot";
 
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX");
+
+  private final Clock clock;
   private final VcsInventorySupplier inventorySupplier;
   private final Function<VcsInventory, Optional<String>> scopeCalc;
   private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
   private final Set<String> stages;
   private final String defaultStage;
 
-  private Reckoner(VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Set<String> stages, String defaultStage) {
+  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Set<String> stages, String defaultStage) {
+    this.clock = clock;
     this.inventorySupplier = inventorySupplier;
     this.scopeCalc = scopeCalc;
     this.stageCalc = stageCalc;
@@ -118,8 +125,8 @@ public final class Reckoner {
       return Version.valueOf(String.format("%s-%s", targetBase.getNormal(), "SNAPSHOT"));
     } else if (stage == null) {
       String buildMetadata = inventory.getCommitId()
-          .map(sha -> inventory.isClean() ? sha : sha + ".uncommitted")
-          .orElse("uncommitted");
+          .filter(sha -> inventory.isClean())
+          .orElseGet(() -> DATE_FORMAT.format(ZonedDateTime.now(clock)));
 
       return Version.valueOf(String.format("%s-%s.%d.%d+%s", targetBase.getNormal(), baseStageName, baseStageNum, inventory.getCommitsSinceBase(), buildMetadata));
     } else if (stage.equals(baseStageName)) {
@@ -134,11 +141,17 @@ public final class Reckoner {
   }
 
   public static final class Builder {
+    private Clock clock;
     private VcsInventorySupplier inventorySupplier;
     private Function<VcsInventory, Optional<String>> scopeCalc;
     private BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
     private Set<String> stages;
     private String defaultStage;
+
+    Builder clock(Clock clock) {
+      this.clock = clock;
+      return this;
+    }
 
     Builder vcs(VcsInventorySupplier inventorySupplier) {
       this.inventorySupplier = inventorySupplier;
@@ -216,11 +229,12 @@ public final class Reckoner {
      * @return the reckoner
      */
     public Reckoner build() {
+      Clock clock = Optional.ofNullable(this.clock).orElseGet(Clock::systemUTC);
       Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
       Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
       Objects.requireNonNull(stages, "Must provide set of stages.");
       Objects.requireNonNull(stageCalc, "Must provide a stage supplier.");
-      return new Reckoner(inventorySupplier, scopeCalc, stageCalc, stages, defaultStage);
+      return new Reckoner(clock, inventorySupplier, scopeCalc, stageCalc, stages, defaultStage);
     }
   }
 }
