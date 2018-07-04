@@ -20,6 +20,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -55,7 +56,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   @Override
   public VcsInventory getInventory() {
     // share this walk throughout to benefit from its caching
-    try (RevWalk walk = new RevWalk(repo)) {
+    try (ObjectReader reader = repo.newObjectReader(); RevWalk walk = new RevWalk(reader)) {
       // saves on some performance as we don't really need the commit bodys
       walk.setRetainBody(false);
 
@@ -94,7 +95,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       Set<Version> claimedVersions = taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
 
       return new VcsInventory(
-          headObjectId.getName(),
+          reader.abbreviate(headObjectId).name(),
           isClean(),
           currentVersion,
           baseVersion.getVersion(),

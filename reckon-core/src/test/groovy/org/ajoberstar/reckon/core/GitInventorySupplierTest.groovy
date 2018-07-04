@@ -15,6 +15,11 @@ class GitInventorySupplierTest extends Specification {
 
   GitInventorySupplier supplier
 
+  def 'commit id is abbreviated, not full'() {
+    expect:
+    supplier.getInventory().commitId == Optional.of(grgit.head().abbreviatedId)
+  }
+
   def 'if HEAD has no tagged versions, current version is empty'() {
     given:
     checkout('head-untagged')
