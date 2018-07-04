@@ -2,41 +2,11 @@ plugins {
   id 'org.ajoberstar.defaults' version '0.12.0'
 }
 
+apply from: 'gradle/locking.gradle'
+apply from: 'gradle/bintray.gradle'
+
 allprojects {
   group = 'org.ajoberstar.reckon'
-
-  dependencyLocking {
-    lockAllConfigurations()
-  }
-
-  task lock {
-    doFirst {
-      assert gradle.startParameter.writeDependencyLocks
-    }
-    doLast {
-      configurations.each {
-        if (it.canBeResolved) {
-          it.resolve()
-        }
-      }
-    }
-  }
-
-  plugins.withId('maven-publish') {
-    publishing {
-      repositories {
-        maven {
-          name = 'bintray'
-          url = 'https://api.bintray.com/maven/ajoberstar/maven/reckon/;publish=1'
-          credentials {
-            username = System.env['BINTRAY_USER']
-            password = System.env['BINTRAY_KEY']
-          }
-        }
-      }
-    }
-  }
-
 }
 
 ext.grgitVersion = '[2.0.0,)'
