@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.gradle;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.grgit.Repository;
@@ -15,17 +16,22 @@ public class ReckonExtension {
   private static final String SNAPSHOT_PROP = "reckon.snapshot";
 
   private Project project;
+  private Grgit grgit;
   private Reckoner.Builder reckoner;
 
   public ReckonExtension(Project project, Grgit grgit) {
     this.project = project;
+    this.grgit = grgit;
     this.reckoner = Reckoner.builder();
-    org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
+    this.reckoner.git(gitRepo());
+  }
+
+  private org.eclipse.jgit.lib.Repository gitRepo() {
+    return Optional.ofNullable(grgit)
         .map(Grgit::getRepository)
         .map(Repository::getJgit)
         .map(Git::getRepository)
         .orElse(null);
-    this.reckoner.git(repo);
   }
 
   @Deprecated
@@ -65,6 +71,11 @@ public class ReckonExtension {
 
       return stageProp.isPresent() ? stageProp : snapshotProp;
     });
+    return this;
+  }
+
+  public ReckonExtension tagSelector(Function<String, Optional<String>> tagSelector) {
+    this.reckoner.git(gitRepo(), tagSelector);
     return this;
   }
 

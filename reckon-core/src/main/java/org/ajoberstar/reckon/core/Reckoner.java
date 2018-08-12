@@ -159,6 +159,10 @@ public final class Reckoner {
       return this;
     }
 
+    private VcsInventory emptyVcsInventory() {
+      return new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
+    }
+
     /**
      * Use the given JGit repository to infer the state of Git.
      *
@@ -167,9 +171,30 @@ public final class Reckoner {
      */
     public Builder git(Repository repo) {
       if (repo == null) {
-        this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
+        this.inventorySupplier = this::emptyVcsInventory;
       } else {
         this.inventorySupplier = new GitInventorySupplier(repo);
+      }
+      return this;
+    }
+
+    /**
+     * Use the given JGit repository to infer the state of Git. Receives a tag selector function to
+     * modify tags before they are parsed.
+     *
+     * @param repo repository that the version should be inferred from
+     * @param tagSelector a function to modify a git tag before its parsed
+     * @return this builder
+     */
+    public Builder git(Repository repo, Function<String, Optional<String>> tagSelector) {
+      if (tagSelector == null) {
+        throw new IllegalArgumentException("Tag selector function needs to be defined");
+      }
+
+      if (repo == null) {
+        this.inventorySupplier = this::emptyVcsInventory;
+      } else {
+        this.inventorySupplier = new GitInventorySupplier(repo, tagSelector);
       }
       return this;
     }
