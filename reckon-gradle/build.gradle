@@ -1,6 +1,7 @@
 plugins {
-  id 'groovy'
+  id 'java-library'
   id 'java-gradle-plugin'
+  id 'groovy'
 }
 
 sourceCompatibility = 8
@@ -11,25 +12,24 @@ repositories {
 
 dependencies {
   // gradle
-  compile gradleApi()
+  compileOnly gradleApi()
 
   // reckon
-  compile project(':reckon-core')
+  api project(':reckon-core')
 
   // git
-  compile "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
-  compile "org.ajoberstar:grgit:$grgitVersion"
-  compatTestCompile "org.ajoberstar:grgit:$grgitVersion"
+  api "org.ajoberstar.grgit:grgit-gradle:$grgitVersion"
+  implementation "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+  compatTestImplementation "org.ajoberstar.grgit:grgit-core:$grgitVersion"
 
   // util
-  compile 'com.google.guava:guava:latest.release'
-  compile 'com.github.zafarkhaja:java-semver:latest.release'
+  implementation 'com.google.guava:guava:latest.release'
 
   // testing
-  compatTestCompile gradleTestKit()
-  compatTestCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
-  compatTestCompile 'org.codehaus.groovy:groovy-all:2.4.15'
-  compatTestCompile 'junit:junit:latest.release'
+  compatTestImplementation gradleTestKit()
+  compatTestImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+  compatTestImplementation 'org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)'
+  compatTestImplementation 'junit:junit:latest.release'
 }
 
 stutter {
