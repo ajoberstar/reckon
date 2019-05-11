@@ -15,7 +15,7 @@ public enum Scope {
    * literal matches. This method supports mixed case String representations, like Major or minor,
    * instead of just PATCH. Additionally, it provides a better error message when an invalid scope is
    * provided.
-   * 
+   *
    * @param value the string to parse as a scope
    * @return the matching scope
    * @throws IllegalArgumentException if no match was found
@@ -38,11 +38,11 @@ public enum Scope {
    * normal versions looking for the first difference of 1 that it finds. Anything else is considered
    * an invalid difference. For example, 1.0.0 to 2.0.0 is MAJOR, 1.0.0 to 1.1.0 is MINOR, 1.0.0 to
    * 1.0.1 is PATCH, 1.0.0 to 3.0.0 is invalid.
-   * 
+   *
    * @param before the earlier version to compare
    * @param after the later version to compare
-   * @return the scope of the change between the two versions, or empty if they are the same or have
-   *         an invalid increment
+   * @return the scope of the change between the two versions, or empty if they are the same
+   * @throws IllegalStateException if they have an invalid increment
    */
   public static Optional<Scope> infer(Version before, Version after) {
     int major = after.getVersion().getMajorVersion() - before.getVersion().getMajorVersion();
@@ -54,8 +54,10 @@ public enum Scope {
       return Optional.of(Scope.MINOR);
     } else if (major == 0 && minor == 0 && patch == 1) {
       return Optional.of(Scope.PATCH);
-    } else {
+    } else if (major == 0 && minor == 0 && patch == 0) {
       return Optional.empty();
+    } else {
+      throw new IllegalStateException("Scope between bases " + before + " and " + after + " must be same or 1 MAJOR/MINOR/PATCH increment apart and are not. Cannot determine correct action.");
     }
   }
 }
