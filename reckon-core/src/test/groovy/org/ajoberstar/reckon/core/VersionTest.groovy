@@ -44,8 +44,16 @@ class VersionTest extends Specification {
     Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('1.2.4-milestone.1')) == Optional.of(Scope.PATCH)
     Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('1.3.0-milestone.1')) == Optional.of(Scope.MINOR)
     Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('2.0.0-milestone.1')) == Optional.of(Scope.MAJOR)
-    Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('0.4.0')) == Optional.empty()
-    Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('2.1.0')) == Optional.empty()
-    Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('1.2.5')) == Optional.empty()
+    Scope.infer(Version.valueOf('1.2.3'), Version.valueOf('1.2.3')) == Optional.empty()
+  }
+
+  @Unroll
+  def 'inferScope fails for invalid increment'(Version after) {
+    when:
+    Scope.infer(Version.valueOf('1.2.3'), after) == Optional.empty()
+    then:
+    thrown(IllegalStateException)
+    where:
+    after << [Version.valueOf('0.4.0'), Version.valueOf('2.1.0'), Version.valueOf('1.2.5')]
   }
 }

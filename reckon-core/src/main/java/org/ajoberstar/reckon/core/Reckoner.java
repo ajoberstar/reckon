@@ -14,11 +14,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jgit.lib.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Primary interface to Reckon. Use {@code builder} to get to an instance of {@code Reckoner}.
  */
 public final class Reckoner {
+  private static final Logger logger = LoggerFactory.getLogger(Reckoner.class);
+
   public static final String FINAL_STAGE = "final";
   public static final String SNAPSHOT_STAGE = "snapshot";
 
@@ -47,6 +51,7 @@ public final class Reckoner {
    */
   public Version reckon() {
     VcsInventory inventory = inventorySupplier.getInventory();
+    logger.debug("Retrieved the following VCS inventory: {}", inventory);
     Version targetNormal = reckonNormal(inventory);
     Version reckoned = reckonTargetVersion(inventory, targetNormal);
 
@@ -58,8 +63,8 @@ public final class Reckoner {
       throw new IllegalStateException("Reckoned version " + reckoned + " has already been released.");
     }
 
-    if (inventory.getClaimedVersions().contains(targetNormal) && !inventory.getCurrentVersion().filter(targetNormal::equals).isPresent() && reckoned.isSignificant()) {
-      throw new IllegalStateException("Reckoned target normal version " + targetNormal + " has already been released.");
+    if (inventory.getClaimedVersions().contains(reckoned.getNormal()) && !inventory.getCurrentVersion().filter(reckoned.getNormal()::equals).isPresent() && reckoned.isSignificant()) {
+      throw new IllegalStateException("Reckoned target normal version " + reckoned.getNormal() + " has already been released.");
     }
 
     if (inventory.getBaseVersion().compareTo(reckoned) > 0) {
@@ -81,9 +86,11 @@ public final class Reckoner {
     Scope scope;
     if (providedScope.isPresent()) {
       scope = providedScope.get();
+      logger.debug("Using provided scope value: {}", scope);
     } else {
       Optional<Scope> inferredScope = Scope.infer(inventory.getBaseNormal(), inventory.getBaseVersion());
       scope = inferredScope.orElse(Scope.MINOR);
+      logger.debug("Inferred scope from base version: {}", scope);
     }
 
     Version targetNormal = inventory.getBaseNormal().incrementNormal(scope);
@@ -91,6 +98,7 @@ public final class Reckoner {
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal)) {
       targetNormal = targetNormal.incrementNormal(scope);
+      logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
     }
 
     return targetNormal;
@@ -109,12 +117,14 @@ public final class Reckoner {
     }
 
     if (FINAL_STAGE.equals(stage)) {
+      logger.debug("Using final stage.");
       return targetNormal;
     }
 
     // rebuild behavior
     if (inventory.isClean() && inventory.getCurrentVersion().isPresent() && stage == null) {
       Version current = inventory.getCurrentVersion().get();
+      logger.debug("Clean repo with current version and no provided stage. Treating as a rebuild of {}.", current);
       return current;
     }
 
@@ -123,16 +133,20 @@ public final class Reckoner {
     int baseStageNum = targetBase.getStage().map(Version.Stage::getNum).orElse(0);
 
     if (SNAPSHOT_STAGE.equals(defaultStage)) {
+      logger.debug("Using snapshot stage.");
       return Version.valueOf(String.format("%s-%s", targetBase.getNormal(), "SNAPSHOT"));
     } else if (stage == null) {
+      logger.debug("No stage provided. Treating as an insignificant version.");
       String buildMetadata = inventory.getCommitId()
           .filter(sha -> inventory.isClean())
           .orElseGet(() -> DATE_FORMAT.format(ZonedDateTime.now(clock)));
 
       return Version.valueOf(String.format("%s-%s.%d.%d+%s", targetBase.getNormal(), baseStageName, baseStageNum, inventory.getCommitsSinceBase(), buildMetadata));
     } else if (stage.equals(baseStageName)) {
+      logger.debug("Provided stage {} is same as in target base {}. Incrementing the stage number.", stage, targetBase);
       return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), baseStageName, baseStageNum + 1));
     } else {
+      logger.debug("Provided stage {} is different than in target base {}. Starting stage number at 1.", stage, targetBase);
       return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), stage, 1));
     }
   }
