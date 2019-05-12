@@ -108,6 +108,8 @@ reckon {
 }
 ```
 
+**NOTE:** Reckon overrides the `project.version` property in Gradle
+
 #### Execute Gradle
 
 Execute Gradle providing the properties, as needed:
