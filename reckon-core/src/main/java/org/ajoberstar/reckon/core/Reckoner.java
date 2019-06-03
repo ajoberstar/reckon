@@ -71,12 +71,6 @@ public final class Reckoner {
       throw new IllegalStateException("Reckoned version " + reckoned + " is (and cannot be) less than base version " + inventory.getBaseVersion());
     }
 
-    inventory.getCurrentVersion().ifPresent(current -> {
-      if (inventory.isClean() && current.isFinal() && !reckoned.isFinal()) {
-        throw new IllegalStateException("Cannot re-release a final version " + current + " as a pre-release: " + reckoned);
-      }
-    });
-
     return reckoned;
   }
 

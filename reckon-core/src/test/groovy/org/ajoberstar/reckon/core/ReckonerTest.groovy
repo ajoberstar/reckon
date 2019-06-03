@@ -163,7 +163,7 @@ class ReckonerTest extends Specification {
     reckonSnapshot(inventory, 'major', 'final') == '2.0.0'
   }
 
-  def 'if current version is present and normal, repo is clean, not allowed to release an incremented pre-release stage'() {
+  def 'if current version is present and normal, repo is clean, allowed to release an incremented pre-release stage'() {
     given:
     VcsInventory inventory = new VcsInventory(
       'abcdef',
@@ -175,28 +175,9 @@ class ReckonerTest extends Specification {
       [] as Set,
       [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
     )
-    when:
-    reckonStage(inventory, null, 'rc')
-    then:
-    thrown(IllegalStateException)
-  }
-
-  def 'if current version is present and normal, repo is clean, not allowed to release an incremented snapshot'() {
-    given:
-    VcsInventory inventory = new VcsInventory(
-      'abcdef',
-      true,
-      Version.valueOf('1.2.3'),
-      Version.valueOf('1.2.3'),
-      Version.valueOf('1.2.3'),
-      1,
-      [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
-    )
-    when:
-    reckonSnapshot(inventory, null, 'snapshot')
-    then:
-    thrown(IllegalStateException)
+    expect:
+    reckonStage(inventory, null, 'rc') == '1.3.0-rc.1'
+    reckonSnapshot(inventory, null, 'snapshot') == '1.3.0-SNAPSHOT'
   }
 
   def 'if current version is present and pre-release, repo is clean, allowed to release a higher normal pre-release'() {
