@@ -1,7 +1,32 @@
-rootProject.name = 'reckon'
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        maven { url = uri("https://artifacts.openmicroscopy.org/artifactory/maven") }
+    }
 
-include 'reckon-core'
-include 'reckon-gradle'
+    resolutionStrategy {
+        eachPlugin {
+            // Work around https://github.com/gradle/gradle/issues/1697.
+            // Override version of omero plugin specified in build.gradle
+            if (requested.id.namespace == "org.openmicroscopy") {
+                String pluginEnvName = requested.id.name.split('-')
+                        .collect { it.toUpperCase() }.join('_') + "_VERSION"
 
-enableFeaturePreview('STABLE_PUBLISHING')
-enableFeaturePreview('IMPROVED_POM_SUPPORT')
+                String propertyName = requested.id.name.split('-')
+                        .collect { it.capitalize() }.join().uncapitalize() + "Version"
+
+                println propertyName
+
+                def version = gradle.rootProject.findProperty(pluginEnvName)
+                        ?: gradle.rootProject.findProperty(propertyName)
+
+                if (version) {
+                    useVersion(version.toString())
+                }
+            }
+        }
+    }
+}
+
+rootProject.name = "omero-reckon-plugin"
