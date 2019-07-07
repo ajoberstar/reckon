@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.gradle
+package org.openmicroscopy.reckon.gradle
 
 import spock.lang.Specification
 import spock.lang.Unroll

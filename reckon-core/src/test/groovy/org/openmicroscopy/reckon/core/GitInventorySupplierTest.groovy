@@ -1,4 +1,8 @@
-package org.ajoberstar.reckon.core
+package org.openmicroscopy.reckon.core
+
+import org.openmicroscopy.reckon.core.GitInventorySupplier
+import org.openmicroscopy.reckon.core.VcsInventory
+import org.openmicroscopy.reckon.core.Version
 
 import java.nio.file.Files
 import java.security.SecureRandom
@@ -13,7 +17,7 @@ class GitInventorySupplierTest extends Specification {
 
   @Shared SecureRandom random = new SecureRandom()
 
-  GitInventorySupplier supplier
+    GitInventorySupplier supplier
 
   def 'commit id is abbreviated, not full'() {
     expect:

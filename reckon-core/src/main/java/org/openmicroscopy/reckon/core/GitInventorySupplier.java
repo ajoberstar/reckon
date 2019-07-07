@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core;
+package org.openmicroscopy.reckon.core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -1,4 +1,8 @@
-package org.ajoberstar.reckon.core
+package org.openmicroscopy.reckon.core
+
+import org.openmicroscopy.reckon.core.Reckoner
+import org.openmicroscopy.reckon.core.VcsInventory
+import org.openmicroscopy.reckon.core.Version
 
 import java.time.Clock;
 import java.time.Instant;

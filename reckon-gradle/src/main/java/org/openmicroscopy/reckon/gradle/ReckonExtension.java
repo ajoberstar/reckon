@@ -1,11 +1,11 @@
-package org.ajoberstar.reckon.gradle;
+package org.openmicroscopy.reckon.gradle;
 
 import java.util.Optional;
 
 import org.ajoberstar.grgit.Grgit;
 import org.ajoberstar.grgit.Repository;
-import org.ajoberstar.reckon.core.Reckoner;
-import org.ajoberstar.reckon.core.Version;
+import org.openmicroscopy.reckon.core.Reckoner;
+import org.openmicroscopy.reckon.core.Version;
 import org.eclipse.jgit.api.Git;
 import org.gradle.api.Project;
 

@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core;
+package org.openmicroscopy.reckon.core;
 
 import java.time.Clock;
 import java.time.ZonedDateTime;

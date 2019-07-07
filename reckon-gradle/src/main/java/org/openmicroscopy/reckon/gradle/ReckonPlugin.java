@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.gradle;
+package org.openmicroscopy.reckon.gradle;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.ajoberstar.grgit.Grgit;
-import org.ajoberstar.reckon.core.Version;
+import org.openmicroscopy.reckon.core.Version;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;

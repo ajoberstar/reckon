@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core;
+package org.openmicroscopy.reckon.core;
 
 import java.util.Collections;
 import java.util.Optional;

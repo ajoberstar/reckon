@@ -1,4 +1,4 @@
-package org.ajoberstar.reckon.core;
+package org.openmicroscopy.reckon.core;
 
 /**
  * This is intentionally package private.

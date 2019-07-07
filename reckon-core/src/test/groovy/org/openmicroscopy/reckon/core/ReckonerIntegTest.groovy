@@ -1,4 +1,6 @@
-package org.ajoberstar.reckon.core
+package org.openmicroscopy.reckon.core
+
+import org.openmicroscopy.reckon.core.Reckoner
 
 import java.time.Clock;
 import java.time.Instant;
@@ -7,7 +9,6 @@ import java.time.ZoneId;
 import java.nio.file.Files
 import java.security.SecureRandom
 import org.ajoberstar.grgit.Grgit
-import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Ignore
 
