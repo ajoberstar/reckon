@@ -5,5 +5,5 @@ package org.openmicroscopy.reckon.core;
  */
 @FunctionalInterface
 interface VcsInventorySupplier {
-  VcsInventory getInventory();
+    VcsInventory getInventory();
 }

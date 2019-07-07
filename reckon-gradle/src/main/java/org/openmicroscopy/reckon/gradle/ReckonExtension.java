@@ -1,83 +1,83 @@
 package org.openmicroscopy.reckon.gradle;
 
-import java.util.Optional;
+import groovy.lang.Closure;
+import org.gradle.api.Action;
 
-import org.ajoberstar.grgit.Grgit;
-import org.ajoberstar.grgit.Repository;
-import org.openmicroscopy.reckon.core.Reckoner;
-import org.openmicroscopy.reckon.core.Version;
-import org.eclipse.jgit.api.Git;
-import org.gradle.api.Project;
+import java.util.Map;
 
-public class ReckonExtension {
-  private static final String SCOPE_PROP = "reckon.scope";
-  private static final String STAGE_PROP = "reckon.stage";
-  private static final String SNAPSHOT_PROP = "reckon.snapshot";
+public interface ReckonExtension {
 
-  private Project project;
-  private Reckoner.Builder reckoner;
+    @Deprecated
+    void setNormal(ReckonExtension ext);
 
-  public ReckonExtension(Project project, Grgit grgit) {
-    this.project = project;
-    this.reckoner = Reckoner.builder();
-    org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
-        .map(Grgit::getRepository)
-        .map(Repository::getJgit)
-        .map(Git::getRepository)
-        .orElse(null);
-    this.reckoner.git(repo);
-  }
+    @Deprecated
+    void setPreRelease(ReckonExtension ext);
 
-  @Deprecated
-  public void setNormal(ReckonExtension ext) {
-    project.getLogger().warn("reckon.normal = scopeFromProp() is deprecated and will be removed in 1.0.0. Call reckon.scopeFromProp() instead.");
-    // no op
-  }
+    /**
+     * @param scopeOpts
+     */
+    void scopeOptions(Map<String, ?> scopeOpts);
 
-  @Deprecated
-  public void setPreRelease(ReckonExtension ext) {
-    project.getLogger().warn("reckon.preRelease = stageFromProp() or snapshotFromProp() is deprecated and will be removed in 1.0.0. Call reckon.stageFromProp() or reckon.snapshotFromProp() instead.");
-    // no op
-  }
+    /**
+     * Configures scope specific options of reckon.
+     * <p>
+     * The supplied action configures an instance of {@link ScopeOptions},
+     * which can be used to configure how scope is determined.
+     * </p>
+     *
+     * @param scopeOpts An action used to configure the scope options.
+     */
+    void scopeOptions(Action<? super ScopeOptions> scopeOpts);
 
-  public ReckonExtension scopeFromProp() {
-    this.reckoner.scopeCalc(inventory -> findProperty(SCOPE_PROP));
-    return this;
-  }
+    /**
+     * Configures scope specific options of reckon.
+     * <p>
+     * The supplied action configures an instance of {@link ScopeOptions},
+     * which can be used to configure how scope is determined.
+     * </p>
+     *
+     * @param scopeOpts A closure used to configure the scope options.
+     */
+    void scopeOptions(Closure scopeOpts);
 
-  public ReckonExtension stageFromProp(String... stages) {
-    this.reckoner.stages(stages);
-    this.reckoner.stageCalc((inventory, targetNormal) -> findProperty(STAGE_PROP));
-    return this;
-  }
+    /**
+     *
+     */
+    void useStages();
 
-  public ReckonExtension snapshotFromProp() {
-    this.reckoner.snapshots();
-    this.reckoner.stageCalc((inventory, targetNormal) -> {
-      Optional<String> stageProp = findProperty(STAGE_PROP);
-      Optional<String> snapshotProp = findProperty(SNAPSHOT_PROP)
-          .map(Boolean::parseBoolean)
-          .map(isSnapshot -> isSnapshot ? "snapshot" : "final");
+    /**
+     * @param stageOpts
+     */
+    void useStages(Map<String, ?> stageOpts);
 
-      snapshotProp.ifPresent(val -> {
-        project.getLogger().warn("Property {} is deprecated and will be removed in 1.0.0. Use {} set to one of [snapshot, final].", SNAPSHOT_PROP, STAGE_PROP);
-      });
+    /**
+     * @param stageOpts
+     */
+    void useStages(Action<? super StageOptions> stageOpts);
 
-      return stageProp.isPresent() ? stageProp : snapshotProp;
-    });
-    return this;
-  }
+    /**
+     * @param stageOpts
+     */
+    void useStages(Closure stageOpts);
 
-  private Optional<String> findProperty(String name) {
-    return Optional.ofNullable(project.findProperty(name))
-        // composite builds have a parent Gradle build and can't trust the values of these properties
-        .filter(value -> project.getGradle().getParent() == null)
-        .map(Object::toString);
-  }
+    /**
+     *
+     */
+    void useSnapshot();
 
-  Version reckonVersion() {
-    Version version = reckoner.build().reckon();
-    project.getLogger().warn("Reckoned version: {}", version);
-    return version;
-  }
+    /**
+     * @param snapshotOpts
+     */
+    void useSnapshot(Map<String, ?> snapshotOpts);
+
+    /**
+     * @param snapshotOpts
+     */
+    void useSnapshot(Action<? super SnapshotOptions> snapshotOpts);
+
+    /**
+     * @param stageOpts
+     */
+    void useSnapshot(Closure stageOpts);
+
 }
