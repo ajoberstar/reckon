@@ -1,5 +1,6 @@
 package org.openmicroscopy.reckon.gradle
 
+import spock.lang.Ignore
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
@@ -10,6 +11,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
 // Composite builds were added in 3.1
+@Ignore
 @IgnoreIf({ System.properties['compat.gradle.version'] == '3.0' })
 class CompositeBuildCompatTest extends Specification {
   @Rule TemporaryFolder tempDir = new TemporaryFolder()
@@ -27,23 +29,22 @@ class CompositeBuildCompatTest extends Specification {
     def grgit1 = Grgit.init(dir: project1Dir)
     projectFile(project1Dir, 'settings.gradle') << 'rootProject.name = "project1"'
     projectFile(project1Dir, '.gitignore') << '.gradle\nbuild\n'
-    build1File << '''\
-plugins {
-  id 'org.ajoberstar.grgit'
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('beta', 'final')
-}
-
-task printVersion {
-  doLast {
-    println "${project.name} version is ${project.version}"
-  }
-}
-'''
+    build1File << """
+        plugins {
+          id 'org.openmicroscopy.reckon'
+        }
+        
+        reckon {
+          normal = scopeFromProp()
+          preRelease = stageFromProp('beta', 'final')
+        }
+        
+        task printVersion {
+          doLast {
+            println "\${project.name} version is \${project.version}"
+          }
+        }
+    """
     grgit1.add(patterns: ['.'])
     grgit1.commit(message: 'first commit')
     grgit1.tag.add(name: '1.3.0', message: 'stuff')
@@ -52,23 +53,22 @@ task printVersion {
     def grgit2 = Grgit.init(dir: project2Dir)
     projectFile(project2Dir, 'settings.gradle') << 'rootProject.name = "project2"'
     projectFile(project2Dir, '.gitignore') << '.gradle\nbuild\n'
-    build2File << '''\
-plugins {
-  id 'org.ajoberstar.grgit'
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('beta', 'final')
-}
-
-task printVersion {
-  doLast {
-    println "${project.name} version is ${project.version}"
-  }
-}
-'''
+    build2File << """
+        plugins {
+          id 'org.openmicroscopy.reckon'
+        }
+        
+        reckon {
+          normal = scopeFromProp()
+          preRelease = stageFromProp('beta', 'final')
+        }
+        
+        task printVersion {
+          doLast {
+            println "\${project.name} version is \${project.version}"
+          }
+        }
+    """
     grgit2.add(patterns: ['.'])
     grgit2.commit(message: 'first commit')
     grgit2.tag.add(name: '1.0.0-beta.1', message: 'stuff')

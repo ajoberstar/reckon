@@ -14,6 +14,8 @@ import org.gradle.api.tasks.TaskProvider;
 import org.openmicroscopy.reckon.core.Reckoner;
 import org.openmicroscopy.reckon.core.Version;
 import org.openmicroscopy.reckon.gradle.internal.DefaultReckonExtension;
+import org.openmicroscopy.reckon.gradle.internal.DefaultScopeOptions;
+import org.openmicroscopy.reckon.gradle.internal.DefaultStageOptions;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,13 +51,9 @@ public class ReckonPlugin implements Plugin<Project> {
                         .create(ReckonExtension.class, RECKON_EXTENSION, DefaultReckonExtension.class, project);
 
         Grgit grgit = (Grgit) project.findProperty("grgit");
-        org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
-                .map(Grgit::getRepository)
-                .map(Repository::getJgit)
-                .map(Git::getRepository)
-                .orElse(null);
 
-        reckonVersion(repo, reckon);
+
+        reckonVersion(grgit, reckon);
 
         TaskProvider<Task> tag = createTagTask(project, grgit);
         TaskProvider<Task> push = createPushTask(project, grgit, tag);
@@ -101,17 +99,27 @@ public class ReckonPlugin implements Plugin<Project> {
         return provider;
     }
 
-    private void reckonVersion(org.eclipse.jgit.lib.Repository repo, DefaultReckonExtension reckonExt) {
+    private void reckonVersion(Grgit grgit, DefaultReckonExtension reckonExt) {
         project.afterEvaluate(project -> {
-            Reckoner.Builder reckoner = Reckoner.builder()
-                    .git(repo)
-                    .stages(reckonExt.getStageOptions().getStages().get())
-                    .defaultStage(reckonExt.getStageOptions().getDefaultStage().get())
-                    .scopeCalc(reckonExt.getScopeOptions().evaluateScope())
-                    .stageCalc(reckonExt.getStageOptions().evaluateStage());
+            org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
+                    .map(Grgit::getRepository)
+                    .map(Repository::getJgit)
+                    .map(Git::getRepository)
+                    .orElse(null);
 
-            Version version = reckoner.build().reckon();
-            project.getLogger().warn("Reckoned version: {}", version);
+            DefaultStageOptions stageOptions = reckonExt.getStageOptions();
+            DefaultScopeOptions scopeOptions = reckonExt.getScopeOptions();
+
+            Reckoner reckoner = Reckoner.builder()
+                    .git(repo)
+                    .stages(stageOptions.getStages().get())
+                    .defaultStage(stageOptions.getDefaultStage().get())
+                    .stageCalc(stageOptions.evaluateStage())
+                    .scopeCalc(scopeOptions.evaluateScope())
+                    .build();
+
+            Version version = reckoner.reckon();
+            logger.warn("Reckoned version: {}", version);
 
             DelayedVersion sharedVersion = new DelayedVersion(() -> version);
             project.allprojects(prj -> prj.setVersion(sharedVersion));

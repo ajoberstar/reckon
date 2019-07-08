@@ -81,7 +81,7 @@ public class DefaultReckonExtension implements ReckonExtension {
 
     @Override
     public void useStages() {
-        this.useStages(Collections.emptyMap());
+        useStages(Collections.emptyMap());
     }
 
     /**

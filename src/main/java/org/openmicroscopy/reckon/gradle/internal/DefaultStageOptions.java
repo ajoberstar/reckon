@@ -43,7 +43,7 @@ public class DefaultStageOptions extends BaseStageOptions implements StageOption
 
     @Override
     public BiFunction<VcsInventory, Version, Optional<String>> evaluateStage() {
-        return (inventory, targetNormal) -> findProperty(ReckonPlugin.STAGE_PROP, defaultStage.get());
+        return (inventory, targetNormal) -> findProperty(ReckonPlugin.STAGE_PROP, null);
     }
 
     /**

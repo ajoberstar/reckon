@@ -33,6 +33,27 @@ class BaseCompatTest extends Specification {
     remote.commit(message: 'second commit')
   }
 
+  def 'if no strategies specified, build passes'() {
+    given:
+    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    task printVersion {
+      doLast  {
+        println project.version
+      }
+    }
+    """
+    when:
+    def result = build('printVersion')
+    then:
+    result.output.contains('Reckoned version: 1.0.1-SNAPSHOT')
+  }
+
   def 'if no git repo found, version is defaulted'() {
     given:
     buildFile << """
@@ -56,28 +77,7 @@ class BaseCompatTest extends Specification {
     def result = build('printVersion', '-q')
     then:
     // version will end with a timestamp, so don't try to validate the whole thing
-    result.output.normalize().startsWith('0.1.0-alpha.0.0+')
-  }
-
-  def 'if no strategies specified, build fails'() {
-    given:
-    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
-
-    buildFile << """
-    plugins {
-      id 'org.openmicroscopy.reckon'
-    }
-    
-    task printVersion {
-      doLast  {
-        println project.version
-      }
-    }
-    """
-    when:
-    def result = buildAndFail('printVersion')
-    then:
-    result.output.contains('Must provide a scope supplier.')
+    result.output.normalize().startsWith('0.0.1-alpha.0.0+')
   }
 
   def 'if reckoned version has build metadata no tag created'() {
@@ -100,7 +100,7 @@ class BaseCompatTest extends Specification {
     when:
     def result = build('reckonTagPush')
     then:
-    result.output.contains('Reckoned version: 1.1.0-alpha.0')
+    result.output.contains('Reckoned version: 1.0.1-alpha.0')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
   }
@@ -123,7 +123,7 @@ class BaseCompatTest extends Specification {
     when:
     def result = build('reckonTagPush')
     then:
-    result.output.contains('Reckoned version: 1.1.0-SNAPSHOT')
+    result.output.contains('Reckoned version: 1.0.1-SNAPSHOT')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
   }
@@ -148,17 +148,16 @@ class BaseCompatTest extends Specification {
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha')
     then:
-    result.output.contains('Reckoned version: 1.1.0-alpha.1')
+    result.output.contains('Reckoned version: 1.0.1-alpha.1')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+    remote.tag.list().find { it.name == '1.0.1-alpha.1' }
   }
 
   def 'if reckoned version is rebuild, skip tag and push'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
-
 
     buildFile << """
     plugins {
@@ -180,34 +179,6 @@ class BaseCompatTest extends Specification {
     result.output.contains('Reckoned version: 1.1.0')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
     result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
-  }
-
-  def 'old syntax of extension does not fail'() {
-    given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
-
-    buildFile << """
-    plugins {
-      id 'org.openmicroscopy.reckon'
-    }
-    
-    reckon {
-      normal = scopeFromProp()
-      preRelease = stageFromProp('alpha','beta', 'final')
-    }
-    
-    task printVersion {
-      doLast  {
-        println project.version
-      }
-    }
-    """
-    local.add(patterns: ['build.gradle'])
-    local.commit(message: 'Build file')
-    when:
-    def result = build('printVersion')
-    then:
-    result.output.contains('Reckoned version: 1.1.0-alpha.0')
   }
 
   private BuildResult build(String... args = []) {
