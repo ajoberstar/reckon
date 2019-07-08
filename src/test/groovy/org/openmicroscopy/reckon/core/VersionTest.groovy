@@ -1,7 +1,5 @@
 package org.openmicroscopy.reckon.core
 
-import org.openmicroscopy.reckon.core.Scope
-import org.openmicroscopy.reckon.core.Version
 import spock.lang.Specification
 import spock.lang.Unroll
 

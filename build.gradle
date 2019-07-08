@@ -1,61 +1,59 @@
 plugins {
-  id 'java-library'
-  id 'groovy'
-  id 'java-gradle-plugin'
-  id "org.openmicroscopy.artifact" version "5.5.2-SNAPSHOT"
+    id 'java-library'
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id "org.openmicroscopy.artifact" version "5.5.2-SNAPSHOT"
 }
 
 group = "org.openmicroscopy"
 version = "5.5.2-SNAPSHOT"
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_1_8
-  targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 ext {
-  grgitVersion = "[3.0.0,4.0.0)"
+    grgitVersion = "[3.0.0,4.0.0)"
 }
 
 repositories {
-  mavenLocal()
-  jcenter()
+    mavenLocal()
+    jcenter()
 }
 
 dependencies {
-  // git
-  api "org.ajoberstar.grgit:grgit-gradle:$grgitVersion"
+    // git
+    api "org.ajoberstar.grgit:grgit-gradle:$grgitVersion"
 
-  // core
-  api "org.eclipse.jgit:org.eclipse.jgit:[5.0,6.0)"
+    // core
+    api "org.eclipse.jgit:org.eclipse.jgit:[5.0,6.0)"
 
-  // util
-  implementation 'org.slf4j:slf4j-api:[1.7.25,1.8.0-alpha)' // wait until final 1.8.0 is out to upgrade
-  implementation 'org.apache.commons:commons-lang3:[3.5,4.0)'
-  implementation 'com.github.zafarkhaja:java-semver:[0.9.0,)'
-  implementation 'com.google.guava:guava:latest.release'
+    // util
+    implementation 'org.slf4j:slf4j-api:[1.7.25,1.8.0-alpha)' // wait until final 1.8.0 is out to upgrade
+    implementation 'org.apache.commons:commons-lang3:[3.5,4.0)'
+    implementation 'com.github.zafarkhaja:java-semver:[0.9.0,)'
+    implementation 'com.google.guava:guava:latest.release'
 
-  // git
+    // git
 
-  // testing
-  testImplementation("org.spockframework:spock-core:1.3-groovy-2.5") {
-    exclude module: "groovy-all"
-  }
-  testImplementation "org.ajoberstar.grgit:grgit-core:$grgitVersion"
-  // testRuntimeOnly 'org.slf4j:slf4j-simple:[1.7.25,1.8.0-alpha)'
-
-//    compatTestImplementation "org.ajoberstar.grgit:grgit-core:$grgitVersion"
-
-//    compatTestImplementation 'org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)'
-//    compatTestImplementation 'junit:junit:latest.release'
+    // testing
+    testImplementation("org.spockframework:spock-core:1.3-groovy-2.5") {
+        exclude module: "groovy-all"
+    }
+    testImplementation "org.ajoberstar.grgit:grgit-core:$grgitVersion"
+    // testRuntimeOnly 'org.slf4j:slf4j-simple:[1.7.25,1.8.0-alpha)'
+    // compatTestImplementation "org.ajoberstar.grgit:grgit-core:$grgitVersion"
+    // compatTestImplementation 'org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)'
+    // compatTestImplementation 'junit:junit:latest.release'
 }
 
 gradlePlugin {
-  plugins {
-    // Plugins for gradle plugins
-    register("reckon-plugin") {
-      id = "org.openmicroscopy.reckon"
-      implementationClass = "org.openmicroscopy.reckon.gradle.ReckonPlugin"
+    plugins {
+        // Plugins for gradle plugins
+        register("reckon-plugin") {
+            id = "org.openmicroscopy.reckon"
+            implementationClass = "org.openmicroscopy.reckon.gradle.ReckonPlugin"
+        }
     }
-  }
 }

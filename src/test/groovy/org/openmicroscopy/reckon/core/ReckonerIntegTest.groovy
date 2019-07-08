@@ -1,7 +1,5 @@
 package org.openmicroscopy.reckon.core
 
-import org.openmicroscopy.reckon.core.Reckoner
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;

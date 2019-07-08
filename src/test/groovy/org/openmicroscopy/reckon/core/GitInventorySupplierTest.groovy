@@ -1,9 +1,5 @@
 package org.openmicroscopy.reckon.core
 
-import org.openmicroscopy.reckon.core.GitInventorySupplier
-import org.openmicroscopy.reckon.core.VcsInventory
-import org.openmicroscopy.reckon.core.Version
-
 import java.nio.file.Files
 import java.security.SecureRandom
 import org.ajoberstar.grgit.Grgit

@@ -36,21 +36,22 @@ class BaseCompatTest extends Specification {
   def 'if no git repo found, version is defaulted'() {
     given:
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  scopeFromProp()
-  stageFromProp('alpha','beta', 'final')
-}
-
-task printVersion {
-  doLast  {
-    println project.version
-  }
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+       useStages {
+           stages.addAll('alpha', 'beta', 'final')
+       }
+    }
+    
+    task printVersion {
+      doLast  {
+        println project.version
+      }
+    }
+    """
     when:
     def result = build('printVersion', '-q')
     then:
@@ -63,16 +64,16 @@ task printVersion {
     Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-task printVersion {
-  doLast  {
-    println project.version
-  }
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    task printVersion {
+      doLast  {
+        println project.version
+      }
+    }
+    """
     when:
     def result = buildAndFail('printVersion')
     then:
@@ -84,15 +85,16 @@ task printVersion {
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  scopeFromProp()
-  stageFromProp('alpha','beta', 'final')
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+       useStages {
+           stages.addAll('alpha', 'beta', 'final')
+       }
+    }
+    """
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
@@ -108,15 +110,14 @@ reckon {
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  scopeFromProp()
-  snapshotFromProp()
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+       useSnapshot()
+    }
+    """
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
@@ -132,15 +133,16 @@ reckon {
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  scopeFromProp()
-  stageFromProp('alpha','beta', 'final')
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+       useStages {
+           stages.addAll('alpha', 'beta', 'final')
+       }
+    }
+    """
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
@@ -159,15 +161,16 @@ reckon {
 
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  scopeFromProp()
-  stageFromProp('alpha', 'beta', 'final')
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+       useStages {
+           stages.addAll('alpha', 'beta', 'final')
+       }
+    }
+    """
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     local.tag.add(name: '1.1.0', message: '1.1.0')
@@ -184,21 +187,21 @@ reckon {
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
     buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('alpha','beta', 'final')
-}
-
-task printVersion {
-  doLast  {
-    println project.version
-  }
-}
-"""
+    plugins {
+      id 'org.openmicroscopy.reckon'
+    }
+    
+    reckon {
+      normal = scopeFromProp()
+      preRelease = stageFromProp('alpha','beta', 'final')
+    }
+    
+    task printVersion {
+      doLast  {
+        println project.version
+      }
+    }
+    """
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
@@ -209,7 +212,6 @@ task printVersion {
 
   private BuildResult build(String... args = []) {
     return GradleRunner.create()
-      .withGradleVersion(System.properties['compat.gradle.version'])
       .withPluginClasspath()
       .withProjectDir(projectDir)
       .forwardOutput()
@@ -219,7 +221,6 @@ task printVersion {
 
   private BuildResult buildAndFail(String... args = []) {
     return GradleRunner.create()
-      .withGradleVersion(System.properties['compat.gradle.version'])
       .withPluginClasspath()
       .withProjectDir(projectDir)
       .forwardOutput()

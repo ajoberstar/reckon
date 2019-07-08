@@ -16,8 +16,6 @@ pluginManagement {
                 String propertyName = requested.id.name.split('-')
                         .collect { it.capitalize() }.join().uncapitalize() + "Version"
 
-                println propertyName
-
                 def version = gradle.rootProject.findProperty(pluginEnvName)
                         ?: gradle.rootProject.findProperty(propertyName)
 

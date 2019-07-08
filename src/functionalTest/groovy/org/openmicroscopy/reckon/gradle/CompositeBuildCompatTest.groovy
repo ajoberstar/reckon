@@ -2,12 +2,10 @@ package org.openmicroscopy.reckon.gradle
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 
