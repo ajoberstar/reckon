@@ -25,7 +25,7 @@ public class DefaultSnapshotOptions extends DefaultStageOptions implements Snaps
         this.snapshot = project.getObjects().property(Boolean.class);
 
         // Set stages to be snapshot and final
-        this.stages.set(Arrays.asList("snapshot", "final"));
+        this.stages.set(Arrays.asList("snapshot", "rc", "final"));
 
         // Default to selecting the snapshot
         this.defaultStage.convention("snapshot");
