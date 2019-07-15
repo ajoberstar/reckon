@@ -97,7 +97,7 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
 ```groovy
 plugins {
-  id 'org.ajoberstar.reckon' version '<version>'
+  id release version '<version>'
 }
 
 reckon {

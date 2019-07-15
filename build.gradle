@@ -51,9 +51,9 @@ dependencies {
 gradlePlugin {
     plugins {
         // Plugins for gradle plugins
-        register("reckon-plugin") {
-            id = "org.openmicroscopy.reckon"
-            implementationClass = "org.openmicroscopy.reckon.gradle.ReckonPlugin"
+        register("release-plugin") {
+            id = "org.openmicroscopy.release"
+            implementationClass = "org.openmicroscopy.release.gradle.ReckonPlugin"
         }
     }
 }

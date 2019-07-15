@@ -29,7 +29,7 @@ This is a continuous example of how the inference algorithm works in practice wi
 
 ```groovy
 plugins {
-  id 'org.ajoberstar.reckon' version '<version>'
+  id release version '<version>'
   // other plugins
 }
 

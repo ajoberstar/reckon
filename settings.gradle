@@ -27,4 +27,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "omero-reckon-plugin"
+rootProject.name = "omero-release-plugin"
