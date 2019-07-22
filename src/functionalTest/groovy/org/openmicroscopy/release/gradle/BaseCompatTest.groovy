@@ -144,7 +144,7 @@ class BaseCompatTest extends Specification {
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
-    def result = build('reckonTagPush', '-Preckon.stage=alpha')
+    def result = build('reckonTagPush', '-Prelease.stage=alpha')
     then:
     result.output.contains('Reckoned version: 1.0.1-alpha.1')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS

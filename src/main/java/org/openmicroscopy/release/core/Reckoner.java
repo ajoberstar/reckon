@@ -126,23 +126,23 @@ public final class Reckoner {
         // Handle snap shot (probably better using polymorphism here)
         if (SNAPSHOT_STAGE.equals(defaultStage)) {
             if (stage == null || stage.equals(SNAPSHOT_STAGE)) {
-                logger.debug("Using snapshot stage.");
+                logger.warn("Using snapshot stage.");
                 return Version.valueOf(String.format("%s-%s", targetBase.getNormal(), "SNAPSHOT"));
             }
         }
 
         if (stage == null) {
-            logger.debug("No stage provided. Treating as an insignificant version.");
+            logger.warn("No stage provided. Treating as an insignificant version.");
             String buildMetadata = inventory.getCommitId()
                     .filter(sha -> inventory.isClean())
                     .orElseGet(() -> DATE_FORMAT.format(ZonedDateTime.now(clock)));
 
             return Version.valueOf(String.format("%s-%s.%d.%d+%s", targetBase.getNormal(), baseStageName, baseStageNum, inventory.getCommitsSinceBase(), buildMetadata));
         } else if (stage.equals(baseStageName)) {
-            logger.debug("Provided stage {} is same as in target base {}. Incrementing the stage number.", stage, targetBase);
+            logger.warn("Provided stage {} is same as in target base {}. Incrementing the stage number.", stage, targetBase);
             return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), baseStageName, baseStageNum + 1));
         } else {
-            logger.debug("Provided stage {} is different than in target base {}. Starting stage number at 1.", stage, targetBase);
+            logger.warn("Provided stage {} is different than in target base {}. Starting stage number at 1.", stage, targetBase);
             return Version.valueOf(String.format("%s-%s.%d", targetBase.getNormal(), stage, 1));
         }
     }

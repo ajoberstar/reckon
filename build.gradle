@@ -53,7 +53,7 @@ gradlePlugin {
         // Plugins for gradle plugins
         register("release-plugin") {
             id = "org.openmicroscopy.release"
-            implementationClass = "org.openmicroscopy.release.gradle.ReckonPlugin"
+            implementationClass = "org.openmicroscopy.release.gradle.ReleasePlugin"
         }
     }
 }

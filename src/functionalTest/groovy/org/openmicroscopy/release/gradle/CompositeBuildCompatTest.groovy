@@ -77,7 +77,7 @@ class CompositeBuildCompatTest extends Specification {
 
   def 'if build included in composite build, reckon properties are ignored'() {
     when:
-    def result = build(project2Dir, 'printVersion', '--include-build', project1Dir.absolutePath, '-Preckon.scope=major', '-Preckon.stage=beta')
+    def result = build(project2Dir, 'printVersion', '--include-build', project1Dir.absolutePath, '-Prelease.scope=major', '-Prelease.stage=beta')
     then:
     result.output.contains('Reckoned version: 1.3.0')
     result.output.contains('Reckoned version: 1.0.0-beta.2')
