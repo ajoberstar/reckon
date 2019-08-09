@@ -71,7 +71,7 @@ There are three types of stages:
 - `<patch>` a positive integer incremented when fixes are made that preserve backwards-compatibility
 - `<stage>` an alphabetical identifier indicating a level of maturity on the way to a final release. They should make logical sense to a human, but alphabetical order **must** be the indicator of maturity to ensure they sort correctly. (e.g. milestone, rc, snapshot would not make sense because snapshot would sort after rc)
 - `<num>` a positive integer incremented when a significant release is made
-- `<commits>` a positive integer indicating the number of commits since the last significant or final release was made
+- `<commits>` a positive integer indicating the number of commits since the last final release was made
 - `<hash or timestamp>` if the repo is clean, an abbreviated commit hash of the current HEAD, otherwise a UTC timestamp
 
 > **NOTE:** This approach is tuned to ensure it sorts correctly both with SemVer rules and Gradle's built in version sorting (which are subtly different).
