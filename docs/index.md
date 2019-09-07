@@ -80,6 +80,24 @@ Reckoned version: 0.1.0-beta.1
 
 Note that you no longer have a count of commits or a commit hash, since this is a significant version that will result in a tag.
 
+Note also that if your repository origin based not on ssh protocol, but https:
+
+```shell
+$ git remote -v
+origin  https://github.com/$username/repository.git (fetch)
+origin  https://github.com/$username/repository.git (push)
+```
+
+Then you must provide credenctials Grgit is going to be used during `git push` command:
+
+```shell
+$ ./gradlew build reckonTagPush -Preckon.stage=beta \
+    -Dorg.ajoberstar.grgit.auth.username=$username \
+    -Dorg.ajoberstar.grgit.auth.password=$password
+```
+
+See details [hete](http://ajoberstar.org/grgit/grgit-authentication.html)
+
 ### Now just run the build again
 
 ```
