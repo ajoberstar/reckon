@@ -1,5 +1,6 @@
 plugins {
   id 'org.ajoberstar.defaults' version '0.15.1-rc.1'
+  id 'org.ajoberstar.stutter' version '0.5.1'
 }
 
 apply from: 'gradle/locking.gradle'

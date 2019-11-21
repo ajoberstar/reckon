@@ -36,10 +36,13 @@ stutter {
   sparse = true
 
   java(8) {
-    compatibleRange '3.0'
+    compatibleRange '4.0'
   }
   java(11) {
     compatibleRange '5.0'
+  }
+  java(13) {
+    compatibleRange '6.0'
   }
 }
 
