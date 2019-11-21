@@ -1,7 +1,7 @@
 # reckon
 
 [![Download](https://api.bintray.com/packages/ajoberstar/maven/reckon/images/download.svg)](https://bintray.com/ajoberstar/maven/reckon/_latestVersion)
-[![CircleCI](https://circleci.com/gh/ajoberstar/reckon.svg?style=svg)](https://circleci.com/gh/ajoberstar/reckon)
+![](https://github.com/ajoberstar/reckon/workflows/.github/workflows/build.yaml/badge.svg)
 
 ## Why do you care?
 
