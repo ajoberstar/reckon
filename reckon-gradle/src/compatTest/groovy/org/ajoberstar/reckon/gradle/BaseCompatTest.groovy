@@ -1,5 +1,6 @@
 package org.ajoberstar.reckon.gradle
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -205,6 +206,37 @@ task printVersion {
     def result = build('printVersion')
     then:
     result.output.contains('Reckoned version: 1.1.0-alpha.0')
+  }
+
+  @IgnoreIf({ System.properties['compat.gradle.version'].toString().startsWith("4.") })
+  def 'Kotlin build script can use isFinal'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    File kotlinBuildFile = projectFile('build.gradle.kts')
+
+    kotlinBuildFile << """
+plugins {
+  id("org.ajoberstar.reckon")
+}
+
+reckon {
+  scopeFromProp()
+  stageFromProp("alpha", "beta", "final")
+}
+
+tasks.register("printIsFinal") {
+  doLast  {
+    val version = project.version as org.ajoberstar.reckon.gradle.VersionProvider
+    print("Is Final: \${version.version.isFinal()}")
+  }
+}
+"""
+    local.add(patterns: ['build.gradle.kts'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('printIsFinal')
+    then:
+    result.output.contains('Is Final: false')
   }
 
   private BuildResult build(String... args = []) {

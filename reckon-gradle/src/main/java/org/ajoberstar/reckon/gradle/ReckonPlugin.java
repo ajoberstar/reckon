@@ -41,7 +41,7 @@ public class ReckonPlugin implements Plugin<Project> {
     task.setDescription("Tag version inferred by reckon.");
     task.setGroup("publishing");
     task.onlyIf(t -> {
-      Version version = ((DelayedVersion) project.getVersion()).getVersion();
+      Version version = ((VersionProvider) project.getVersion()).getVersion();
 
       // rebuilds shouldn't trigger a new tag
       boolean alreadyTagged = grgit.getTag().list().stream()
@@ -71,13 +71,14 @@ public class ReckonPlugin implements Plugin<Project> {
     return task;
   }
 
-  private static class DelayedVersion {
+  private static class DelayedVersion implements VersionProvider {
     private final Supplier<Version> reckoner;
 
     public DelayedVersion(Supplier<Version> reckoner) {
       this.reckoner = Suppliers.memoize(reckoner);
     }
 
+    @Override
     public Version getVersion() {
       return reckoner.get();
     }
