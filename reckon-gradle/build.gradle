@@ -1,13 +1,11 @@
 plugins {
-  id 'java-library'
+  id 'maven-publish'
   id 'java-gradle-plugin'
+  id 'java-library'
   id 'groovy'
-}
 
-sourceCompatibility = 8
-
-repositories {
-  jcenter()
+  id 'com.gradle.plugin-publish'
+  id 'org.ajoberstar.stutter'
 }
 
 dependencies {
@@ -27,7 +25,7 @@ dependencies {
 
   // testing
   compatTestImplementation gradleTestKit()
-  compatTestImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+  compatTestImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
   compatTestImplementation 'org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)'
   compatTestImplementation 'junit:junit:latest.release'
 }
@@ -41,8 +39,14 @@ stutter {
   java(11) {
     compatibleRange '5.0'
   }
-  java(13) {
-    compatibleRange '6.0'
+  java(15) {
+    compatibleRange '6.3'
+  }
+}
+
+jar {
+  manifest {
+    attributes 'Automatic-Module-Name': 'org.ajoberstar.reckon.gradle'
   }
 }
 
@@ -63,3 +67,6 @@ pluginBundle {
     version = project.version
   }
 }
+
+// remove duplicate publication
+gradlePlugin.automatedPublishing = false

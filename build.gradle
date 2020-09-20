@@ -1,13 +1,42 @@
 plugins {
-  id 'org.ajoberstar.defaults' version '0.15.1-rc.1'
-  id 'org.ajoberstar.stutter' version '0.5.1'
+  id 'org.ajoberstar.grgit'
+  id 'org.ajoberstar.reckon'
 }
 
+apply from: 'gradle/spotless.gradle'
 apply from: 'gradle/locking.gradle'
 apply from: 'gradle/bintray.gradle'
 
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha', 'beta', 'rc', 'final')
+}
+
 allprojects {
   group = 'org.ajoberstar.reckon'
+
+  plugins.withId('java-library') {
+    sourceCompatibility = 8
+
+    repositories {
+      jcenter()
+    }
+
+    java {
+      withSourcesJar()
+      withJavadocJar()
+    }
+
+    plugins.withId('maven-publish') {
+      publishing {
+        publications {
+          main(MavenPublication) {
+            from components.java
+          }
+        }
+      }
+    }
+  }
 }
 
 ext.grgitVersion = '[4.0.0,5.0.0)'
