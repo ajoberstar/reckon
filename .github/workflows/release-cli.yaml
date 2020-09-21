@@ -1,0 +1,82 @@
+name: Release CLI
+on:
+  pull_request:
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact-path: reckon
+            artifact-name: reckon-linux-x64
+          - os: windows-latest
+            artifact-path: reckon.exe
+            artifact-name: reckon-windows-x64
+      fail-fast: false
+    steps:
+      - name: "Checkout repo"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 0
+      - name: "Setup Java"
+        uses: "actions/setup-java@v1"
+        with:
+          java-version: 15
+      - name: "Validate Gradle Wrapper"
+        uses: gradle/wrapper-validation-action@v1
+      - name: "Cache Gradle wrapper"
+        uses: "actions/cache@v2"
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/notifications
+          key: "gradle-wrapper-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}"
+      - name: "Cache Gradle dependencies"
+        uses: "actions/cache@v2"
+        with:
+          path: "~/.gradle/caches"
+          key: "gradle-caches-${{ runner.os }}-${{ hashFiles('**/gradle/dependency-locks/*.lockfile') }}"
+      - name: "Compile native image"
+        run: "./gradlew :reckon-cli:nativeImage"
+      - name: "Upload binary"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: reckon-cli/build/graal/${{ matrix.artifact-path }}
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: create-release
+        name: "Create release"
+        uses: "actions/create-release@v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "release-test"
+          release_name: "My draft"
+          body: |
+            This is a test release
+          draft: true
+      - name: "Download artifacts"
+        uses: "actions/download-artifact@v2"
+      - name: "Upload Linux artifacts to release"
+        uses: "actions/upload-release-asset@v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: reckon-linux-x64/reckon
+          asset_name: reckon
+          asset_content_type: application/octet-stream
+      - name: "Upload Windows artifacts to release"
+        uses: "actions/upload-release-asset@v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: reckon-windows-x64/reckon.exe
+          asset_name: reckon.exe
+          asset_content_type: application/octet-stream
