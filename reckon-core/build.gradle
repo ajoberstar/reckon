@@ -4,6 +4,10 @@ plugins {
   id 'groovy'
 }
 
+tasks.withType(JavaCompile) {
+  options.release = 8
+}
+
 dependencies {
   // logging
   implementation 'org.slf4j:slf4j-api:[1.7.25,1.8.0-alpha)' // wait until final 1.8.0 is out to upgrade
