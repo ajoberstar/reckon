@@ -1,6 +1,5 @@
 # reckon
 
-[![Download](https://api.bintray.com/packages/ajoberstar/maven/reckon/images/download.svg)](https://bintray.com/ajoberstar/maven/reckon/_latestVersion)
 ![](https://github.com/ajoberstar/reckon/workflows/.github/workflows/build.yaml/badge.svg)
 
 ## Project News
