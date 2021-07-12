@@ -67,7 +67,9 @@ public final class Reckoner {
       throw new IllegalStateException("Reckoned target normal version " + reckoned.getNormal() + " has already been released.");
     }
 
-    if (inventory.getBaseVersion().compareTo(reckoned) > 0) {
+    if (inventory.getBaseVersion().getStage().equals(FINAL_STAGE)
+        && reckoned.getStage().get().getName().equals(SNAPSHOT_STAGE)
+        && inventory.getBaseVersion().compareTo(reckoned) > 0) {
       throw new IllegalStateException("Reckoned version " + reckoned + " is (and cannot be) less than base version " + inventory.getBaseVersion());
     }
 
@@ -105,7 +107,7 @@ public final class Reckoner {
         .map(String::toLowerCase)
         .orElse(null);
 
-    if (stage != null && !stages.contains(stage)) {
+    if (stage != null && (!stages.contains(stage) && !stage.equals(SNAPSHOT_STAGE))) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
       throw new IllegalArgumentException(message);
     }
@@ -210,7 +212,7 @@ public final class Reckoner {
           .orElseThrow(() -> new IllegalArgumentException("No non-final stages provided."));
 
       if (this.stages.contains(SNAPSHOT_STAGE)) {
-        throw new IllegalArgumentException("Snapshots are not supported in stage mode.");
+        this.defaultStage = SNAPSHOT_STAGE;
       }
 
       return this;
