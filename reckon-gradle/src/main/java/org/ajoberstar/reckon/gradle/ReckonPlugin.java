@@ -11,6 +11,7 @@ import org.ajoberstar.reckon.core.Version;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.provider.Provider;
 
 public class ReckonPlugin implements Plugin<Project> {
   public static final String TAG_TASK = "reckonTagCreate";
@@ -21,9 +22,12 @@ public class ReckonPlugin implements Plugin<Project> {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    project.getPluginManager().apply("org.ajoberstar.grgit");
 
-    Grgit grgit = (Grgit) project.findProperty("grgit");
+    Provider<GrgitService> serviceProvider = project.getGradle().getSharedServices().registerIfAbsent("grgitProvider", GrgitService.class, spec -> {
+      spec.getParameters().getProjectDirectory().set(project.getRootDir());
+    });
+    Grgit grgit = serviceProvider.get().getGrgit();
+
     ReckonExtension extension = project.getExtensions().create("reckon", ReckonExtension.class, project, grgit);
 
     DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);

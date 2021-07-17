@@ -9,7 +9,6 @@ com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
 com.google.j2objc:j2objc-annotations:1.3
 com.googlecode.javaewah:JavaEWAH:1.1.7
 org.ajoberstar.grgit:grgit-core:4.1.0
-org.ajoberstar.grgit:grgit-gradle:4.1.0
 org.checkerframework:checker-qual:2.11.1
 org.eclipse.jgit:org.eclipse.jgit:5.9.0.202009080501-r
 org.slf4j:slf4j-api:1.7.2

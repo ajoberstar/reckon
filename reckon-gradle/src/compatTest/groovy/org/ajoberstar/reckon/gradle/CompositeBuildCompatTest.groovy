@@ -31,7 +31,6 @@ class CompositeBuildCompatTest extends Specification {
     projectFile(project1Dir, '.gitignore') << '.gradle\nbuild\n'
     build1File << '''\
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -56,7 +55,6 @@ task printVersion {
     projectFile(project2Dir, '.gitignore') << '.gradle\nbuild\n'
     build2File << '''\
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
