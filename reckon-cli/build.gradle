@@ -5,15 +5,11 @@ plugins {
 
 mainClassName = 'org.ajoberstar.reckon.cli.Main'
 
-tasks.withType(JavaCompile) {
-  options.release = 11
-}
-
 graal {
   mainClass 'org.ajoberstar.reckon.cli.Main'
   outputName 'reckon'
   graalVersion '20.2.0'
-  javaVersion '11'
+  javaVersion '8'
 
   option '--initialize-at-build-time=org.eclipse.jgit.lib.Constants'
   option '--initialize-at-build-time=org.eclipse.jgit.util.RawParseUtils'

@@ -8,10 +8,6 @@ plugins {
   id 'org.ajoberstar.stutter'
 }
 
-tasks.withType(JavaCompile) {
-  options.release = 8
-}
-
 dependencies {
   // gradle
   compileOnly gradleApi()
