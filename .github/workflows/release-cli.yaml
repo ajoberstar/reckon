@@ -1,0 +1,46 @@
+name: Release CLI
+on:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repo"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 0
+      - name: "Setup Java"
+        uses: "actions/setup-java@v1"
+        with:
+          java-version: 15
+      - name: "Validate Gradle Wrapper"
+        uses: gradle/wrapper-validation-action@v1
+      - name: "Cache Gradle wrapper"
+        uses: "actions/cache@v2"
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/notifications
+          key: "gradle-wrapper-${{ runner.os }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}"
+      - name: "Cache Gradle dependencies"
+        uses: "actions/cache@v2"
+        with:
+          path: "~/.gradle/caches"
+          key: "gradle-caches-${{ runner.os }}-${{ hashFiles('**/gradle/dependency-locks/*.lockfile') }}"
+      - name: "Compile native image"
+        run: "./gradlew :reckon-cli:nativeImage"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Docker registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Build image and push
+        uses: docker/build-push-action@v2
+        with:
+          context: "."
+          file: ./reckon-docker/Dockerfile
+          tags: "ghcr.io/${{ github.repository }}:pr-${{ github.event.number }}"
+          push: true

@@ -15,9 +15,7 @@ reckon {
 allprojects {
   group = 'org.ajoberstar.reckon'
 
-  plugins.withId('java-library') {
-    sourceCompatibility = 8
-
+  plugins.withId('java') {
     repositories {
       jcenter()
     }

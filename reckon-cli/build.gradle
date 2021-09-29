@@ -1,0 +1,59 @@
+plugins {
+  id 'com.palantir.graal'
+  id 'application'
+}
+
+mainClassName = 'org.ajoberstar.reckon.cli.Main'
+
+tasks.withType(JavaCompile) {
+  options.release = 11
+}
+
+graal {
+  mainClass 'org.ajoberstar.reckon.cli.Main'
+  outputName 'reckon'
+  graalVersion '20.2.0'
+  javaVersion '11'
+
+  option '--initialize-at-build-time=org.eclipse.jgit.lib.Constants'
+  option '--initialize-at-build-time=org.eclipse.jgit.util.RawParseUtils'
+  option '--initialize-at-build-time=org.eclipse.jgit.dircache.DirCache'
+  option '--initialize-at-build-time=org.eclipse.jgit.diff.DiffEntry'
+  option '--initialize-at-build-time=org.eclipse.jgit.ignore.internal.Strings'
+  option '--initialize-at-build-time=org.eclipse.jgit.attributes.AttributesHandler'
+  option '--initialize-at-build-time=org.eclipse.jgit.lib.ObjectId'
+  option '--initialize-at-build-time=org.eclipse.jgit.treewalk.WorkingTreeIterator'
+  option '--initialize-at-build-time=org.eclipse.jgit.diff.RenameDetector'
+  option '--initialize-at-build-time=org.slf4j'
+  option '--static'
+}
+
+dependencies {
+  // reckon
+  implementation project(':reckon-core')
+
+  // cli
+  implementation 'info.picocli:picocli:latest.release'
+  annotationProcessor 'info.picocli:picocli-codegen:latest.release'
+
+  // json
+  implementation 'com.fasterxml.jackson.core:jackson-databind:latest.release'
+
+  // logging
+  runtimeOnly 'org.slf4j:slf4j-nop:[1.7.25,1.8.0-alpha)'
+}
+
+// picocli config
+compileJava {
+  options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+}
+
+task writeReckonVersion(type: WriteProperties) {
+  outputFile = file('build/reckon/version.properties')
+  property('version', provider { project.version.version.toString() })
+  property('normal', provider { project.version.version.normal.toString() })
+}
+
+processResources.from(writeReckonVersion) {
+  into "META-INF/reckon/${project.group}/${project.name}"
+}
