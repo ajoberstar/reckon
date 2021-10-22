@@ -19,7 +19,11 @@ allprojects {
     sourceCompatibility = 8
 
     repositories {
-      jcenter()
+      mavenCentral()
+      maven {
+        name = 'ajoberstar-backup'
+        url = 'https://ajoberstar.org/bintray-backup/'
+      }
     }
 
     java {
