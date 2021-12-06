@@ -6,8 +6,8 @@ plugins {
   id("spotless-convention")
 }
 
-group = "org.ajoberstar.grgit"
-description = "The Groovy way to use Git."
+group = "org.ajoberstar.reckon"
+description = "Infer a project's version from your Git repository."
 
 repositories {
   mavenCentral()
