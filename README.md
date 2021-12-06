@@ -4,6 +4,10 @@
 
 ## Project News
 
+### Newest versions are on Maven Central
+
+As of 0.13.1, reckon is published to Maven Central and the Gradle Plugin Portal.
+
 ### Retirement of Bintray/JCenter
 
 This project was previously uploaded to JCenter, which is being retired by JFrog on May 1st 2021.

@@ -154,6 +154,7 @@ class GitInventorySupplierTest extends Specification {
   def setupSpec() {
     repoDir = Files.createTempDirectory('repo').toFile()
     grgit = Grgit.init(dir: repoDir)
+    def initialBranch = grgit.branch.current().name
 
     commit()
     commit()
@@ -184,7 +185,7 @@ class GitInventorySupplierTest extends Specification {
     tag('0.2.0-rc.1')
     commit()
 
-    checkout('master')
+    checkout(initialBranch)
     commit()
     branch('parallel-untagged-since-merge')
     commit()
@@ -214,7 +215,7 @@ class GitInventorySupplierTest extends Specification {
     commit()
     commit()
 
-    checkout('master')
+    checkout(initialBranch)
     commit()
     tag('0.3.0')
     commit()
