@@ -15,7 +15,7 @@ dependencies {
   api(project(":reckon-core"))
 
   // git
-  api("org.ajoberstar.grgit:grgit-gradle:[4.0.0,5.0.0)")
+  api("org.ajoberstar.grgit:grgit-core:[4.0.0,5.0.0)")
   implementation("org.eclipse.jgit:org.eclipse.jgit:[5.0,6.0)")
   compatTestImplementation("org.ajoberstar.grgit:grgit-core:[4.0.0,5.0.0)")
 
@@ -33,10 +33,10 @@ stutter {
   setSparse(true)
 
   java(8) {
-    compatibleRange("4.0")
+    compatibleRange("6.1")
   }
   java(11) {
-    compatibleRange("5.0")
+    compatibleRange("6.1")
   }
   java(15) {
     compatibleRange("6.3")
