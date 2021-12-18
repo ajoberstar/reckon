@@ -17,6 +17,7 @@ class ReckonerIntegTest extends Specification {
 
   File repoDir
   Grgit grgit
+  String initialBranch
   SecureRandom random = new SecureRandom()
 
   def 'rebuild works with parallel branches'() {
@@ -35,7 +36,7 @@ class ReckonerIntegTest extends Specification {
     reckonStage(null, null) == '0.1.1'
     checkout('0.1.0')
     reckonStage(null, null) == '0.1.0'
-    checkout('master')
+    checkout(initialBranch)
     tag('0.2.0')
     reckonStage(null, null) == '0.2.0'
     checkout('0.1.1')
@@ -79,6 +80,7 @@ class ReckonerIntegTest extends Specification {
   def setup() {
     repoDir = Files.createTempDirectory('repo').toFile()
     grgit = Grgit.init(dir: repoDir)
+    initialBranch = grgit.branch.current().name
   }
 
   def cleanup() {
