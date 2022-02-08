@@ -60,11 +60,6 @@ pluginBundle {
       tags = listOf("semver", "git", "version", "versioning")
     }
   }
-  mavenCoordinates {
-    groupId = project.group as String
-    artifactId = project.name as String
-    version = project.version.toString()
-  }
 }
 
 // remove duplicate publication
