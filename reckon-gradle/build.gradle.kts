@@ -49,20 +49,19 @@ tasks.named<Jar>("jar") {
   }
 }
 
-pluginBundle {
-  website = "https://github.com/ajoberstar/reckon"
-  vcsUrl = "https://github.com/ajoberstar/reckon.git"
-  description = "Infer a project\"s version from your Git repository"
+gradlePlugin {
   plugins {
-    create("publishPlugin") {
+    create("plugin") {
       id = "org.ajoberstar.reckon"
       displayName = "Reckon Plugin"
-      tags = listOf("semver", "git", "version", "versioning")
+      implementationClass = "org.ajoberstar.reckon.gradle.ReckonPlugin"
     }
   }
 }
 
-// remove duplicate publication
-gradlePlugin {
-  setAutomatedPublishing(false)
+pluginBundle {
+  website = "https://github.com/ajoberstar/reckon"
+  vcsUrl = "https://github.com/ajoberstar/reckon.git"
+  description = "Infer a project\"s version from your Git repository"
+  tags = listOf("semver", "git", "version", "versioning")
 }
