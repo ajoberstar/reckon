@@ -1,6 +1,6 @@
 pluginManagement {
   plugins {
-    id("com.gradle.plugin-publish") version "0.18.0"
+    id("com.gradle.plugin-publish") version "0.20.0"
 
     id("org.ajoberstar.grgit") version "4.1.1"
     id("org.ajoberstar.reckon") version "0.13.0"
