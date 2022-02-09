@@ -1,6 +1,6 @@
 # reckon
 
-![](https://github.com/ajoberstar/reckon/workflows/.github/workflows/build.yaml/badge.svg)
+![](https://github.com/ajoberstar/reckon/workflows/.github/workflows/ci.yaml/badge.svg)
 
 ## Project News
 

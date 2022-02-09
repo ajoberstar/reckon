@@ -1,26 +1,24 @@
 package org.ajoberstar.reckon.gradle
 
 import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.TempDir
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 
 class BaseCompatTest extends Specification {
-  @Rule TemporaryFolder tempDir = new TemporaryFolder()
+  @TempDir File tempDir
   File projectDir
   File buildFile
   Grgit remote
 
   def setup() {
-    projectDir = tempDir.newFolder('project')
+    projectDir = new File(tempDir, 'project')
     buildFile = projectFile('build.gradle')
 
-    def remoteDir = tempDir.newFolder('remote')
+    def remoteDir = new File(tempDir, 'remote')
     remote = Grgit.init(dir: remoteDir)
 
     remoteFile('.gitignore') << '.gradle/\nbuild/\n'

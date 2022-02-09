@@ -1,0 +1,34 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+cglib:cglib-nodep:3.3.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+com.github.zafarkhaja:java-semver:0.9.0=runtimeClasspath,testRuntimeClasspath
+com.google.code.findbugs:jsr305:3.0.2=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.google.errorprone:error_prone_annotations:2.7.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.google.guava:failureaccess:1.0.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.google.guava:guava:31.0.1-jre=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.google.j2objc:j2objc-annotations:1.3=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.googlecode.javaewah:JavaEWAH:1.1.12=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+net.bytebuddy:byte-buddy:1.11.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.ajoberstar.grgit:grgit-core:4.1.1=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.ajoberstar.grgit:grgit-gradle:4.1.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.apache.commons:commons-lang3:3.12.0=runtimeClasspath,testRuntimeClasspath
+org.apiguardian:apiguardian-api:1.1.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.assertj:assertj-core:3.16.1=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.checkerframework:checker-qual:3.12.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.codehaus.groovy:groovy:3.0.8=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.hamcrest:hamcrest:2.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.jetbrains:annotations:20.1.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.junit.platform:junit-platform-commons:1.7.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.junit.platform:junit-platform-engine:1.7.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.junit.platform:junit-platform-launcher:1.7.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.junit.platform:junit-platform-testkit:1.7.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.junit:junit-bom:5.7.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.objenesis:objenesis:3.2=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.opentest4j:opentest4j:1.2.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.ow2.asm:asm:9.1=compatTestCompileClasspath,compatTestRuntimeClasspath
+org.slf4j:slf4j-api:1.7.30=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.spockframework:spock-core:2.0-groovy-3.0=compatTestCompileClasspath,compatTestRuntimeClasspath
+empty=

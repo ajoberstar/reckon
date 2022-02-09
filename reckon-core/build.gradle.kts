@@ -1,6 +1,22 @@
 plugins {
-  id("java-library-convention")
+  id("org.ajoberstar.defaults.java-library")
   groovy
+}
+
+group = "org.ajoberstar.reckon"
+description = "Infer a project's version from your Git repository."
+
+mavenCentral {
+  developerName.set("Andrew Oberstar")
+  developerEmail.set("ajoberstar@gmail.com")
+  githubOwner.set("ajoberstar")
+  githubRepository.set("reckon")
+}
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(8))
+  }
 }
 
 dependencies {

@@ -1,10 +1,24 @@
 plugins {
-  id("java-library-convention")
-  id("java-gradle-plugin")
+  id("org.ajoberstar.defaults.gradle-plugin")
   groovy
 
-  id("com.gradle.plugin-publish")
   id("org.ajoberstar.stutter")
+}
+
+group = "org.ajoberstar.reckon"
+description = "Infer a project's version from your Git repository."
+
+mavenCentral {
+  developerName.set("Andrew Oberstar")
+  developerEmail.set("ajoberstar@gmail.com")
+  githubOwner.set("ajoberstar")
+  githubRepository.set("reckon")
+}
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(8))
+  }
 }
 
 dependencies {
@@ -24,23 +38,42 @@ dependencies {
 
   // testing
   compatTestImplementation(gradleTestKit())
-  compatTestImplementation("org.spockframework:spock-core:1.3-groovy-2.5")
-  compatTestImplementation("org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)")
-  compatTestImplementation("junit:junit:latest.release")
+  compatTestImplementation("org.spockframework:spock-core:2.0-groovy-3.0")
+}
+
+tasks.withType<Test> {
+  useJUnitPlatform()
 }
 
 stutter {
-  setSparse(true)
+  val java8 by matrices.creating {
+    javaToolchain {
+      languageVersion.set(JavaLanguageVersion.of(8))
+    }
+    gradleVersions {
+      compatibleRange("4.0")
+    }
+  }
+  val java11 by matrices.creating {
+    javaToolchain {
+      languageVersion.set(JavaLanguageVersion.of(11))
+    }
+    gradleVersions {
+      compatibleRange("5.0")
+    }
+  }
+  val java17 by matrices.creating {
+    javaToolchain {
+      languageVersion.set(JavaLanguageVersion.of(17))
+    }
+    gradleVersions {
+      compatibleRange("7.3")
+    }
+  }
+}
 
-  java(8) {
-    compatibleRange("4.0")
-  }
-  java(11) {
-    compatibleRange("5.0")
-  }
-  java(15) {
-    compatibleRange("6.3")
-  }
+tasks.named("check") {
+  dependsOn(tasks.named("compatTest"))
 }
 
 tasks.named<Jar>("jar") {
@@ -54,14 +87,8 @@ gradlePlugin {
     create("plugin") {
       id = "org.ajoberstar.reckon"
       displayName = "Reckon Plugin"
+      description = "Infer a project's version from your Git repository."
       implementationClass = "org.ajoberstar.reckon.gradle.ReckonPlugin"
     }
   }
-}
-
-pluginBundle {
-  website = "https://github.com/ajoberstar/reckon"
-  vcsUrl = "https://github.com/ajoberstar/reckon.git"
-  description = "Infer a project\"s version from your Git repository"
-  tags = listOf("semver", "git", "version", "versioning")
 }

@@ -2,27 +2,24 @@ package org.ajoberstar.reckon.gradle
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.TempDir
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 
 // Composite builds were added in 3.1
 @IgnoreIf({ System.properties['compat.gradle.version'] == '3.0' })
 class CompositeBuildCompatTest extends Specification {
-  @Rule TemporaryFolder tempDir = new TemporaryFolder()
+  @TempDir File tempDir
   File project1Dir
   File project2Dir
   File build1File
   File build2File
 
   def setup() {
-    project1Dir = tempDir.newFolder('project1')
-    project2Dir = tempDir.newFolder('project2')
+    project1Dir = new File(tempDir, 'project1')
+    project2Dir = new File(tempDir, 'project2')
     build1File = projectFile(project1Dir, 'build.gradle')
     build2File = projectFile(project2Dir, 'build.gradle')
 
