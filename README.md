@@ -6,7 +6,9 @@
 
 ### Newest versions are on Maven Central
 
-As of 0.13.1, reckon is published to Maven Central and the Gradle Plugin Portal.
+As of 0.13.1, reckon is published to Maven Central.
+
+As of 0.13.2 reckon is no longer directly published to the Gradle Plugin Portal, but since the portal proxies Maven Central you can still access reckon through the portal. The only side effect is that [the portal](https://plugins.gradle.org/plugin/org.ajoberstar.reckon) will no longer list the latest version. Use this repo or [search.maven.org](https://search.maven.org/search?q=g:org.ajoberstar.reckon) to find the latest version.
 
 ### Retirement of Bintray/JCenter
 
