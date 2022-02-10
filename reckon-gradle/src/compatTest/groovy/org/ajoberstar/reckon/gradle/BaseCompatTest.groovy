@@ -45,12 +45,12 @@ reckon {
 
 task printVersion {
   doLast  {
-    println project.version
+    println reckon.version.get()
   }
 }
 """
     when:
-    def result = build('printVersion', '-q')
+    def result = build('printVersion', '-q', '--configuration-cache')
     then:
     // version will end with a timestamp, so don't try to validate the whole thing
     result.output.normalize().startsWith('0.1.0-alpha.0.0+')
@@ -72,7 +72,7 @@ task printVersion {
 }
 """
     when:
-    def result = buildAndFail('printVersion')
+    def result = buildAndFail('printVersion', '--configuration-cache')
     then:
     result.output.contains('Must provide a scope supplier.')
   }
@@ -94,11 +94,11 @@ reckon {
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
-    def result = build('reckonTagPush')
+    def result = build('reckonTagPush', '--configuration-cache')
     then:
     result.output.contains('Reckoned version: 1.1.0-alpha.0')
-    result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
-    result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
+    result.task(':reckonTagCreate').outcome == TaskOutcome.UP_TO_DATE
+    result.task(':reckonTagPush').outcome == TaskOutcome.UP_TO_DATE
   }
 
   def 'if reckoned version is SNAPSHOT no tag created'() {
@@ -118,11 +118,11 @@ reckon {
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
-    def result = build('reckonTagPush')
+    def result = build('reckonTagPush', '--configuration-cache')
     then:
     result.output.contains('Reckoned version: 1.1.0-SNAPSHOT')
-    result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
-    result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
+    result.task(':reckonTagCreate').outcome == TaskOutcome.UP_TO_DATE
+    result.task(':reckonTagPush').outcome == TaskOutcome.UP_TO_DATE
   }
 
   def 'if reckoned version is significant tag created and pushed'() {
@@ -142,7 +142,7 @@ reckon {
     local.add(patterns: ['build.gradle'])
     local.commit(message: 'Build file')
     when:
-    def result = build('reckonTagPush', '-Preckon.stage=alpha')
+    def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
     result.output.contains('Reckoned version: 1.1.0-alpha.1')
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
@@ -151,7 +151,7 @@ reckon {
     remote.tag.list().find { it.name == '1.1.0-alpha.1' }
   }
 
-  def 'if reckoned version is rebuild, skip tag and push'() {
+  def 'if reckoned version is rebuild, skip tag create, but push'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
@@ -170,39 +170,11 @@ reckon {
     local.commit(message: 'Build file')
     local.tag.add(name: '1.1.0', message: '1.1.0')
     when:
-    def result = build('reckonTagPush')
+    def result = build('reckonTagPush', '--configuration-cache')
     then:
     result.output.contains('Reckoned version: 1.1.0')
-    result.task(':reckonTagCreate').outcome == TaskOutcome.SKIPPED
-    result.task(':reckonTagPush').outcome == TaskOutcome.SKIPPED
-  }
-
-  def 'old syntax of extension does not fail'() {
-    given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
-
-    buildFile << """
-plugins {
-  id 'org.ajoberstar.reckon'
-}
-
-reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('alpha','beta', 'final')
-}
-
-task printVersion {
-  doLast  {
-    println project.version
-  }
-}
-"""
-    local.add(patterns: ['build.gradle'])
-    local.commit(message: 'Build file')
-    when:
-    def result = build('printVersion')
-    then:
-    result.output.contains('Reckoned version: 1.1.0-alpha.0')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.UP_TO_DATE
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
   }
 
   private BuildResult build(String... args = []) {

@@ -1,90 +1,76 @@
 package org.ajoberstar.reckon.gradle;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import org.ajoberstar.grgit.Grgit;
+import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
 import org.ajoberstar.reckon.core.Version;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
+import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.TaskProvider;
 
 public class ReckonPlugin implements Plugin<Project> {
   public static final String TAG_TASK = "reckonTagCreate";
   public static final String PUSH_TASK = "reckonTagPush";
+
+  private static final String SCOPE_PROP = "reckon.scope";
+  private static final String STAGE_PROP = "reckon.stage";
 
   @Override
   public void apply(Project project) {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    project.getPluginManager().apply("org.ajoberstar.grgit");
+    project.getPluginManager().apply("org.ajoberstar.grgit.service");
 
-    Grgit grgit = (Grgit) project.findProperty("grgit");
-    ReckonExtension extension = project.getExtensions().create("reckon", ReckonExtension.class, project, grgit);
+    var grgitServiceExtension = project.getExtensions().getByType(GrgitServiceExtension.class);
+    var grgitService = grgitServiceExtension.getService();
 
-    DelayedVersion sharedVersion = new DelayedVersion(extension::reckonVersion);
+    var extension = project.getExtensions().create("reckon", ReckonExtension.class);
+    extension.getGrgitService().set(grgitService);
+    // composite builds have a parent Gradle build and can't trust the values of these properties
+    if (project.getGradle().getParent() == null) {
+      extension.getScope().set(project.getProviders().gradleProperty(SCOPE_PROP).forUseAtConfigurationTime());
+      extension.getStage().set(project.getProviders().gradleProperty(STAGE_PROP).forUseAtConfigurationTime());
+    }
+
+
+    var sharedVersion = new DelayedVersion(extension.getVersion());
     project.allprojects(prj -> {
       prj.setVersion(sharedVersion);
     });
 
-    Task tag = createTagTask(project, extension, grgit);
-    Task push = createPushTask(project, extension, grgit, tag);
-    push.dependsOn(tag);
+    var tag = createTagTask(project, extension);
+    var push = createPushTask(project, extension);
+    push.configure(t -> t.dependsOn(tag));
   }
 
-  private Task createTagTask(Project project, ReckonExtension extension, Grgit grgit) {
-    Task task = project.getTasks().create(TAG_TASK);
-    task.setDescription("Tag version inferred by reckon.");
-    task.setGroup("publishing");
-    task.onlyIf(t -> {
-      Version version = ((DelayedVersion) project.getVersion()).getVersion();
-
-      // rebuilds shouldn't trigger a new tag
-      boolean alreadyTagged = grgit.getTag().list().stream()
-          .anyMatch(tag -> tag.getName().equals(version.toString()));
-
-      return version.isSignificant() && !alreadyTagged;
+  private TaskProvider<ReckonCreateTagTask> createTagTask(Project project, ReckonExtension extension) {
+    return project.getTasks().register(TAG_TASK, ReckonCreateTagTask.class, task -> {
+      task.setDescription("Tag version inferred by reckon.");
+      task.setGroup("publishing");
+      task.getGrgitService().set(extension.getGrgitService());
+      task.getVersion().set(extension.getVersion());
     });
-    task.doLast(t -> {
-      Map<String, Object> args = new HashMap<>();
-      args.put("name", project.getVersion());
-      args.put("message", project.getVersion());
-      grgit.getTag().add(args);
-    });
-    return task;
   }
 
-  private Task createPushTask(Project project, ReckonExtension extension, Grgit grgit, Task create) {
-    Task task = project.getTasks().create(PUSH_TASK);
-    task.setDescription("Push version tag created by reckon.");
-    task.setGroup("publishing");
-    task.onlyIf(t -> create.getDidWork());
-    task.doLast(t -> {
-      Map<String, Object> args = new HashMap<>();
-      args.put("refsOrSpecs", Arrays.asList("refs/tags/" + project.getVersion().toString()));
-      grgit.push(args);
+  private TaskProvider<ReckonPushTagTask> createPushTask(Project project, ReckonExtension extension) {
+    return project.getTasks().register(PUSH_TASK, ReckonPushTagTask.class, task -> {
+      task.setDescription("Push version tag created by reckon.");
+      task.setGroup("publishing");
+      task.getGrgitService().set(extension.getGrgitService());
+      task.getVersion().set(extension.getVersion());
     });
-    return task;
   }
 
   private static class DelayedVersion {
-    private final Supplier<Version> reckoner;
+    private final Provider<Version> versionProvider;
 
-    public DelayedVersion(Supplier<Version> reckoner) {
-      this.reckoner = Suppliers.memoize(reckoner);
-    }
-
-    public Version getVersion() {
-      return reckoner.get();
+    public DelayedVersion(Provider<Version> versionProvider) {
+      this.versionProvider = versionProvider;
     }
 
     @Override
     public String toString() {
-      return reckoner.get().toString();
+      return versionProvider.get().toString();
     }
   }
 }

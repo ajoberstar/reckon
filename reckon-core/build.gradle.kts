@@ -15,26 +15,36 @@ mavenCentral {
 
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(8))
+    languageVersion.set(JavaLanguageVersion.of(11))
   }
 }
 
 dependencies {
   // logging
-  implementation("org.slf4j:slf4j-api:[1.7.25,1.8.0-alpha)") // wait until final 1.8.0 is out to upgrade
-  testRuntimeOnly("org.slf4j:slf4j-simple:[1.7.25,1.8.0-alpha)")
+  implementation("org.slf4j:slf4j-api:[1.7.25,1.8.0[")
 
   // git
-  api("org.eclipse.jgit:org.eclipse.jgit:[5.0,6.0)")
-  testImplementation("org.ajoberstar.grgit:grgit-core:[4.0.0,5.0.0)")
+  api("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
 
   // util
-  implementation("org.apache.commons:commons-lang3:[3.5,4.0)")
-  implementation("com.github.zafarkhaja:java-semver:[0.9.0,)")
+  implementation("org.apache.commons:commons-lang3:[3.5,4.0[")
+  implementation("com.github.zafarkhaja:java-semver:[0.9,)")
 
   // testing
-  testImplementation("org.spockframework:spock-core:1.3-groovy-2.5")
-  testImplementation("org.codehaus.groovy:groovy-all:[2.5,2.6-alpha)")
+
+}
+
+testing {
+  suites {
+    val test by getting(JvmTestSuite::class) {
+      useSpock("2.0-groovy-3.0")
+      dependencies {
+        implementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
+        implementation("org.codehaus.groovy:groovy-all:[3.0,4.0[")
+        runtimeOnly("org.slf4j:slf4j-simple:[1.7.25,1.8.0[")
+      }
+    }
+  }
 }
 
 tasks.named<Jar>("jar") {

@@ -33,8 +33,8 @@ plugins {
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('beta', 'final')
+  scopeFromProp()
+  stageFromProp('beta', 'final')
 }
 
 task printVersion {
@@ -58,8 +58,8 @@ plugins {
 }
 
 reckon {
-  normal = scopeFromProp()
-  preRelease = stageFromProp('beta', 'final')
+  scopeFromProp()
+  stageFromProp('beta', 'final')
 }
 
 task printVersion {
