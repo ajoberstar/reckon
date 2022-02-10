@@ -17,7 +17,7 @@ mavenCentral {
 
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(8))
+    languageVersion.set(JavaLanguageVersion.of(11))
   }
 }
 
@@ -29,9 +29,9 @@ dependencies {
   api(project(":reckon-core"))
 
   // git
-  api("org.ajoberstar.grgit:grgit-gradle:[4.0.0,5.0.0)")
-  implementation("org.eclipse.jgit:org.eclipse.jgit:[5.0,6.0)")
-  compatTestImplementation("org.ajoberstar.grgit:grgit-core:[4.0.0,5.0.0)")
+  api("org.ajoberstar.grgit:grgit-gradle:[5.0,6.0[")
+  implementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
+  compatTestImplementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
 
   // util
   implementation("com.google.guava:guava:latest.release")
@@ -46,20 +46,12 @@ tasks.withType<Test> {
 }
 
 stutter {
-  val java8 by matrices.creating {
-    javaToolchain {
-      languageVersion.set(JavaLanguageVersion.of(8))
-    }
-    gradleVersions {
-      compatibleRange("4.0")
-    }
-  }
   val java11 by matrices.creating {
     javaToolchain {
       languageVersion.set(JavaLanguageVersion.of(11))
     }
     gradleVersions {
-      compatibleRange("5.0")
+      compatibleRange("7.0")
     }
   }
   val java17 by matrices.creating {
