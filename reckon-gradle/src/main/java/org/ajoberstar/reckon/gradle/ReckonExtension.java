@@ -2,70 +2,86 @@ package org.ajoberstar.reckon.gradle;
 
 import java.util.Optional;
 
-import org.ajoberstar.grgit.Grgit;
-import org.ajoberstar.grgit.Repository;
+import javax.inject.Inject;
+
+import org.ajoberstar.grgit.gradle.GrgitService;
 import org.ajoberstar.reckon.core.Reckoner;
 import org.ajoberstar.reckon.core.Version;
-import org.eclipse.jgit.api.Git;
-import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 
 public class ReckonExtension {
-  private static final String SCOPE_PROP = "reckon.scope";
-  private static final String STAGE_PROP = "reckon.stage";
-  private static final String SNAPSHOT_PROP = "reckon.snapshot";
+  private static Logger logger = Logging.getLogger(ReckonExtension.class);
 
-  private Project project;
-  private Reckoner.Builder reckoner;
+  private final Reckoner.Builder reckoner;
+  private final Property<GrgitService> grgitService;
+  private final Property<String> scope;
+  private final Property<String> stage;
+  private final Property<Version> version;
 
-  public ReckonExtension(Project project, Grgit grgit) {
-    this.project = project;
+  @Inject
+  public ReckonExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
     this.reckoner = Reckoner.builder();
-    org.eclipse.jgit.lib.Repository repo = Optional.ofNullable(grgit)
-        .map(Grgit::getRepository)
-        .map(Repository::getJgit)
-        .map(Git::getRepository)
-        .orElse(null);
-    this.reckoner.git(repo);
+    this.grgitService = objectFactory.property(GrgitService.class);
+    this.scope = objectFactory.property(String.class);
+    this.stage = objectFactory.property(String.class);
+    this.version = objectFactory.property(Version.class);
+
+    var versionProvider = providerFactory.provider(this::reckonVersion);
+    this.version.set(versionProvider);
+    this.version.disallowChanges();
+    this.version.finalizeValueOnRead();
   }
 
   public ReckonExtension scopeFromProp() {
-    this.reckoner.scopeCalc(inventory -> findProperty(SCOPE_PROP));
+    this.reckoner.scopeCalc(inventory -> Optional.ofNullable(scope.getOrNull()));
     return this;
   }
 
   public ReckonExtension stageFromProp(String... stages) {
     this.reckoner.stages(stages);
-    this.reckoner.stageCalc((inventory, targetNormal) -> findProperty(STAGE_PROP));
+    this.reckoner.stageCalc((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
     return this;
   }
 
   public ReckonExtension snapshotFromProp() {
     this.reckoner.snapshots();
-    this.reckoner.stageCalc((inventory, targetNormal) -> {
-      Optional<String> stageProp = findProperty(STAGE_PROP);
-      Optional<String> snapshotProp = findProperty(SNAPSHOT_PROP)
-          .map(Boolean::parseBoolean)
-          .map(isSnapshot -> isSnapshot ? "snapshot" : "final");
-
-      snapshotProp.ifPresent(val -> {
-        project.getLogger().warn("Property {} is deprecated and will be removed in 1.0.0. Use {} set to one of [snapshot, final].", SNAPSHOT_PROP, STAGE_PROP);
-      });
-
-      return stageProp.isPresent() ? stageProp : snapshotProp;
-    });
+    this.reckoner.stageCalc((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
     return this;
   }
 
-  private Optional<String> findProperty(String name) {
-    return Optional.ofNullable(project.findProperty(name))
-        // composite builds have a parent Gradle build and can't trust the values of these properties
-        .filter(value -> project.getGradle().getParent() == null)
-        .map(Object::toString);
+  public Provider<Version> getVersion() {
+    return version;
   }
 
-  Version reckonVersion() {
-    Version version = reckoner.build().reckon();
-    project.getLogger().warn("Reckoned version: {}", version);
+  Property<GrgitService> getGrgitService() {
+    return grgitService;
+  }
+
+  Property<String> getScope() {
+    return scope;
+  }
+
+  Property<String> getStage() {
+    return stage;
+  }
+
+  private Version reckonVersion() {
+    try {
+      var git = grgitService.get().getGrgit();
+      var repo = git.getRepository().getJgit().getRepository();
+      reckoner.git(repo);
+    } catch (Exception e) {
+      // no git repo found
+      reckoner.git(null);
+    }
+
+    var version = reckoner.build().reckon();
+    logger.warn("Reckoned version: {}", version);
     return version;
   }
 }
