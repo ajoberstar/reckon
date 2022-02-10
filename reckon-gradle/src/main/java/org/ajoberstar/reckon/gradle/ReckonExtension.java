@@ -28,18 +28,6 @@ public class ReckonExtension {
     this.reckoner.git(repo);
   }
 
-  @Deprecated
-  public void setNormal(ReckonExtension ext) {
-    project.getLogger().warn("reckon.normal = scopeFromProp() is deprecated and will be removed in 1.0.0. Call reckon.scopeFromProp() instead.");
-    // no op
-  }
-
-  @Deprecated
-  public void setPreRelease(ReckonExtension ext) {
-    project.getLogger().warn("reckon.preRelease = stageFromProp() or snapshotFromProp() is deprecated and will be removed in 1.0.0. Call reckon.stageFromProp() or reckon.snapshotFromProp() instead.");
-    // no op
-  }
-
   public ReckonExtension scopeFromProp() {
     this.reckoner.scopeCalc(inventory -> findProperty(SCOPE_PROP));
     return this;
