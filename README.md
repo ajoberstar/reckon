@@ -139,6 +139,9 @@ reckon {
   // omit this to use the default of writing tag names of the form 1.2.3
   // this is a Version to String function
   tagWriter = version -> "project-a/" + version
+
+  // omit this to use the default of tag messages including just the raw version, e.g. "1.2.3"
+  tagMessage = version.map(v -> "Version " + v)
 }
 ```
 

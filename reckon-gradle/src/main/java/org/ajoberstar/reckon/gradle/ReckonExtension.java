@@ -30,6 +30,8 @@ public class ReckonExtension {
   private Provider<VersionTagParser> tagParserProvider;
   private Provider<VersionTagWriter> tagWriterProvider;
 
+  private Property<String> tagMessage;
+
   @Inject
   public ReckonExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
     this.reckoner = Reckoner.builder();
@@ -47,6 +49,8 @@ public class ReckonExtension {
     this.tagWriter = null;
     this.tagParserProvider = providerFactory.provider(() -> this.tagParser);
     this.tagWriterProvider = providerFactory.provider(() -> this.tagWriter);
+
+    this.tagMessage = objectFactory.property(String.class);
   }
 
   public ReckonExtension scopeFromProp() {
@@ -80,6 +84,10 @@ public class ReckonExtension {
 
   public void setTagWriter(VersionTagWriter tagWriter) {
     this.tagWriter = tagWriter;
+  }
+
+  public Property<String> getTagMessage() {
+    return tagMessage;
   }
 
   public Provider<Version> getVersion() {

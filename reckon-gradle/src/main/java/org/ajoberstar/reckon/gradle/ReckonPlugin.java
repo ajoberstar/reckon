@@ -30,6 +30,7 @@ public class ReckonPlugin implements Plugin<Project> {
     extension.getGrgitService().set(grgitService);
     extension.setTagParser(VersionTagParser.getDefault());
     extension.setTagWriter(VersionTagWriter.getDefault());
+    extension.getTagMessage().convention(extension.getVersion().map(Version::toString));
 
     // composite builds have a parent Gradle build and can't trust the values of these properties
     if (project.getGradle().getParent() == null) {
@@ -54,6 +55,7 @@ public class ReckonPlugin implements Plugin<Project> {
       task.getGrgitService().set(extension.getGrgitService());
       task.getVersion().set(extension.getVersion());
       task.getTagWriter().set(extension.getTagWriter());
+      task.getTagMessage().set(extension.getTagMessage());
     });
   }
 

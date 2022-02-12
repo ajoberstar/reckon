@@ -184,6 +184,33 @@ reckon {
     remote.tag.list().find { it.name == 'project-a/9.1.0-alpha.1' }
   }
 
+  def 'tag message can be overridden and if reckoned version is significant tag created and pushed'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
+  tagMessage = version.map(v -> "Version " + v)
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
+    then:
+    result.output.contains('Reckoned version: 1.1.0-alpha.1')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
+    and:
+    remote.tag.list().find { it.name == '1.1.0-alpha.1' && it.shortMessage == 'Version 1.1.0-alpha.1' }
+  }
+
   def 'if reckoned version is rebuild, skip tag create, but push'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)

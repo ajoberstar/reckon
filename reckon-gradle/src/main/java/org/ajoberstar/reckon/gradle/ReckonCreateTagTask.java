@@ -18,19 +18,20 @@ public class ReckonCreateTagTask extends DefaultTask {
   private Property<GrgitService> grgitService;
   private Property<Version> version;
   private Property<VersionTagWriter> tagWriter;
+  private Property<String> tagMessage;
 
   @Inject
   public ReckonCreateTagTask(ObjectFactory objectFactory) {
     this.grgitService = objectFactory.property(GrgitService.class);
     this.version = objectFactory.property(Version.class);
     this.tagWriter = objectFactory.property(VersionTagWriter.class);
+    this.tagMessage = objectFactory.property(String.class);
   }
 
   @TaskAction
   public void create() {
     var git = grgitService.get().getGrgit();;
     var tagName = tagWriter.get().write(version.get());
-    var versionString = version.get().toString();
 
     // rebuilds shouldn't trigger a new tag
     boolean alreadyTagged = git.getTag().list().stream()
@@ -41,7 +42,7 @@ public class ReckonCreateTagTask extends DefaultTask {
     } else {
       git.getTag().add(op -> {
         op.setName(tagName);
-        op.setMessage(versionString);
+        op.setMessage(tagMessage.get());
       });
       setDidWork(true);
     }
@@ -60,5 +61,10 @@ public class ReckonCreateTagTask extends DefaultTask {
   @Input
   public Property<VersionTagWriter> getTagWriter() {
     return tagWriter;
+  }
+
+  @Input
+  public Property<String> getTagMessage() {
+    return tagMessage;
   }
 }
