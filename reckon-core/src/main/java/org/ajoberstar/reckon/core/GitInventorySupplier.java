@@ -49,11 +49,11 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   @Override
   public VcsInventory getInventory() {
     // share this walk throughout to benefit from its caching
-    try (ObjectReader reader = repo.newObjectReader(); RevWalk walk = new RevWalk(reader)) {
+    try (var reader = repo.newObjectReader(); RevWalk walk = new RevWalk(reader)) {
       // saves on some performance as we don't really need the commit bodys
       walk.setRetainBody(false);
 
-      ObjectId headObjectId = repo.getRefDatabase().findRef("HEAD").getObjectId();
+      var headObjectId = repo.getRefDatabase().findRef("HEAD").getObjectId();
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
@@ -62,29 +62,29 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
       logger.debug("Found HEAD commit {}", headObjectId);
 
-      RevCommit headCommit = walk.parseCommit(headObjectId);
+      var headCommit = walk.parseCommit(headObjectId);
 
-      Set<TaggedVersion> taggedVersions = getTaggedVersions(walk);
+      var taggedVersions = getTaggedVersions(walk);
 
       logger.debug("Found tagged versions: {}", taggedVersions);
 
-      Version currentVersion = findCurrent(headCommit, taggedVersions.stream())
+      var currentVersion = findCurrent(headCommit, taggedVersions.stream())
           .map(TaggedVersion::getVersion)
           .orElse(null);
-      TaggedVersion baseNormal = findBase(walk, headCommit, taggedVersions.stream().filter(TaggedVersion::isNormal));
-      TaggedVersion baseVersion = findBase(walk, headCommit, taggedVersions.stream());
+      var baseNormal = findBase(walk, headCommit, taggedVersions.stream().filter(TaggedVersion::isNormal));
+      var baseVersion = findBase(walk, headCommit, taggedVersions.stream());
 
-      int commitsSinceBase = RevWalkUtils.count(walk, headCommit, baseNormal.getCommit());
+      var commitsSinceBase = RevWalkUtils.count(walk, headCommit, baseNormal.getCommit());
 
-      Set<TaggedVersion> parallelCandidates = findParallelCandidates(walk, headCommit, taggedVersions);
+      var parallelCandidates = findParallelCandidates(walk, headCommit, taggedVersions);
 
-      Set<RevCommit> taggedCommits = taggedVersions.stream().map(TaggedVersion::getCommit).collect(Collectors.toSet());
-      Set<Version> parallelVersions = parallelCandidates.stream()
+      var taggedCommits = taggedVersions.stream().map(TaggedVersion::getCommit).collect(Collectors.toSet());
+      var parallelVersions = parallelCandidates.stream()
           .map(version -> findParallel(walk, headCommit, version, taggedCommits))
           .flatMap(Optional::stream)
           .collect(Collectors.toSet());
 
-      Set<Version> claimedVersions = taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
+      var claimedVersions = taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
 
       var commitMessages = findCommitMessages(walk, headCommit, baseNormal.getCommit());
 
@@ -114,16 +114,16 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   }
 
   private Set<TaggedVersion> getTaggedVersions(RevWalk walk) throws IOException {
-    Set<TaggedVersion> versions = new HashSet<>();
+    var versions = new HashSet<TaggedVersion>();
 
-    for (Ref ref : repo.getRefDatabase().getRefsByPrefix(Constants.R_TAGS)) {
+    for (var ref : repo.getRefDatabase().getRefsByPrefix(Constants.R_TAGS)) {
 
-      Ref tag = repo.getRefDatabase().peel(ref);
+      var tag = repo.getRefDatabase().peel(ref);
       // only annotated tags return a peeled object id
-      ObjectId objectId = tag.getPeeledObjectId() == null ? tag.getObjectId() : tag.getPeeledObjectId();
-      RevCommit commit = walk.parseCommit(objectId);
+      var objectId = tag.getPeeledObjectId() == null ? tag.getObjectId() : tag.getPeeledObjectId();
+      var commit = walk.parseCommit(objectId);
 
-      String tagName = Repository.shortenRefName(ref.getName());
+      var tagName = Repository.shortenRefName(ref.getName());
       tagParser.parse(tagName).ifPresent(version -> {
         versions.add(new TaggedVersion(version, commit));
       });
@@ -143,15 +143,15 @@ final class GitInventorySupplier implements VcsInventorySupplier {
     walk.setRevFilter(RevFilter.ALL);
     walk.markStart(head);
 
-    Map<RevCommit, List<TaggedVersion>> versionsByCommit = versions.collect(Collectors.groupingBy(TaggedVersion::getCommit));
+    var versionsByCommit = versions.collect(Collectors.groupingBy(TaggedVersion::getCommit));
 
     Stream.Builder<List<TaggedVersion>> builder = Stream.builder();
 
-    for (RevCommit commit : walk) {
-      List<TaggedVersion> matches = versionsByCommit.get(commit);
+    for (var commit : walk) {
+      var matches = versionsByCommit.get(commit);
       if (matches != null) {
         // Parents can't be "nearer". Exclude them to avoid extra walking.
-        for (RevCommit parent : commit.getParents()) {
+        for (var parent : commit.getParents()) {
           walk.markUninteresting(parent);
         }
         builder.accept(matches);
@@ -191,11 +191,11 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       walk.markStart(head);
       walk.markStart(candidate.getCommit());
 
-      RevCommit mergeBase = walk.next();
+      var mergeBase = walk.next();
 
       walk.reset();
       walk.setRevFilter(RevFilter.ALL);
-      boolean taggedSinceMergeBase = RevWalkUtils.find(walk, head, mergeBase).stream()
+      var taggedSinceMergeBase = RevWalkUtils.find(walk, head, mergeBase).stream()
           .anyMatch(tagged::contains);
 
       if (mergeBase != null

@@ -34,7 +34,7 @@ public class ReckonCreateTagTask extends DefaultTask {
     var tagName = tagWriter.get().write(version.get());
 
     // rebuilds shouldn't trigger a new tag
-    boolean alreadyTagged = git.getTag().list().stream()
+    var alreadyTagged = git.getTag().list().stream()
         .anyMatch(tag -> tag.getName().equals(tagName));
 
     if (alreadyTagged || !version.get().isSignificant()) {
