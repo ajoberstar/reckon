@@ -8,8 +8,7 @@ public interface StageCalculator {
   Optional<String> calculate(VcsInventory inventory, Version targetNormal);
 
   default StageCalculator or(StageCalculator otherCalc) {
-    return (inventory, targetNormal) ->
-      this.calculate(inventory, targetNormal)
+    return (inventory, targetNormal) -> this.calculate(inventory, targetNormal)
         .or(() -> otherCalc.calculate(inventory, targetNormal));
   }
 
@@ -17,8 +16,8 @@ public interface StageCalculator {
     return (inventory, targetNormal) -> {
       var stageStr = stageCalc.apply(inventory, targetNormal);
       return stageStr.map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .map(String::toLowerCase);
+          .filter(s -> !s.isEmpty())
+          .map(String::toLowerCase);
     };
   }
 }

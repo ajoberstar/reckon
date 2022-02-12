@@ -54,8 +54,8 @@ public final class VcsInventory {
         .map(Collections::unmodifiableSet)
         .orElse(Collections.emptySet());
     this.commitMessages = Optional.ofNullable(commitMessages)
-      .map(Collections::unmodifiableList)
-      .orElse(Collections.emptyList());
+        .map(Collections::unmodifiableList)
+        .orElse(Collections.emptyList());
   }
 
   /**

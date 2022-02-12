@@ -1,6 +1,5 @@
 plugins {
   id("org.ajoberstar.defaults.java-library")
-  groovy
 }
 
 group = "org.ajoberstar.reckon"
@@ -29,18 +28,16 @@ dependencies {
   // util
   implementation("org.apache.commons:commons-lang3:[3.5,4.0[")
   implementation("com.github.zafarkhaja:java-semver:[0.9,)")
-
-  // testing
-
 }
 
 testing {
   suites {
     val test by getting(JvmTestSuite::class) {
-      useSpock("2.0-groovy-3.0")
+      useJUnitJupiter("latest.release")
       dependencies {
+        implementation("org.junit.jupiter:junit-jupiter-params")
+        implementation("org.mockito:mockito-core:latest.release")
         implementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
-        implementation("org.codehaus.groovy:groovy-all:[3.0,4.0[")
         runtimeOnly("org.slf4j:slf4j-simple:[1.7.25,1.8.0[")
       }
     }

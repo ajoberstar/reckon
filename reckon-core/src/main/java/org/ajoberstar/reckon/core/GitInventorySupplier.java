@@ -97,7 +97,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
           commitsSinceBase,
           parallelVersions,
           claimedVersions,
-        commitMessages);
+          commitMessages);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
