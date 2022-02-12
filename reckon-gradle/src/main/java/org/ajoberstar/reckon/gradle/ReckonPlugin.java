@@ -1,7 +1,10 @@
 package org.ajoberstar.reckon.gradle;
 
 import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
+import org.ajoberstar.grgit.gradle.GrgitServicePlugin;
 import org.ajoberstar.reckon.core.Version;
+import org.ajoberstar.reckon.core.VersionTagParser;
+import org.ajoberstar.reckon.core.VersionTagWriter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
@@ -19,19 +22,22 @@ public class ReckonPlugin implements Plugin<Project> {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    project.getPluginManager().apply("org.ajoberstar.grgit.service");
+    project.getPluginManager().apply(GrgitServicePlugin.class);
 
     var grgitServiceExtension = project.getExtensions().getByType(GrgitServiceExtension.class);
     var grgitService = grgitServiceExtension.getService();
 
     var extension = project.getExtensions().create("reckon", ReckonExtension.class);
     extension.getGrgitService().set(grgitService);
+    extension.setTagParser(VersionTagParser.getDefault());
+    extension.setTagWriter(VersionTagWriter.getDefault());
+    extension.getTagMessage().convention(extension.getVersion().map(Version::toString));
+
     // composite builds have a parent Gradle build and can't trust the values of these properties
     if (project.getGradle().getParent() == null) {
       extension.getScope().set(project.getProviders().gradleProperty(SCOPE_PROP).forUseAtConfigurationTime());
       extension.getStage().set(project.getProviders().gradleProperty(STAGE_PROP).forUseAtConfigurationTime());
     }
-
 
     var sharedVersion = new DelayedVersion(extension.getVersion());
     project.allprojects(prj -> {
@@ -49,6 +55,8 @@ public class ReckonPlugin implements Plugin<Project> {
       task.setGroup("publishing");
       task.getGrgitService().set(extension.getGrgitService());
       task.getVersion().set(extension.getVersion());
+      task.getTagWriter().set(extension.getTagWriter());
+      task.getTagMessage().set(extension.getTagMessage());
     });
   }
 
@@ -57,7 +65,9 @@ public class ReckonPlugin implements Plugin<Project> {
       task.setDescription("Push version tag created by reckon.");
       task.setGroup("publishing");
       task.getGrgitService().set(extension.getGrgitService());
+      task.getRemote().set(extension.getRemote());
       task.getVersion().set(extension.getVersion());
+      task.getTagWriter().set(extension.getTagWriter());
     });
   }
 

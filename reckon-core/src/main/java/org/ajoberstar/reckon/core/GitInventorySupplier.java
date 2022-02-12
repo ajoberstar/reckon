@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,18 +38,11 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   private static final Logger logger = LoggerFactory.getLogger(GitInventorySupplier.class);
 
   private final Repository repo;
-  private final Function<Ref, Optional<Version>> tagParser;
+  private final VersionTagParser tagParser;
 
-  public GitInventorySupplier(Repository repo) {
-    this(repo, tagName -> Optional.of(tagName.replaceAll("^v", "")));
-  }
-
-  public GitInventorySupplier(Repository repo, Function<String, Optional<String>> tagSelector) {
+  public GitInventorySupplier(Repository repo, VersionTagParser tagParser) {
     this.repo = repo;
-    this.tagParser = ref -> {
-      String tagName = Repository.shortenRefName(ref.getName());
-      return tagSelector.apply(tagName).flatMap(Version::parse);
-    };
+    this.tagParser = tagParser;
   }
 
   @Override
@@ -60,7 +52,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       // saves on some performance as we don't really need the commit bodys
       walk.setRetainBody(false);
 
-      ObjectId headObjectId = repo.getRefDatabase().getRef("HEAD").getObjectId();
+      ObjectId headObjectId = repo.getRefDatabase().findRef("HEAD").getObjectId();
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
@@ -88,8 +80,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       Set<RevCommit> taggedCommits = taggedVersions.stream().map(TaggedVersion::getCommit).collect(Collectors.toSet());
       Set<Version> parallelVersions = parallelCandidates.stream()
           .map(version -> findParallel(walk, headCommit, version, taggedCommits))
-          // TODO Java 9 Optional::stream
-          .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty())
+          .flatMap(Optional::stream)
           .collect(Collectors.toSet());
 
       Set<Version> claimedVersions = taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
@@ -121,12 +112,15 @@ final class GitInventorySupplier implements VcsInventorySupplier {
   private Set<TaggedVersion> getTaggedVersions(RevWalk walk) throws IOException {
     Set<TaggedVersion> versions = new HashSet<>();
 
-    for (Ref ref : repo.getRefDatabase().getRefs(Constants.R_TAGS).values()) {
-      Ref tag = repo.peel(ref);
+    for (Ref ref : repo.getRefDatabase().getRefsByPrefix(Constants.R_TAGS)) {
+
+      Ref tag = repo.getRefDatabase().peel(ref);
       // only annotated tags return a peeled object id
       ObjectId objectId = tag.getPeeledObjectId() == null ? tag.getObjectId() : tag.getPeeledObjectId();
       RevCommit commit = walk.parseCommit(objectId);
-      tagParser.apply(tag).ifPresent(version -> {
+
+      String tagName = Repository.shortenRefName(ref.getName());
+      tagParser.parse(tagName).ifPresent(version -> {
         versions.add(new TaggedVersion(version, commit));
       });
     }
@@ -198,9 +192,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       walk.reset();
       walk.setRevFilter(RevFilter.ALL);
       boolean taggedSinceMergeBase = RevWalkUtils.find(walk, head, mergeBase).stream()
-          .filter(tagged::contains)
-          .findAny()
-          .isPresent();
+          .anyMatch(tagged::contains);
 
       if (mergeBase != null
           && !taggedSinceMergeBase

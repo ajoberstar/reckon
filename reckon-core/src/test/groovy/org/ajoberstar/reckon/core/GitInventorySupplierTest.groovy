@@ -146,7 +146,7 @@ class GitInventorySupplierTest extends Specification {
   def 'if no commits, all results are empty'() {
     given:
     def emptyGrgit = Grgit.init(dir: Files.createTempDirectory('repo2').toFile())
-    def emptySupplier = new GitInventorySupplier(emptyGrgit.repository.jgit.repository)
+    def emptySupplier = new GitInventorySupplier(emptyGrgit.repository.jgit.repository, VersionTagParser.getDefault())
     expect:
     emptySupplier.getInventory() == new VcsInventory(null, true, null, null, null, 0, null, null)
   }
@@ -230,7 +230,7 @@ class GitInventorySupplierTest extends Specification {
   }
 
   def setup() {
-    supplier = new GitInventorySupplier(grgit.repository.jgit.repository)
+    supplier = new GitInventorySupplier(grgit.repository.jgit.repository, VersionTagParser.getDefault())
   }
 
   private void commit() {

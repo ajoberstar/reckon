@@ -281,6 +281,31 @@ class ReckonerTest extends Specification {
     reckonStage(inventory, null, 'final') == '1.3.0'
   }
 
+  def 'if supplier returns empty, scope defaults to provided default inferred scope if base version is base normal'() {
+    given:
+    def inventory = new VcsInventory(
+      'abcdef',
+      true,
+      null,
+      Version.valueOf('1.2.2'),
+      Version.valueOf('1.2.2'),
+      1,
+      [] as Set,
+      [] as Set
+    )
+    expect:
+    Reckoner.builder()
+      .clock(CLOCK)
+      .vcs { -> inventory }
+      .defaultInferredScope(Scope.PATCH)
+      .scopeCalc { i -> Optional.empty() }
+      .stages('beta', 'milestone', 'rc', 'final')
+      .stageCalc { i, v -> Optional.of('final') }
+      .build()
+      .reckon()
+      .toString() == '1.2.3'
+  }
+
   def 'if supplier returns empty, scope defaults to scope used by base version'() {
     given:
     def inventory = new VcsInventory(
