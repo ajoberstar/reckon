@@ -136,4 +136,8 @@ public final class VcsInventory {
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
+
+  public static VcsInventory empty(boolean clean) {
+    return new VcsInventory(null, clean, null, null, null, 0, Collections.emptySet(), Collections.emptySet(), Collections.emptyList());
+  }
 }

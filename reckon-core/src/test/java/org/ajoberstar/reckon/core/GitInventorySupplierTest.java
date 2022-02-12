@@ -2,14 +2,10 @@ package org.ajoberstar.reckon.core;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
@@ -174,7 +170,7 @@ public class GitInventorySupplierTest {
     });
 
     var emptySupplier = new GitInventorySupplier(emptyGrgit.getRepository().getJgit().getRepository(), VersionTagParser.getDefault());
-    assertEquals(new VcsInventory(null, true, null, null, null, 0, null, null, null), emptySupplier.getInventory());
+    assertEquals(VcsInventory.empty(true), emptySupplier.getInventory());
   }
 
   @BeforeAll
