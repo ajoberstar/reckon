@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
  * Scope is an indication of how large the change between SemVer normal versions is.
  */
 public enum Scope {
-  MAJOR, MINOR, PATCH;
+  // always keep these in ascending order of significance
+  PATCH, MINOR, MAJOR;
 
   /**
    * Parses a String version of a Scope. This is an alternative to {@code valueOf} which only supports

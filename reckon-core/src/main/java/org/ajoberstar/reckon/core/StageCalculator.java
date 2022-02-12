@@ -5,11 +5,17 @@ import java.util.function.BiFunction;
 
 @FunctionalInterface
 public interface StageCalculator {
-  Optional<String> calculate(VcsInventory inventory, Version baseVersion);
+  Optional<String> calculate(VcsInventory inventory, Version targetNormal);
+
+  default StageCalculator or(StageCalculator otherCalc) {
+    return (inventory, targetNormal) ->
+      this.calculate(inventory, targetNormal)
+        .or(() -> otherCalc.calculate(inventory, targetNormal));
+  }
 
   static StageCalculator ofUserString(BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
-    return (inventory, base) -> {
-      var stageStr = stageCalc.apply(inventory, base);
+    return (inventory, targetNormal) -> {
+      var stageStr = stageCalc.apply(inventory, targetNormal);
       return stageStr.map(String::trim)
         .filter(s -> !s.isEmpty())
         .map(String::toLowerCase);
