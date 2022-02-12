@@ -5,16 +5,14 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.ajoberstar.grgit.gradle.GrgitService;
-import org.ajoberstar.reckon.core.Reckoner;
-import org.ajoberstar.reckon.core.Version;
-import org.ajoberstar.reckon.core.VersionTagParser;
-import org.ajoberstar.reckon.core.VersionTagWriter;
+import org.ajoberstar.reckon.core.*;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
+import org.gradle.api.provider.SetProperty;
 
 public class ReckonExtension {
   private static Logger logger = Logging.getLogger(ReckonExtension.class);
@@ -27,10 +25,10 @@ public class ReckonExtension {
 
   private VersionTagParser tagParser;
   private VersionTagWriter tagWriter;
-  private Provider<VersionTagParser> tagParserProvider;
-  private Provider<VersionTagWriter> tagWriterProvider;
+  private final Provider<VersionTagParser> tagParserProvider;
+  private final Provider<VersionTagWriter> tagWriterProvider;
 
-  private Property<String> tagMessage;
+  private final Property<String> tagMessage;
 
   @Inject
   public ReckonExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
@@ -56,6 +54,10 @@ public class ReckonExtension {
   public ReckonExtension scopeFromProp() {
     this.reckoner.scopeCalc(inventory -> Optional.ofNullable(scope.getOrNull()));
     return this;
+  }
+
+  public void setDefaultInferredScope(String scope) {
+    this.reckoner.defaultInferredScope(Scope.from(scope));
   }
 
   public ReckonExtension stageFromProp(String... stages) {

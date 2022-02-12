@@ -90,6 +90,7 @@ plugins {
 reckon {
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
+  defaultInferredScope = 'patch'
 }
 """
     local.add(patterns: ['build.gradle'])
@@ -97,7 +98,7 @@ reckon {
     when:
     def result = build('reckonTagPush', '--configuration-cache')
     then:
-    result.output.contains('Reckoned version: 1.1.0-alpha.0')
+    result.output.contains('Reckoned version: 1.0.1-alpha.0')
     result.task(':reckonTagCreate').outcome == TaskOutcome.UP_TO_DATE
     result.task(':reckonTagPush').outcome == TaskOutcome.UP_TO_DATE
   }

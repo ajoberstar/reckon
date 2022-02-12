@@ -32,14 +32,16 @@ public final class Reckoner {
   private final VcsInventorySupplier inventorySupplier;
   private final Function<VcsInventory, Optional<String>> scopeCalc;
   private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+  private final Scope defaultInferredScope;
   private final Set<String> stages;
   private final String defaultStage;
 
-  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Set<String> stages, String defaultStage) {
+  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
     this.clock = clock;
     this.inventorySupplier = inventorySupplier;
     this.scopeCalc = scopeCalc;
     this.stageCalc = stageCalc;
+    this.defaultInferredScope = defaultInferredScope;
     this.stages = stages;
     this.defaultStage = defaultStage;
   }
@@ -83,7 +85,7 @@ public final class Reckoner {
       logger.debug("Using provided scope value: {}", scope);
     } else {
       Optional<Scope> inferredScope = Scope.infer(inventory.getBaseNormal(), inventory.getBaseVersion());
-      scope = inferredScope.orElse(Scope.MINOR);
+      scope = inferredScope.orElse(defaultInferredScope);
       logger.debug("Inferred scope from base version: {}", scope);
     }
 
@@ -154,6 +156,7 @@ public final class Reckoner {
     private VcsInventorySupplier inventorySupplier;
     private Function<VcsInventory, Optional<String>> scopeCalc;
     private BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+    private Scope defaultInferredScope = Scope.MINOR;
     private Set<String> stages;
     private String defaultStage;
 
@@ -202,6 +205,11 @@ public final class Reckoner {
      */
     public Builder scopeCalc(Function<VcsInventory, Optional<String>> scopeCalc) {
       this.scopeCalc = scopeCalc;
+      return this;
+    }
+
+    public Builder defaultInferredScope(Scope defaultInferredScope) {
+      this.defaultInferredScope = defaultInferredScope;
       return this;
     }
 
@@ -260,9 +268,10 @@ public final class Reckoner {
       Clock clock = Optional.ofNullable(this.clock).orElseGet(Clock::systemUTC);
       Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
       Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
+      Objects.requireNonNull(defaultInferredScope, "Must provide a default inferred scope");
       Objects.requireNonNull(stages, "Must provide set of stages.");
       Objects.requireNonNull(stageCalc, "Must provide a stage supplier.");
-      return new Reckoner(clock, inventorySupplier, scopeCalc, stageCalc, stages, defaultStage);
+      return new Reckoner(clock, inventorySupplier, scopeCalc, stageCalc, defaultInferredScope, stages, defaultStage);
     }
   }
 }
