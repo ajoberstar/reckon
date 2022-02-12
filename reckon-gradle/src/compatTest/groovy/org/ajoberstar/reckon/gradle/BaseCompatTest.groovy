@@ -13,6 +13,7 @@ class BaseCompatTest extends Specification {
   File projectDir
   File buildFile
   Grgit remote
+  Grgit remote2
 
   def setup() {
     projectDir = new File(tempDir, 'project')
@@ -30,6 +31,9 @@ class BaseCompatTest extends Specification {
     remoteFile('master.txt') << 'contents here2'
     remote.add(patterns: ['.'])
     remote.commit(message: 'second commit')
+
+    def remote2Dir = new File(tempDir, 'remote2')
+    remote2 = Grgit.clone(dir: remote2Dir, uri: remote.repository.rootDir)
   }
 
   def 'if no git repo found, version is defaulted'() {
@@ -153,6 +157,35 @@ reckon {
     remote.tag.list().find { it.name == '1.1.0-alpha.1' }
   }
 
+  def 'remote can be overridden and if reckoned version is significant tag created and pushed'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
+  remote = 'other-remote'
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    local.remote.add(name: 'other-remote', url: remote2.getRepository().getRootDir())
+    when:
+    def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
+    then:
+    result.output.contains('Reckoned version: 1.1.0-alpha.1')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
+    and:
+    !remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+    remote2.tag.list().find { it.name == '1.1.0-alpha.1' }
+  }
+
   def 'tag parser/writer can be overridden and reckoned version is significant tag created and pushed'() {
     given:
     def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
@@ -260,6 +293,12 @@ reckon {
 
   private File remoteFile(String path) {
     File file = new File(remote.repository.rootDir, path)
+    file.parentFile.mkdirs()
+    return file
+  }
+
+  private File remote2File(String path) {
+    File file = new File(remote2.repository.rootDir, path)
     file.parentFile.mkdirs()
     return file
   }

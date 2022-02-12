@@ -23,6 +23,8 @@ public class ReckonExtension {
   private final Property<String> stage;
   private final Property<Version> version;
 
+  private final Property<String> remote;
+
   private VersionTagParser tagParser;
   private VersionTagWriter tagWriter;
   private final Provider<VersionTagParser> tagParserProvider;
@@ -42,6 +44,8 @@ public class ReckonExtension {
     this.version.set(versionProvider);
     this.version.disallowChanges();
     this.version.finalizeValueOnRead();
+
+    this.remote = objectFactory.property(String.class);
 
     this.tagParser = null;
     this.tagWriter = null;
@@ -70,6 +74,10 @@ public class ReckonExtension {
     this.reckoner.snapshots();
     this.reckoner.stageCalc((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
     return this;
+  }
+
+  public Property<String> getRemote() {
+    return remote;
   }
 
   public Provider<VersionTagParser> getTagParser() {

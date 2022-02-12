@@ -131,6 +131,9 @@ reckon {
 
   // omit this to use the default of 'minor'
   defaultInferredScope = 'patch'
+  
+  // omit to use default remote
+  remote = 'other-remote'
 
   // omit this to use the default of parsing tag names of the form 1.2.3 or v1.2.3
   // this is a String to Optional<Version> function

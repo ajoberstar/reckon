@@ -65,6 +65,7 @@ public class ReckonPlugin implements Plugin<Project> {
       task.setDescription("Push version tag created by reckon.");
       task.setGroup("publishing");
       task.getGrgitService().set(extension.getGrgitService());
+      task.getRemote().set(extension.getRemote());
       task.getVersion().set(extension.getVersion());
       task.getTagWriter().set(extension.getTagWriter());
     });
