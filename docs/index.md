@@ -96,7 +96,7 @@ $ ./gradlew build reckonTagPush -Preckon.stage=beta \
     -Dorg.ajoberstar.grgit.auth.password=$password
 ```
 
-See details [hete](http://ajoberstar.org/grgit/grgit-authentication.html)
+See details [here](http://ajoberstar.org/grgit/grgit-authentication.html)
 
 ### Now just run the build again
 
