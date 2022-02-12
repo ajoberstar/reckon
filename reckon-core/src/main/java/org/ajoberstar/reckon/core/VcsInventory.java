@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.core;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ public final class VcsInventory {
   private final Version baseNormal;
   private final Set<Version> parallelNormals;
   private final Set<Version> claimedVersions;
+  private final List<String> commitMessages;
 
   /**
    * This is intentionally package private.
@@ -33,7 +35,8 @@ public final class VcsInventory {
       Version baseNormal,
       int commitsSinceBase,
       Set<Version> parallelNormals,
-      Set<Version> claimedVersions) {
+      Set<Version> claimedVersions,
+      List<String> commitMessages) {
     if (commitsSinceBase < 0) {
       throw new IllegalArgumentException("Commits since base must be 0 or greater: " + commitsSinceBase);
     }
@@ -50,6 +53,9 @@ public final class VcsInventory {
     this.claimedVersions = Optional.ofNullable(claimedVersions)
         .map(Collections::unmodifiableSet)
         .orElse(Collections.emptySet());
+    this.commitMessages = Optional.ofNullable(commitMessages)
+      .map(Collections::unmodifiableList)
+      .orElse(Collections.emptyList());
   }
 
   /**
@@ -107,6 +113,13 @@ public final class VcsInventory {
    */
   public Set<Version> getClaimedVersions() {
     return claimedVersions;
+  }
+
+  /**
+   * All commit messages between the current HEAD commit and the base verison's commit.
+   */
+  public List<String> getCommitMessages() {
+    return commitMessages;
   }
 
   @Override

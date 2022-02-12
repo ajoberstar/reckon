@@ -189,7 +189,7 @@ public final class Reckoner {
      */
     public Builder git(Repository repo, VersionTagParser tagParser) {
       if (repo == null) {
-        this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
+        this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet(), Collections.emptyList());
       } else {
         var realParser = Optional.ofNullable(tagParser).orElse(VersionTagParser.getDefault());
         this.inventorySupplier = new GitInventorySupplier(repo, realParser);

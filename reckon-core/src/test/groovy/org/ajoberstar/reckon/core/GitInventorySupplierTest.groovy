@@ -93,6 +93,7 @@ class GitInventorySupplierTest extends Specification {
     checkout('final-current')
     expect:
     supplier.getInventory().commitsSinceBase == 0
+    supplier.getInventory().commitMessages == []
   }
 
   def 'if no reachable tagged finals, commits since base is size of log from HEAD'() {
@@ -100,6 +101,7 @@ class GitInventorySupplierTest extends Specification {
     checkout('final-unreachable')
     expect:
     supplier.getInventory().commitsSinceBase == 4
+    supplier.getInventory().commitMessages == ['do', 'do', 'do', 'do']
   }
 
   def 'if reachable tagged finals, commits since base is size of log from HEAD excluding the base normal'() {
@@ -148,7 +150,7 @@ class GitInventorySupplierTest extends Specification {
     def emptyGrgit = Grgit.init(dir: Files.createTempDirectory('repo2').toFile())
     def emptySupplier = new GitInventorySupplier(emptyGrgit.repository.jgit.repository, VersionTagParser.getDefault())
     expect:
-    emptySupplier.getInventory() == new VcsInventory(null, true, null, null, null, 0, null, null)
+    emptySupplier.getInventory() == new VcsInventory(null, true, null, null, null, 0, null, null, null)
   }
 
   def setupSpec() {

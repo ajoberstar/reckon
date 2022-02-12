@@ -29,7 +29,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [Version.valueOf('1.3.0')] as Set,
-      [Version.valueOf('2.0.0-rc.1')] as Set
+      [Version.valueOf('2.0.0-rc.1')] as Set,
+      []
     )
     when:
     Reckoner.builder()
@@ -56,7 +57,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [Version.valueOf('1.3.0')] as Set,
-      [Version.valueOf('2.0.0-rc.1')] as Set
+      [Version.valueOf('2.0.0-rc.1')] as Set,
+      []
     )
     when:
     reckonStage(inventory, 'major', 'rc')
@@ -67,15 +69,16 @@ class ReckonerTest extends Specification {
   def 'if target version is normal, current version is ignored'() {
     given:
     VcsInventory inventory = new VcsInventory(
-        'abcdef',
-        true,
-        Version.valueOf('1.2.3-milestone.1'),
-        Version.valueOf('1.2.3-milestone.1'),
-        Version.valueOf('1.2.2'),
-        1,
-        [Version.valueOf('1.3.0')] as Set,
-        [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
-        )
+      'abcdef',
+      true,
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.3-milestone.1'),
+      Version.valueOf('1.2.2'),
+      1,
+      [Version.valueOf('1.3.0')] as Set,
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set,
+      []
+    )
     expect:
     reckonStage(inventory, 'major', 'final') == '2.0.0'
   }
@@ -90,7 +93,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [Version.valueOf('1.3.0')] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == '1.2.3-milestone.1'
@@ -106,7 +110,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.3'),
       1,
       [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == '1.2.3'
@@ -123,7 +128,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [Version.valueOf('1.3.0')] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == "1.2.3-milestone.1.1+${TIMESTAMP}"
@@ -139,7 +145,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.3'),
       1,
       [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == "1.3.0-beta.0.1+${TIMESTAMP}"
@@ -156,7 +163,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.3'),
       1,
       [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, 'minor', 'final') == '1.3.0'
@@ -173,7 +181,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.3'),
       1,
       [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, 'rc') == '1.3.0-rc.1'
@@ -190,7 +199,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set
+      [Version.valueOf('1.2.2'), Version.valueOf('1.2.3-milestone.1')] as Set,
+      []
     )
     expect:
     reckonStage(inventory, 'minor', 'rc') == '1.3.0-rc.1'
@@ -206,8 +216,9 @@ class ReckonerTest extends Specification {
       Version.valueOf('0.0.0'),
       1,
       [] as Set,
-      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
-      )
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set,
+      []
+    )
     expect:
     reckonStage(inventory, null, null) == '0.1.0'
   }
@@ -222,8 +233,9 @@ class ReckonerTest extends Specification {
       Version.valueOf('0.0.0'),
       1,
       [] as Set,
-      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
-      )
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set,
+      []
+    )
     expect:
     reckonStage(inventory, null, null) == '0.1.0-beta.0.1+abcdef'
   }
@@ -238,8 +250,9 @@ class ReckonerTest extends Specification {
       Version.valueOf('0.0.0'),
       1,
       [] as Set,
-      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set
-      )
+      [Version.valueOf('0.1.0'), Version.valueOf('0.1.1'), Version.valueOf('0.2.0')] as Set,
+      []
+    )
     when:
     reckonStage(inventory, null, 'rc')
     then:
@@ -256,8 +269,9 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [] as Set,
-        [] as Set
-        )
+        [] as Set,
+      []
+      )
     when:
     reckonStage(inventory, 'general', 'beta')
     then:
@@ -275,7 +289,8 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [] as Set,
-        [] as Set
+        [] as Set,
+      []
         )
     expect:
     reckonStage(inventory, null, 'final') == '1.3.0'
@@ -291,7 +306,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     Reckoner.builder()
@@ -316,7 +332,8 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [] as Set,
-        [] as Set
+        [] as Set,
+      []
         )
     expect:
     reckonStage(inventory, null, 'final') == '1.2.3'
@@ -332,7 +349,8 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [] as Set,
-        [] as Set
+        [] as Set,
+      []
         )
     expect:
     reckonStage(inventory, 'major', 'final') == '2.0.0'
@@ -348,7 +366,8 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [Version.valueOf('2.0.0')] as Set,
-        [] as Set
+        [] as Set,
+      []
         )
     expect:
     reckonStage(inventory, 'major', 'final') == '3.0.0'
@@ -364,7 +383,8 @@ class ReckonerTest extends Specification {
         Version.valueOf('1.2.2'),
         1,
         [] as Set,
-        [Version.valueOf('2.0.0')] as Set
+        [Version.valueOf('2.0.0')] as Set,
+      []
         )
     when:
     reckonStage(inventory, 'major', 'final')
@@ -382,7 +402,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     when:
     reckonStage(inventory, 'major', 'not')
@@ -400,7 +421,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, 'major', 'final') == '2.0.0'
@@ -416,7 +438,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, 'major', null) == '2.0.0-beta.0.5+abcdef'
@@ -432,7 +455,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, 'major', '') == '2.0.0-beta.0.5+abcdef'
@@ -448,7 +472,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == '1.2.3-milestone.2.5+abcdef'
@@ -464,7 +489,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, 'milestone') == '1.2.3-milestone.3'
@@ -480,7 +506,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, 'rc') == '1.2.3-rc.1'
@@ -497,7 +524,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == "1.2.3-milestone.2.5+${TIMESTAMP}"
@@ -514,7 +542,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonStage(inventory, null, null) == "1.2.3-milestone.2.5+${TIMESTAMP}"
@@ -531,7 +560,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     when:
     reckonStage(inventory, null, stage)
@@ -551,7 +581,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       5,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonSnapshot(inventory, null, 'snapshot') == '1.3.0-SNAPSHOT'
@@ -567,7 +598,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     when:
     reckonSnapshot(inventory, 'major', 'not')
@@ -585,7 +617,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonSnapshot(inventory, 'major', 'final') == '2.0.0'
@@ -601,7 +634,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     expect:
     reckonSnapshot(inventory, 'major', 'snapshot') == '2.0.0-SNAPSHOT'
@@ -618,7 +652,8 @@ class ReckonerTest extends Specification {
       Version.valueOf('1.2.2'),
       1,
       [] as Set,
-      [] as Set
+      [] as Set,
+      []
     )
     when:
     reckonSnapshot(inventory, 'major', 'final')

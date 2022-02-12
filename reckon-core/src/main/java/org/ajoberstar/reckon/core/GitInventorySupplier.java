@@ -2,6 +2,7 @@ package org.ajoberstar.reckon.core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +57,7 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
       if (headObjectId == null) {
         logger.debug("No HEAD commit. Presuming repo is empty.");
-        return new VcsInventory(null, isClean(), null, null, null, 0, null, null);
+        return new VcsInventory(null, isClean(), null, null, null, 0, null, null, null);
       }
 
       logger.debug("Found HEAD commit {}", headObjectId);
@@ -85,6 +86,8 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
       Set<Version> claimedVersions = taggedVersions.stream().map(TaggedVersion::getVersion).collect(Collectors.toSet());
 
+      var commitMessages = findCommitMessages(walk, headCommit, baseNormal.getCommit());
+
       return new VcsInventory(
           reader.abbreviate(headObjectId).name(),
           isClean(),
@@ -93,7 +96,8 @@ final class GitInventorySupplier implements VcsInventorySupplier {
           baseNormal.getVersion(),
           commitsSinceBase,
           parallelVersions,
-          claimedVersions);
+          claimedVersions,
+        commitMessages);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -202,6 +206,21 @@ final class GitInventorySupplier implements VcsInventorySupplier {
       } else {
         return Optional.empty();
       }
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  private List<String> findCommitMessages(RevWalk walk, RevCommit head, RevCommit base) {
+    try {
+      walk.reset();
+      walk.setRevFilter(RevFilter.ALL);
+      var messages = new ArrayList<String>();
+      for (var commit : RevWalkUtils.find(walk, head, base)) {
+        walk.parseBody(commit);
+        messages.add(commit.getFullMessage());
+      }
+      return messages;
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
