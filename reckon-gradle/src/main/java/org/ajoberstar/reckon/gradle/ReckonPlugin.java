@@ -2,6 +2,8 @@ package org.ajoberstar.reckon.gradle;
 
 import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
 import org.ajoberstar.reckon.core.Version;
+import org.ajoberstar.reckon.core.VersionTagParser;
+import org.ajoberstar.reckon.core.VersionTagWriter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
@@ -26,12 +28,14 @@ public class ReckonPlugin implements Plugin<Project> {
 
     var extension = project.getExtensions().create("reckon", ReckonExtension.class);
     extension.getGrgitService().set(grgitService);
+    extension.setTagParser(VersionTagParser.getDefault());
+    extension.setTagWriter(VersionTagWriter.getDefault());
+
     // composite builds have a parent Gradle build and can't trust the values of these properties
     if (project.getGradle().getParent() == null) {
       extension.getScope().set(project.getProviders().gradleProperty(SCOPE_PROP).forUseAtConfigurationTime());
       extension.getStage().set(project.getProviders().gradleProperty(STAGE_PROP).forUseAtConfigurationTime());
     }
-
 
     var sharedVersion = new DelayedVersion(extension.getVersion());
     project.allprojects(prj -> {
@@ -49,6 +53,7 @@ public class ReckonPlugin implements Plugin<Project> {
       task.setGroup("publishing");
       task.getGrgitService().set(extension.getGrgitService());
       task.getVersion().set(extension.getVersion());
+      task.getTagWriter().set(extension.getTagWriter());
     });
   }
 
@@ -58,6 +63,7 @@ public class ReckonPlugin implements Plugin<Project> {
       task.setGroup("publishing");
       task.getGrgitService().set(extension.getGrgitService());
       task.getVersion().set(extension.getVersion());
+      task.getTagWriter().set(extension.getTagWriter());
     });
   }
 

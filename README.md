@@ -127,6 +127,18 @@ reckon {
   stageFromProp('milestone', 'rc', 'final')
   // alternative to stageFromProp
   // snapshotFromProp()
+
+  // omit this to use the default of parsing tag names of the form 1.2.3 or v1.2.3
+  // this is a String to Optional<Version> function
+  // return an empty optional for tags you don't consider a relevant version
+  tagParser = tagName -> java.util.Optional.of(tagName)
+    .filter(name -> name.startsWith("project-a/"))
+    .map(name -> name.replace("project-a/", ""))
+    .flatMap(name -> org.ajoberstar.reckon.core.Version.parse(name))
+
+  // omit this to use the default of writing tag names of the form 1.2.3
+  // this is a Version to String function
+  tagWriter = version -> "project-a/" + version
 }
 ```
 

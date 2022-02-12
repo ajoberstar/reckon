@@ -26,6 +26,7 @@ class BaseCompatTest extends Specification {
     remote.add(patterns: ['.'])
     remote.commit(message: 'first commit')
     remote.tag.add(name: '1.0.0', message: '1.0.0')
+    remote.tag.add(name: 'project-a/9.0.0', message: '9.0.0')
     remoteFile('master.txt') << 'contents here2'
     remote.add(patterns: ['.'])
     remote.commit(message: 'second commit')
@@ -149,6 +150,38 @@ reckon {
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
     remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+  }
+
+  def 'tag parser/writer can be overridden and reckoned version is significant tag created and pushed'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
+  
+  tagParser = tagName -> java.util.Optional.of(tagName)
+      .filter(name -> name.startsWith("project-a/"))
+      .map(name -> name.replace("project-a/", ""))
+      .flatMap(name -> org.ajoberstar.reckon.core.Version.parse(name))
+  tagWriter = version -> "project-a/" + version
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
+    then:
+    result.output.contains('Reckoned version: 9.1.0-alpha.1')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
+    and:
+    remote.tag.list().find { it.name == 'project-a/9.1.0-alpha.1' }
   }
 
   def 'if reckoned version is rebuild, skip tag create, but push'() {

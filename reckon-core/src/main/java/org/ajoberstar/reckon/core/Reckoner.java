@@ -174,10 +174,22 @@ public final class Reckoner {
      * @return this builder
      */
     public Builder git(Repository repo) {
+      return git(repo, null);
+    }
+
+    /**
+     * Use the given JGit repository to infer the state of Git.
+     *
+     * @param repo repository that the version should be inferred from
+     * @param tagParser a parser used to find versions from tag names
+     * @return this builder
+     */
+    public Builder git(Repository repo, VersionTagParser tagParser) {
       if (repo == null) {
         this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
       } else {
-        this.inventorySupplier = new GitInventorySupplier(repo);
+        var realParser = Optional.ofNullable(tagParser).orElse(VersionTagParser.getDefault());
+        this.inventorySupplier = new GitInventorySupplier(repo, realParser);
       }
       return this;
     }
