@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.gradle;
 
 import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
+import org.ajoberstar.grgit.gradle.GrgitServicePlugin;
 import org.ajoberstar.reckon.core.Version;
 import org.ajoberstar.reckon.core.VersionTagParser;
 import org.ajoberstar.reckon.core.VersionTagWriter;
@@ -21,7 +22,7 @@ public class ReckonPlugin implements Plugin<Project> {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    project.getPluginManager().apply("org.ajoberstar.grgit.service");
+    project.getPluginManager().apply(GrgitServicePlugin.class);
 
     var grgitServiceExtension = project.getExtensions().getByType(GrgitServiceExtension.class);
     var grgitService = grgitServiceExtension.getService();
