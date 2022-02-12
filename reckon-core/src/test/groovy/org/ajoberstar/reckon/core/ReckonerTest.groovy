@@ -38,7 +38,7 @@ class ReckonerTest extends Specification {
       .vcs { -> inventory }
       .scopeCalc { i -> Optional.empty() }
       .stages('beTA', 'miLEStone', 'RC', 'Final')
-      .stageCalc { i, v -> Optional.ofNullable(stage) }
+      .stageCalc(StageCalculator.ofUserString { i, v -> Optional.ofNullable(stage) })
       .build()
       .reckon()
     then:
@@ -445,23 +445,6 @@ class ReckonerTest extends Specification {
     reckonStage(inventory, 'major', null) == '2.0.0-beta.0.5+abcdef'
   }
 
-  def 'if target does not contain stage and stage is an empty string, use the default stage and add num commits and commit id'() {
-    given:
-    VcsInventory inventory = new VcsInventory(
-      'abcdef',
-      true,
-      null,
-      Version.valueOf('1.2.3-milestone.2'),
-      Version.valueOf('1.2.2'),
-      5,
-      [] as Set,
-      [] as Set,
-      []
-    )
-    expect:
-    reckonStage(inventory, 'major', '') == '2.0.0-beta.0.5+abcdef'
-  }
-
   def 'if target does not contain stage and stage is present, add num commits and commit id'() {
     given:
     VcsInventory inventory = new VcsInventory(
@@ -665,7 +648,7 @@ class ReckonerTest extends Specification {
     return Reckoner.builder()
       .clock(CLOCK)
       .vcs { -> inventory }
-      .scopeCalc { i -> Optional.ofNullable(scope) }
+      .scopeCalc { i -> Optional.ofNullable(scope).map(Scope::from) }
       .stages('beta', 'milestone', 'rc', 'final')
       .stageCalc { i, v -> Optional.ofNullable(stage) }
       .build()
@@ -676,7 +659,7 @@ class ReckonerTest extends Specification {
     return Reckoner.builder()
       .clock(CLOCK)
       .vcs { -> inventory }
-      .scopeCalc { i -> Optional.ofNullable(scope) }
+      .scopeCalc { i -> Optional.ofNullable(scope).map(Scope::from) }
       .snapshots()
       .stageCalc { i, v -> Optional.ofNullable(stage) }
       .build()

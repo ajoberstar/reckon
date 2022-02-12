@@ -12,7 +12,6 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
-import org.gradle.api.provider.SetProperty;
 
 public class ReckonExtension {
   private static Logger logger = Logging.getLogger(ReckonExtension.class);
@@ -56,7 +55,7 @@ public class ReckonExtension {
   }
 
   public ReckonExtension scopeFromProp() {
-    this.reckoner.scopeCalc(inventory -> Optional.ofNullable(scope.getOrNull()));
+    this.reckoner.scopeCalc(ScopeCalculator.ofUserString(inventory -> Optional.ofNullable(scope.getOrNull())));
     return this;
   }
 
@@ -66,13 +65,13 @@ public class ReckonExtension {
 
   public ReckonExtension stageFromProp(String... stages) {
     this.reckoner.stages(stages);
-    this.reckoner.stageCalc((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
+    this.reckoner.stageCalc(StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull())));
     return this;
   }
 
   public ReckonExtension snapshotFromProp() {
     this.reckoner.snapshots();
-    this.reckoner.stageCalc((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
+    this.reckoner.stageCalc(StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull())));
     return this;
   }
 

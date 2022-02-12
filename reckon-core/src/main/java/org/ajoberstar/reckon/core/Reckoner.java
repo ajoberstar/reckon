@@ -30,13 +30,13 @@ public final class Reckoner {
 
   private final Clock clock;
   private final VcsInventorySupplier inventorySupplier;
-  private final Function<VcsInventory, Optional<String>> scopeCalc;
-  private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+  private final ScopeCalculator scopeCalc;
+  private final StageCalculator stageCalc;
   private final Scope defaultInferredScope;
   private final Set<String> stages;
   private final String defaultStage;
 
-  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
+  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, ScopeCalculator scopeCalc, StageCalculator stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
     this.clock = clock;
     this.inventorySupplier = inventorySupplier;
     this.scopeCalc = scopeCalc;
@@ -77,7 +77,7 @@ public final class Reckoner {
   }
 
   private Version reckonNormal(VcsInventory inventory) {
-    Optional<Scope> providedScope = scopeCalc.apply(inventory).filter(value -> !value.isEmpty()).map(Scope::from);
+    Optional<Scope> providedScope = scopeCalc.calculate(inventory);
 
     Scope scope;
     if (providedScope.isPresent()) {
@@ -101,11 +101,7 @@ public final class Reckoner {
   }
 
   private Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage = stageCalc.apply(inventory, targetNormal)
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .map(String::toLowerCase)
-        .orElse(null);
+    String stage = stageCalc.calculate(inventory, targetNormal).orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
       String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
@@ -154,8 +150,8 @@ public final class Reckoner {
   public static final class Builder {
     private Clock clock;
     private VcsInventorySupplier inventorySupplier;
-    private Function<VcsInventory, Optional<String>> scopeCalc;
-    private BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+    private ScopeCalculator scopeCalc;
+    private StageCalculator stageCalc;
     private Scope defaultInferredScope = Scope.MINOR;
     private Set<String> stages;
     private String defaultStage;
@@ -203,7 +199,7 @@ public final class Reckoner {
      * @param scopeCalc the function that provides the scope
      * @return this builder
      */
-    public Builder scopeCalc(Function<VcsInventory, Optional<String>> scopeCalc) {
+    public Builder scopeCalc(ScopeCalculator scopeCalc) {
       this.scopeCalc = scopeCalc;
       return this;
     }
@@ -254,7 +250,7 @@ public final class Reckoner {
      * @param stageCalc the function that provides the stage
      * @return this builder
      */
-    public Builder stageCalc(BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
+    public Builder stageCalc(StageCalculator stageCalc) {
       this.stageCalc = stageCalc;
       return this;
     }
