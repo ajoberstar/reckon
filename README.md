@@ -123,12 +123,29 @@ plugins {
 }
 
 reckon {
+  // START As of 0.16.0
+  // what stages are allowed
+  stages('milestone', 'rc', 'final')
+  // or use snapshots
+  snapshots()
+  
+  // how do you calculate the scope/stage
+  scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages()) // fall back to commit message (see below) if no explicit prop set
+  stageCalc = calcScopeFromProp()
+  // these can also be arbitrary closures (see code for details)
+  scopeCalc = { inventory -> Optional.of(Scope.MAJOR) }
+  stageCalc = { inventory, targetNormal -> Optional.of('beta') }
+  
+  // END As of 0.16.0
+  
+  // START LEGACY
   scopeFromProp()
   stageFromProp('milestone', 'rc', 'final')
 
   // alternative to stageFromProp
   // snapshotFromProp()
-
+  // END LEGACY
+  
   // omit this to use the default of 'minor'
   defaultInferredScope = 'patch'
   
@@ -154,23 +171,82 @@ reckon {
 
 **NOTE:** Reckon overrides the `project.version` property in Gradle
 
-#### Execute Gradle
+#### Passing scope/stage as props
 
-Execute Gradle providing the properties, as needed:
-
-- `reckon.scope` - one of `major`, `minor`, or `patch` (defaults to `minor`) to specify which component of the previous release should be incremented
-- `reckon.stage`
-  - (if you used `stageFromProp`) one of the values passed to `stageFromProp` (defaults to the first alphabetically) to specify what phase of development you are in
-  - (if you used `snapshotFromProp`) either `snapshot` or `final` (defaults to `snapshot`) to specify what phase of development you are in
-- `reckon.snapshot` - **deprecated** (if you used `snapshotFromProp`) one of `true` or `false` (defaults to `true`) to determine whether a snapshot should be made
+- `reckon.scope` (allowed if `scopeCalc` includes `calcStageFromProp()` or if you called `scopeFromProp()`)
+  Valid values: `major`, `minor`, `patch` (if not set the scope is inferred by other means)
+- `reckon.stage` (allowed if `stageCalc` includes `calcStageFromProp()`or if you used `stageFromProp()` or `snapshotFromProp()`)
+  - For users of `stages()` or `stageFromProp()`:
+    Valid values are any stage you listed via those methods. (if not set the stage is inferred by other means)
+  - For users of `snapshots()` or `snapshotFromProp()`:
+    Valid values: `snapshot` or `final`
 
 When Gradle executes, the version will be inferred as soon as something tries to access it. This will be output to the console (as below).
 
 ```
 ./gradlew build -Preckon.scope=minor -Preckon.stage=milestone
 Reckoned version 1.3.0-milestone.1
-...
 ```
+
+#### Reading scope from commit messages
+
+**NOTE:** This is considered somewhat experimental as of 0.16.0.
+
+If you want the scope to inferred in a more automated way, consider making use of a commit message convention. This sections describes the out-of-the-box convention supported by Reckon. Others are possible by customizing the `scopeCalc` further.
+
+If your `scopeCalc` includes `calcScopeFromCommitMessages()`, the commit messages between your "base normal" (previous final release) and the current `HEAD` are parsed for SemVer indicators.
+
+The general form is:
+
+```
+<scope>(optional area of codebase): rest of message
+
+body is not used
+```
+
+Where `<scope>` is `major`, `minor`, or `patch` (must be lowercase).
+
+The `(area)` is not used for any programmatic reasons, but could be used by other tools to categorize changes. 
+
+Example that would be treated as a `Scope.MAJOR`:
+
+```
+major: Dropped support for Gradle 5
+
+This is a breaking change reoving support for Gradle 5 due to use of a new feature in Gradle 6.
+```
+
+Example that would be treated as a `Scope.MINOR`:
+
+```
+minor(plugin): Dropped support for Gradle 5
+
+This is a breaking change reoving support for Gradle 5 due to use of a new feature in Gradle 6.
+```
+
+Take this example commit log:
+
+```
+xzy1234 patch: other fixes
+abc1234 (tag: 1.2.3) patch: fixed things
+def1234 chore(docs): Documenting change to plugin application
+ghi1234 (tag: 1.3.0-beta.1) minor: Adding property to override tag message
+jkl1234 patch(extension): Fixed support for Provider in extension
+mno1234 Other message not following convention
+pqr1234 (HEAD -> main) major: Removed deprecated setNormal method
+```
+
+In this case we'd be looking at all commits since the last tagged final version, `1.2.3`. We'd only care about messages that follow our convention of prefixing the message with a scope. Since there's a mix of commits using all 3 scopes, we pick the most severe of the ones we found `major`.
+
+##### Special Case for pre-1.0.0
+
+Before 1.0.0, SemVer doesn't really guarantee anything, but a good practice seems to be a `PATCH` increment is for bug fixes, while a `MINOR` increase can be new features or breaking changes.
+
+In order to promote the convention of using `major: My message` for breaking changes, before 1.0.0 a `major` in a commit message will be read as `minor`. The goal is to promote you explicitly documenting breaking changes in your commit logs, while requiring the actual 1.0.0 version bump to come via an override with `-Preckon.scope=major`.
+
+##### DISCLAIMER this is not Convention Commits compliant
+
+While this approach is similar to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), it does not follow their spec, sticking to something more directly applicable to Reckon's scopes. User's can use the `calcScopeFromCommitMessages(Function<String, Optional<Scope>>)` form if they want to implement Conventional Commits, or any other scheme themselves.
 
 ### Tagging and pushing your version
 

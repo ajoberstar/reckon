@@ -1,6 +1,7 @@
 package org.ajoberstar.reckon.gradle;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -54,24 +55,59 @@ public class ReckonExtension {
     this.tagMessage = objectFactory.property(String.class);
   }
 
-  public ReckonExtension scopeFromProp() {
-    this.reckoner.scopeCalc(ScopeCalculator.ofUserString(inventory -> Optional.ofNullable(scope.getOrNull())));
-    return this;
-  }
-
   public void setDefaultInferredScope(String scope) {
     this.reckoner.defaultInferredScope(Scope.from(scope));
   }
 
-  public ReckonExtension stageFromProp(String... stages) {
+  public void stages(String... stages) {
     this.reckoner.stages(stages);
-    this.reckoner.stageCalc(StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull())));
+  }
+
+  public void snapshots() {
+    this.reckoner.snapshots();
+  }
+
+  public void setScopeCalc(ScopeCalculator scopeCalc) {
+    this.reckoner.scopeCalc(scopeCalc);
+  }
+
+  public void setStageCalc(StageCalculator stageCalc) {
+    this.reckoner.stageCalc(stageCalc);
+  }
+
+  public ScopeCalculator calcScopeFromProp() {
+    return ScopeCalculator.ofUserString(inventory -> Optional.ofNullable(scope.getOrNull()));
+  }
+
+  public ScopeCalculator calcScopeFromCommitMessages() {
+    return ScopeCalculator.ofCommitMessages();
+  }
+
+  public ScopeCalculator calcScopeFromCommitMessages(Function<String, Optional<Scope>> messageParser) {
+    return ScopeCalculator.ofCommitMessage(messageParser);
+  }
+
+  public StageCalculator calcStageFromProp() {
+    return StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
+  }
+
+  @Deprecated
+  public ReckonExtension scopeFromProp() {
+    this.reckoner.scopeCalc(calcScopeFromProp());
     return this;
   }
 
+  @Deprecated
+  public ReckonExtension stageFromProp(String... stages) {
+    this.reckoner.stages(stages);
+    this.reckoner.stageCalc(calcStageFromProp());
+    return this;
+  }
+
+  @Deprecated
   public ReckonExtension snapshotFromProp() {
     this.reckoner.snapshots();
-    this.reckoner.stageCalc(StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull())));
+    this.reckoner.stageCalc(calcStageFromProp());
     return this;
   }
 
