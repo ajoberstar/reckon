@@ -141,9 +141,9 @@ public final class Version implements Comparable<Version> {
     }
 
     private static Stage valueOf(com.github.zafarkhaja.semver.Version version) {
-      Matcher matcher = STAGE_REGEX.matcher(version.getPreReleaseVersion());
+      var matcher = STAGE_REGEX.matcher(version.getPreReleaseVersion());
       if (matcher.find()) {
-        String name = matcher.group("name");
+        var name = matcher.group("name");
         int num = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
         return new Stage(name, num);
       } else {
@@ -163,7 +163,7 @@ public final class Version implements Comparable<Version> {
     try {
       return new Version(com.github.zafarkhaja.semver.Version.valueOf(versionString));
     } catch (IllegalArgumentException | ParseException e) {
-      String message = String.format("Invalid version \"%s\": %s", versionString, e.getMessage());
+      var message = String.format("Invalid version \"%s\": %s", versionString, e.getMessage());
       throw new IllegalArgumentException(message, e);
     }
   }

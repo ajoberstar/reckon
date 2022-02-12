@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
  * Scope is an indication of how large the change between SemVer normal versions is.
  */
 public enum Scope {
-  MAJOR, MINOR, PATCH;
+  // always keep these in ascending order of significance
+  PATCH, MINOR, MAJOR;
 
   /**
    * Parses a String version of a Scope. This is an alternative to {@code valueOf} which only supports
@@ -24,11 +25,11 @@ public enum Scope {
     try {
       return Scope.valueOf(value.toUpperCase());
     } catch (IllegalArgumentException e) {
-      String scopes = Arrays.stream(Scope.values())
+      var scopes = Arrays.stream(Scope.values())
           .map(Scope::name)
           .map(String::toLowerCase)
           .collect(Collectors.joining(", "));
-      String message = String.format("Scope \"%s\" is not one of: %s", value, scopes);
+      var message = String.format("Scope \"%s\" is not one of: %s", value, scopes);
       throw new IllegalArgumentException(message, e);
     }
   }
@@ -45,9 +46,9 @@ public enum Scope {
    * @throws IllegalStateException if they have an invalid increment
    */
   public static Optional<Scope> infer(Version before, Version after) {
-    int major = after.getVersion().getMajorVersion() - before.getVersion().getMajorVersion();
-    int minor = after.getVersion().getMinorVersion() - before.getVersion().getMinorVersion();
-    int patch = after.getVersion().getPatchVersion() - before.getVersion().getPatchVersion();
+    var major = after.getVersion().getMajorVersion() - before.getVersion().getMajorVersion();
+    var minor = after.getVersion().getMinorVersion() - before.getVersion().getMinorVersion();
+    var patch = after.getVersion().getPatchVersion() - before.getVersion().getPatchVersion();
     if (major == 1 && after.getVersion().getMinorVersion() == 0 && after.getVersion().getPatchVersion() == 0) {
       return Optional.of(Scope.MAJOR);
     } else if (major == 0 && minor == 1 && after.getVersion().getPatchVersion() == 0) {

@@ -30,7 +30,7 @@ class BaseCompatTest extends Specification {
     remote.tag.add(name: 'project-a/9.0.0', message: '9.0.0')
     remoteFile('master.txt') << 'contents here2'
     remote.add(patterns: ['.'])
-    remote.commit(message: 'second commit')
+    remote.commit(message: 'major: second commit')
 
     def remote2Dir = new File(tempDir, 'remote2')
     remote2 = Grgit.clone(dir: remote2Dir, uri: remote.repository.rootDir)
@@ -155,6 +155,60 @@ reckon {
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
     remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+  }
+
+  def 'can use commit messages for scope and if reckoned version is significant tag created and pushed'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  stages('alpha','beta', 'final')
+  scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages())
+  stageCalc = calcStageFromProp()
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
+    then:
+    result.output.contains('Reckoned version: 2.0.0-alpha.1')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
+    and:
+    remote.tag.list().find { it.name == '2.0.0-alpha.1' }
+  }
+
+  def 'can use commit messages for scope but override with prop and if reckoned version is significant tag created and pushed'() {
+    given:
+    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+reckon {
+  stages('alpha','beta', 'final')
+  scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages())
+  stageCalc = calcStageFromProp()
+}
+"""
+    local.add(patterns: ['build.gradle'])
+    local.commit(message: 'Build file')
+    when:
+    def result = build('reckonTagPush', '-Preckon.scope=patch', '-Preckon.stage=alpha', '--configuration-cache')
+    then:
+    result.output.contains('Reckoned version: 1.0.1-alpha.1')
+    result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
+    result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
+    and:
+    remote.tag.list().find { it.name == '1.0.1-alpha.1' }
   }
 
   def 'remote can be overridden and if reckoned version is significant tag created and pushed'() {

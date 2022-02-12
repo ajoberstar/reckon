@@ -30,13 +30,13 @@ public final class Reckoner {
 
   private final Clock clock;
   private final VcsInventorySupplier inventorySupplier;
-  private final Function<VcsInventory, Optional<String>> scopeCalc;
-  private final BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+  private final ScopeCalculator scopeCalc;
+  private final StageCalculator stageCalc;
   private final Scope defaultInferredScope;
   private final Set<String> stages;
   private final String defaultStage;
 
-  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, Function<VcsInventory, Optional<String>> scopeCalc, BiFunction<VcsInventory, Version, Optional<String>> stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
+  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, ScopeCalculator scopeCalc, StageCalculator stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
     this.clock = clock;
     this.inventorySupplier = inventorySupplier;
     this.scopeCalc = scopeCalc;
@@ -52,10 +52,10 @@ public final class Reckoner {
    * @return the reckoned version
    */
   public Version reckon() {
-    VcsInventory inventory = inventorySupplier.getInventory();
+    var inventory = inventorySupplier.getInventory();
     logger.debug("Retrieved the following VCS inventory: {}", inventory);
-    Version targetNormal = reckonNormal(inventory);
-    Version reckoned = reckonTargetVersion(inventory, targetNormal);
+    var targetNormal = reckonNormal(inventory);
+    var reckoned = reckonTargetVersion(inventory, targetNormal);
 
     if (reckoned.isSignificant() && !inventory.isClean()) {
       throw new IllegalStateException("Cannot release a final or significant stage without a clean repo.");
@@ -77,19 +77,19 @@ public final class Reckoner {
   }
 
   private Version reckonNormal(VcsInventory inventory) {
-    Optional<Scope> providedScope = scopeCalc.apply(inventory).filter(value -> !value.isEmpty()).map(Scope::from);
+    var providedScope = scopeCalc.calculate(inventory);
 
     Scope scope;
     if (providedScope.isPresent()) {
       scope = providedScope.get();
       logger.debug("Using provided scope value: {}", scope);
     } else {
-      Optional<Scope> inferredScope = Scope.infer(inventory.getBaseNormal(), inventory.getBaseVersion());
+      var inferredScope = Scope.infer(inventory.getBaseNormal(), inventory.getBaseVersion());
       scope = inferredScope.orElse(defaultInferredScope);
       logger.debug("Inferred scope from base version: {}", scope);
     }
 
-    Version targetNormal = inventory.getBaseNormal().incrementNormal(scope);
+    var targetNormal = inventory.getBaseNormal().incrementNormal(scope);
 
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal)) {
@@ -101,14 +101,10 @@ public final class Reckoner {
   }
 
   private Version reckonTargetVersion(VcsInventory inventory, Version targetNormal) {
-    String stage = stageCalc.apply(inventory, targetNormal)
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .map(String::toLowerCase)
-        .orElse(null);
+    var stage = stageCalc.calculate(inventory, targetNormal).orElse(null);
 
     if (stage != null && !stages.contains(stage)) {
-      String message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
+      var message = String.format("Stage \"%s\" is not one of: %s", stage, stages);
       throw new IllegalArgumentException(message);
     }
 
@@ -119,21 +115,21 @@ public final class Reckoner {
 
     // rebuild behavior
     if (inventory.isClean() && inventory.getCurrentVersion().isPresent() && stage == null) {
-      Version current = inventory.getCurrentVersion().get();
+      var current = inventory.getCurrentVersion().get();
       logger.debug("Clean repo with current version and no provided stage. Treating as a rebuild of {}.", current);
       return current;
     }
 
-    Version targetBase = targetNormal.equals(inventory.getBaseVersion().getNormal()) ? inventory.getBaseVersion() : targetNormal;
-    String baseStageName = targetBase.getStage().map(Version.Stage::getName).orElse(defaultStage);
-    int baseStageNum = targetBase.getStage().map(Version.Stage::getNum).orElse(0);
+    var targetBase = targetNormal.equals(inventory.getBaseVersion().getNormal()) ? inventory.getBaseVersion() : targetNormal;
+    var baseStageName = targetBase.getStage().map(Version.Stage::getName).orElse(defaultStage);
+    var baseStageNum = targetBase.getStage().map(Version.Stage::getNum).orElse(0);
 
     if (SNAPSHOT_STAGE.equals(defaultStage)) {
       logger.debug("Using snapshot stage.");
       return Version.valueOf(String.format("%s-%s", targetBase.getNormal(), "SNAPSHOT"));
     } else if (stage == null) {
       logger.debug("No stage provided. Treating as an insignificant version.");
-      String buildMetadata = inventory.getCommitId()
+      var buildMetadata = inventory.getCommitId()
           .filter(sha -> inventory.isClean())
           .orElseGet(() -> DATE_FORMAT.format(ZonedDateTime.now(clock)));
 
@@ -154,8 +150,8 @@ public final class Reckoner {
   public static final class Builder {
     private Clock clock;
     private VcsInventorySupplier inventorySupplier;
-    private Function<VcsInventory, Optional<String>> scopeCalc;
-    private BiFunction<VcsInventory, Version, Optional<String>> stageCalc;
+    private ScopeCalculator scopeCalc;
+    private StageCalculator stageCalc;
     private Scope defaultInferredScope = Scope.MINOR;
     private Set<String> stages;
     private String defaultStage;
@@ -189,7 +185,7 @@ public final class Reckoner {
      */
     public Builder git(Repository repo, VersionTagParser tagParser) {
       if (repo == null) {
-        this.inventorySupplier = () -> new VcsInventory(null, false, null, null, null, 0, Collections.emptySet(), Collections.emptySet());
+        this.inventorySupplier = () -> VcsInventory.empty(false);
       } else {
         var realParser = Optional.ofNullable(tagParser).orElse(VersionTagParser.getDefault());
         this.inventorySupplier = new GitInventorySupplier(repo, realParser);
@@ -203,7 +199,7 @@ public final class Reckoner {
      * @param scopeCalc the function that provides the scope
      * @return this builder
      */
-    public Builder scopeCalc(Function<VcsInventory, Optional<String>> scopeCalc) {
+    public Builder scopeCalc(ScopeCalculator scopeCalc) {
       this.scopeCalc = scopeCalc;
       return this;
     }
@@ -254,7 +250,7 @@ public final class Reckoner {
      * @param stageCalc the function that provides the stage
      * @return this builder
      */
-    public Builder stageCalc(BiFunction<VcsInventory, Version, Optional<String>> stageCalc) {
+    public Builder stageCalc(StageCalculator stageCalc) {
       this.stageCalc = stageCalc;
       return this;
     }
@@ -265,7 +261,7 @@ public final class Reckoner {
      * @return the reckoner
      */
     public Reckoner build() {
-      Clock clock = Optional.ofNullable(this.clock).orElseGet(Clock::systemUTC);
+      var clock = Optional.ofNullable(this.clock).orElseGet(Clock::systemUTC);
       Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
       Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
       Objects.requireNonNull(defaultInferredScope, "Must provide a default inferred scope");
