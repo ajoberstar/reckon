@@ -131,7 +131,7 @@ reckon {
   
   // how do you calculate the scope/stage
   scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages()) // fall back to commit message (see below) if no explicit prop set
-  stageCalc = calcScopeFromProp()
+  stageCalc = calcStageFromProp()
   // these can also be arbitrary closures (see code for details)
   scopeCalc = { inventory -> Optional.of(Scope.MAJOR) }
   stageCalc = { inventory, targetNormal -> Optional.of('beta') }
