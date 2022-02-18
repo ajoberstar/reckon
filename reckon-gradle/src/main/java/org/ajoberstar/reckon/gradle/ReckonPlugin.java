@@ -1,5 +1,7 @@
 package org.ajoberstar.reckon.gradle;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
 import org.ajoberstar.grgit.gradle.GrgitServicePlugin;
 import org.ajoberstar.reckon.core.Version;
@@ -11,8 +13,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ReckonPlugin implements Plugin<Project> {
   private static Logger logger = Logging.getLogger(ReckonPlugin.class);
