@@ -1,9 +1,10 @@
 plugins {
-  id("org.ajoberstar.grgit")
   id("org.ajoberstar.reckon")
 }
 
 reckon {
-  scopeFromProp()
-  stageFromProp("beta", "rc", "final")
+  setDefaultInferredScope("patch")
+  stages("beta", "rc", "final")
+  setScopeCalc(calcScopeFromProp().or(calcScopeFromCommitMessages()))
+  setStageCalc(calcStageFromProp())
 }
