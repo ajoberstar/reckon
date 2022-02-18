@@ -61,7 +61,7 @@ task printVersion {
     result.output.normalize().startsWith('0.1.0-alpha.0.0+')
   }
 
-  def 'if no strategies specified, build fails'() {
+  def 'if no strategies specified, version is unspecified'() {
     given:
     Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
@@ -72,14 +72,43 @@ plugins {
 
 task printVersion {
   doLast  {
-    println project.version
+    println version
   }
 }
 """
     when:
-    def result = buildAndFail('printVersion', '--configuration-cache')
+    def result = build('printVersion', '-q', '--configuration-cache')
     then:
-    result.output.contains('Must provide a scope supplier.')
+    result.output.contains('unspecified')
+  }
+
+  def 'if version evaluated before reckon configured, reckon can still be evaluated after'() {
+    given:
+    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+
+    buildFile << """
+plugins {
+  id 'org.ajoberstar.reckon'
+}
+
+println version
+
+reckon {
+  scopeFromProp()
+  stageFromProp('alpha','beta', 'final')
+}
+
+task printVersion {
+  doLast  {
+    println version
+  }
+}
+"""
+    when:
+    def result = build('printVersion', '--configuration-cache')
+    then:
+    result.output.contains('unspecified')
+    result.output.contains('Reckoned version: 1.1.0-alpha.0')
   }
 
   def 'if reckoned version has build metadata no tag created'() {

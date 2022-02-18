@@ -7,10 +7,16 @@ import org.ajoberstar.reckon.core.VersionTagParser;
 import org.ajoberstar.reckon.core.VersionTagWriter;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class ReckonPlugin implements Plugin<Project> {
+  private static Logger logger = Logging.getLogger(ReckonPlugin.class);
+
   public static final String TAG_TASK = "reckonTagCreate";
   public static final String PUSH_TASK = "reckonTagPush";
 
@@ -73,14 +79,24 @@ public class ReckonPlugin implements Plugin<Project> {
 
   private static class DelayedVersion {
     private final Provider<Version> versionProvider;
+    private final AtomicBoolean warned;
 
     public DelayedVersion(Provider<Version> versionProvider) {
       this.versionProvider = versionProvider;
+      this.warned = new AtomicBoolean(false);
     }
 
     @Override
     public String toString() {
-      return versionProvider.get().toString();
+      try {
+        return versionProvider.get().toString();
+      } catch (Exception e) {
+        if (warned.compareAndSet(false, true)) {
+          logger.warn("Project version evaluated before reckon was configured. Run with --info to see cause.");
+        }
+        logger.info("Project version evaluated before reckon was configured.", e);
+        return "unspecified";
+      }
     }
   }
 }
