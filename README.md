@@ -117,6 +117,21 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
 #### Apply the plugin
 
+In `settings.gradle`:
+
+```groovy
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+```
+
+**NB:** `mavenCentral()` must be before `gradlePluginPortal()`.
+
+Then in `build.gradle`:
+
 ```groovy
 plugins {
   id 'org.ajoberstar.reckon' version '<version>'
