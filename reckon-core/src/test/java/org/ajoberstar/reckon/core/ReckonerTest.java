@@ -343,6 +343,22 @@ public class ReckonerTest {
   }
 
   @Test
+  @DisplayName("if incremented via paralel still in parallel, increment with higher scope")
+  public void doubleConflictingParallelIncrementsHigherScope() {
+    var inventory = new VcsInventory(
+        "abcdef",
+        true,
+        null,
+        Version.valueOf("1.1.0"),
+        Version.valueOf("1.1.0"),
+        1,
+        Set.of(Version.valueOf("1.1.1"), Version.valueOf("1.1.2")),
+        Set.of(Version.valueOf("1.1.0"), Version.valueOf("1.1.1"), Version.valueOf("1.1.2")),
+        List.of());
+    assertEquals("1.2.0", reckonStage(inventory, Scope.PATCH, "final"));
+  }
+
+  @Test
   @DisplayName("if target normal is in the claimed versions, throw")
   public void claimedTargetThrows() {
     var inventory = new VcsInventory(

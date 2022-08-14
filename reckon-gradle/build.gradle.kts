@@ -10,7 +10,7 @@ description = "Infer a project's version from your Git repository."
 
 mavenCentral {
   developerName.set("Andrew Oberstar")
-  developerEmail.set("ajoberstar@gmail.com")
+  developerEmail.set("andrew@ajoberstar.org")
   githubOwner.set("ajoberstar")
   githubRepository.set("reckon")
 }

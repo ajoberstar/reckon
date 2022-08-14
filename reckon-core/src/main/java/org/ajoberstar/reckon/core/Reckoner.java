@@ -93,8 +93,16 @@ public final class Reckoner {
 
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal)) {
-      targetNormal = targetNormal.incrementNormal(scope);
       logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
+      targetNormal = targetNormal.incrementNormal(scope);
+    }
+
+    // if it's still in parallel, increment with higher scope
+
+    if (inventory.getParallelNormals().contains(targetNormal) && scope != Scope.MAJOR) {
+      // TODO maybe only do this for "soft" scopes (i.e. not explicitly asked for)
+      logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
+      targetNormal = targetNormal.incrementNormal(scope.increment());
     }
 
     return targetNormal;

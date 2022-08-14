@@ -54,38 +54,6 @@ public class ReckonerIntegTest {
     assertEquals("0.1.0", reckonStage(null, null));
   }
 
-  @Disabled("This is't working")
-  @Test
-  @DisplayName("multiple release branches")
-  public void multipleReleaseBranches() throws IOException {
-    commit();
-    branch("release/2.0.x");
-    checkout("release/2.0.x");
-    commit();
-    tag("2.0.0");
-    commit();
-    tag("2.0.1");
-    checkout("2.0.0");
-    branch("release/2.1.x");
-    checkout("release/2.1.x");
-    commit();
-    checkout("2.0.0");
-    branch("release/3.0.x");
-    checkout("release/3.0.x");
-    commit();
-    tag("3.0.0-dev.0");
-    commit();
-    tag("3.0.0-rc.1");
-    checkout("2.0.0");
-    branch("release/3.1.x");
-    checkout("release/3.1.x");
-    commit();
-    tag("3.1.0-dev.0");
-    commit();
-
-    assertEquals("3.1.0-dev.1.1+" + TIMESTAMP, reckonStage(null, null));
-  }
-
   @BeforeEach
   public void setupRepo() throws IOException {
     repoDir = Files.createTempDirectory("repo");
