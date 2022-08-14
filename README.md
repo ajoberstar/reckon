@@ -200,8 +200,6 @@ Reckoned version 1.3.0-milestone.1
 
 #### Reading scope from commit messages
 
-**NOTE:** This is considered somewhat experimental as of 0.16.0.
-
 If you want the scope to inferred in a more automated way, consider making use of a commit message convention. This sections describes the out-of-the-box convention supported by Reckon. Others are possible by customizing the `scopeCalc` further.
 
 If your `scopeCalc` includes `calcScopeFromCommitMessages()`, the commit messages between your "base normal" (previous final release) and the current `HEAD` are parsed for SemVer indicators.
