@@ -2,28 +2,13 @@
 
 [![CI](https://github.com/ajoberstar/reckon/actions/workflows/ci.yaml/badge.svg)](https://github.com/ajoberstar/reckon/actions/workflows/ci.yaml)
 
-## Project News
+**NOTE:** As of 0.13.1, reckon is published to Maven Central
 
-### Newest versions are on Maven Central
+## Getting Help or Contributing
 
-As of 0.13.1, reckon is published to Maven Central.
+**IMPORANT:** Nowadays, I'm not spending a lot of time on maintenance due to other time commitments. While, I will eventually get to issues or PRs raised, **do not** expect a timely response. I'm not trying to be rude or dismissive, I only get back to this project periodically (on the order of _months_, in many cases). Please set your expectations appropriately as you file issues or open PRs.
 
-As of 0.13.2 reckon is no longer directly published to the Gradle Plugin Portal, but since the portal proxies Maven Central you can still access reckon through the portal. The only side effect is that [the portal](https://plugins.gradle.org/plugin/org.ajoberstar.reckon) will no longer list the latest version. Use this repo or [search.maven.org](https://search.maven.org/search?q=g:org.ajoberstar.reckon) to find the latest version.
-
-### Old versions from Bintray/JCenter
-
-This project was previously uploaded to JCenter, which was deprecated in 2021.
-
-In the event that JCenter is unavailable and acess to past versions is needed, I've made a Maven repo available in [bintray-backup](https://github.com/ajoberstar/bintray-backup). Add the following to your repositories to use it.
-
-```groovy
-maven {
-  name = 'ajoberstar-backup'
-  url = 'https://ajoberstar.org/bintray-backup/'
-}
-```
-
-Made possible by [lacasseio/bintray-helper](https://github.com/lacasseio/bintray-helper) in case you have a similar need to pull your old Bintray artifacts.
+Please use the repo's [issues](https://github.com/ajoberstar/reckon/issues) for all questions, bug reports, and feature requests.
 
 ## Why do you care?
 
@@ -277,16 +262,28 @@ reckonTagCreate.dependsOn check
 
 See [How Reckon Works](docs/index.md), which includes examples of how reckon will behave in various scenarios.
 
-## Contributing
+## Finding versions of reckon
 
-Contributions are very welcome and are accepted through pull requests.
+### Newest versions are on Maven Central
 
-Smaller changes can come directly as a PR, but larger or more complex
-ones should be discussed in an issue first to flesh out the approach.
+As of 0.13.1, reckon is published to Maven Central.
 
-If you're interested in implementing a feature on the
-[issues backlog](https://github.com/ajoberstar/reckon/issues), add a comment
-to make sure it's not already in progress and for any needed discussion.
+As of 0.13.2 reckon is no longer directly published to the Gradle Plugin Portal, but since the portal proxies Maven Central you can still access reckon through the portal. The only side effect is that [the portal](https://plugins.gradle.org/plugin/org.ajoberstar.reckon) will no longer list the latest version. Use this repo or [search.maven.org](https://search.maven.org/search?q=g:org.ajoberstar.reckon) to find the latest version.
+
+### Old versions from Bintray/JCenter
+
+This project was previously uploaded to JCenter, which was deprecated in 2021.
+
+In the event that JCenter is unavailable and acess to past versions is needed, I've made a Maven repo available in [bintray-backup](https://github.com/ajoberstar/bintray-backup). Add the following to your repositories to use it.
+
+```groovy
+maven {
+  name = 'ajoberstar-backup'
+  url = 'https://ajoberstar.org/bintray-backup/'
+}
+```
+
+Made possible by [lacasseio/bintray-helper](https://github.com/lacasseio/bintray-helper) in case you have a similar need to pull your old Bintray artifacts.
 
 ## Acknowledgements
 
