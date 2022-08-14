@@ -11,6 +11,19 @@ public enum Scope {
   // always keep these in ascending order of significance
   PATCH, MINOR, MAJOR;
 
+  public Scope increment() {
+    switch (this) {
+      case MAJOR:
+        throw new IllegalStateException("Cannot increment MAJOR");
+      case MINOR:
+        return MAJOR;
+      case PATCH:
+        return MINOR;
+      default:
+        throw new AssertionError("Invalid scope: " + this);
+    }
+  }
+
   /**
    * Parses a String version of a Scope. This is an alternative to {@code valueOf} which only supports
    * literal matches. This method supports mixed case String representations, like Major or minor,
