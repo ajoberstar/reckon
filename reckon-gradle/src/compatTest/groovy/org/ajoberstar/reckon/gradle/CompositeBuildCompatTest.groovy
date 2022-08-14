@@ -8,8 +8,6 @@ import org.ajoberstar.grgit.Grgit
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.BuildResult
 
-// Composite builds were added in 3.1
-@IgnoreIf({ System.properties['compat.gradle.version'] == '3.0' })
 class CompositeBuildCompatTest extends Specification {
   @TempDir File tempDir
   File project1Dir

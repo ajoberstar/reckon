@@ -82,5 +82,11 @@ gradlePlugin {
       description = "Infer a project's version from your Git repository."
       implementationClass = "org.ajoberstar.reckon.gradle.ReckonPlugin"
     }
+    create("settings") {
+      id = "org.ajoberstar.reckon.settings"
+      displayName = "Reckon Settings Plugin"
+      description = "Infer a build's version from your Git repository."
+      implementationClass = "org.ajoberstar.reckon.gradle.ReckonSettingsPlugin"
+    }
   }
 }
