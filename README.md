@@ -144,6 +144,11 @@ reckon {
   // omit this to use the default of 'minor'
   defaultInferredScope = 'patch'
   
+  // omit this to use the deafult of 'patch'
+  // if you use branches like maintenance/1.2.x, set this to 'minor'
+  // if you use branches like maintenance/2.x, set this to 'major'
+  parallelBranchScope = 'minor'
+
   // omit to use default remote
   remote = 'other-remote'
 
