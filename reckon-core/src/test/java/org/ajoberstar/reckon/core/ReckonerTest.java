@@ -355,7 +355,17 @@ public class ReckonerTest {
         Set.of(Version.valueOf("1.1.1"), Version.valueOf("1.1.2")),
         Set.of(Version.valueOf("1.1.0"), Version.valueOf("1.1.1"), Version.valueOf("1.1.2")),
         List.of());
-    assertEquals("1.2.0", reckonStage(inventory, Scope.PATCH, "final"));
+
+    var reckoner = Reckoner.builder()
+        .clock(CLOCK)
+        .vcs(() -> inventory)
+        .parallelBranchScope(Scope.MINOR)
+        .scopeCalc(i -> Optional.ofNullable(Scope.PATCH))
+        .stageCalc((i, v) -> Optional.ofNullable("final"))
+        .stages("beta", "milestone", "rc", "final")
+        .build();
+
+    assertEquals("1.2.0", reckoner.reckon().toString());
   }
 
   @Test

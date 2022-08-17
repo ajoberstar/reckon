@@ -59,6 +59,10 @@ public class ReckonExtension {
     this.reckoner.defaultInferredScope(Scope.from(scope));
   }
 
+  public void setParallelBranchScope(String scope) {
+    this.reckoner.parallelBranchScope(Scope.from(scope));
+  }
+
   public void stages(String... stages) {
     this.reckoner.stages(stages);
   }

@@ -33,15 +33,17 @@ public final class Reckoner {
   private final ScopeCalculator scopeCalc;
   private final StageCalculator stageCalc;
   private final Scope defaultInferredScope;
+  private final Scope parallelBranchScope;
   private final Set<String> stages;
   private final String defaultStage;
 
-  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, ScopeCalculator scopeCalc, StageCalculator stageCalc, Scope defaultInferredScope, Set<String> stages, String defaultStage) {
+  private Reckoner(Clock clock, VcsInventorySupplier inventorySupplier, ScopeCalculator scopeCalc, StageCalculator stageCalc, Scope defaultInferredScope, Scope parallelBranchScope, Set<String> stages, String defaultStage) {
     this.clock = clock;
     this.inventorySupplier = inventorySupplier;
     this.scopeCalc = scopeCalc;
     this.stageCalc = stageCalc;
     this.defaultInferredScope = defaultInferredScope;
+    this.parallelBranchScope = parallelBranchScope;
     this.stages = stages;
     this.defaultStage = defaultStage;
   }
@@ -93,16 +95,13 @@ public final class Reckoner {
 
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal)) {
-      logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
-      targetNormal = targetNormal.incrementNormal(scope);
-    }
-
-    // if it's still in parallel, increment with higher scope
-
-    if (inventory.getParallelNormals().contains(targetNormal) && scope != Scope.MAJOR) {
-      // TODO maybe only do this for "soft" scopes (i.e. not explicitly asked for)
-      logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
-      targetNormal = targetNormal.incrementNormal(scope.increment());
+      if (scope.compareTo(parallelBranchScope) < 0) {
+        logger.debug("Skipping {} as it's being developed on a parallel branch. While {} was requested, parallel branches claim a {}, using that instead.", scope, parallelBranchScope);
+        targetNormal = targetNormal.incrementNormal(parallelBranchScope);
+      } else {
+        logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);
+        targetNormal = targetNormal.incrementNormal(scope);
+      }
     }
 
     return targetNormal;
@@ -161,6 +160,7 @@ public final class Reckoner {
     private ScopeCalculator scopeCalc;
     private StageCalculator stageCalc;
     private Scope defaultInferredScope = Scope.MINOR;
+    private Scope parallelBranchScope = Scope.PATCH;
     private Set<String> stages;
     private String defaultStage;
 
@@ -214,6 +214,11 @@ public final class Reckoner {
 
     public Builder defaultInferredScope(Scope defaultInferredScope) {
       this.defaultInferredScope = defaultInferredScope;
+      return this;
+    }
+
+    public Builder parallelBranchScope(Scope parallelBranchScope) {
+      this.parallelBranchScope = parallelBranchScope;
       return this;
     }
 
@@ -273,9 +278,10 @@ public final class Reckoner {
       Objects.requireNonNull(inventorySupplier, "Must provide a vcs.");
       Objects.requireNonNull(scopeCalc, "Must provide a scope supplier.");
       Objects.requireNonNull(defaultInferredScope, "Must provide a default inferred scope");
+      Objects.requireNonNull(parallelBranchScope, "Must provide a parallel branch scope");
       Objects.requireNonNull(stages, "Must provide set of stages.");
       Objects.requireNonNull(stageCalc, "Must provide a stage supplier.");
-      return new Reckoner(clock, inventorySupplier, scopeCalc, stageCalc, defaultInferredScope, stages, defaultStage);
+      return new Reckoner(clock, inventorySupplier, scopeCalc, stageCalc, defaultInferredScope, parallelBranchScope, stages, defaultStage);
     }
   }
 }
