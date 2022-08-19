@@ -92,9 +92,10 @@ public final class Reckoner {
     }
 
     var targetNormal = inventory.getBaseNormal().incrementNormal(scope);
+    var probableStage = stageCalc.calculate(inventory, targetNormal);
 
     // if a version's already being developed on a parallel branch we'll skip it
-    if (inventory.getParallelNormals().contains(targetNormal)) {
+    if (inventory.getParallelNormals().contains(targetNormal) && probableStage.isPresent()) {
       if (scope.compareTo(parallelBranchScope) < 0) {
         logger.debug("Skipping {} as it's being developed on a parallel branch. While {} was requested, parallel branches claim a {}, using that instead.", scope, parallelBranchScope);
         targetNormal = targetNormal.incrementNormal(parallelBranchScope);
