@@ -66,11 +66,19 @@ public class ReckonExtension {
   }
 
   public void setDefaultInferredScope(String scope) {
-    this.reckonerBuilder.defaultInferredScope(Scope.from(scope));
+    setDefaultInferredScope(Scope.from(scope));
+  }
+
+  public void setDefaultInferredScope(Scope scope) {
+    this.reckonerBuilder.defaultInferredScope(scope);
   }
 
   public void setParallelBranchScope(String scope) {
-    this.reckonerBuilder.parallelBranchScope(Scope.from(scope));
+    setParallelBranchScope(Scope.from(scope));
+  }
+
+  public void setParallelBranchScope(Scope scope) {
+    this.reckonerBuilder.parallelBranchScope(scope);
   }
 
   public void stages(String... stages) {
