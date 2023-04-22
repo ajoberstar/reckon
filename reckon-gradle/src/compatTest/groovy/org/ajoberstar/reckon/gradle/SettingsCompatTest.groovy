@@ -51,14 +51,14 @@ reckon {
 }
 """
     buildFile << """
-task printVersion {
+tasks.register('printVersion') {
   doLast  {
     println version
   }
 }
 """
     when:
-    def result = build('printVersion', '-q', '--configuration-cache')
+    def result = build('printVersion', '-q', '--no-configuration-cache')
     then:
     // version will end with a timestamp, so don't try to validate the whole thing
     result.output.normalize().startsWith('0.1.0-alpha.0.0+')
@@ -74,14 +74,14 @@ plugins {
 }
 """
     buildFile << """
-task printVersion {
+tasks.register('printVersion') {
   doLast  {
     println version
   }
 }
 """
     when:
-    def result = build('printVersion', '-q', '--configuration-cache')
+    def result = build('printVersion', '-q', '--no-configuration-cache')
     then:
     result.output.contains('unspecified')
   }

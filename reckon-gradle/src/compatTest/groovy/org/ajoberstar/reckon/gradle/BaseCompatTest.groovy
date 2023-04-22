@@ -55,7 +55,7 @@ task printVersion {
 }
 """
     when:
-    def result = build('printVersion', '-q', '--configuration-cache')
+    def result = build('printVersion', '-q', '--no-configuration-cache')
     then:
     // version will end with a timestamp, so don't try to validate the whole thing
     result.output.normalize().startsWith('0.1.0-alpha.0.0+')
@@ -77,7 +77,7 @@ task printVersion {
 }
 """
     when:
-    def result = build('printVersion', '-q', '--configuration-cache')
+    def result = build('printVersion', '-q', '--no-configuration-cache')
     then:
     result.output.contains('unspecified')
   }
@@ -105,7 +105,7 @@ task printVersion {
 }
 """
     when:
-    def result = build('printVersion', '--configuration-cache')
+    def result = build('printVersion', '--no-configuration-cache')
     then:
     result.output.contains('unspecified')
     result.output.contains('Reckoned version: 1.1.0-alpha.0')
