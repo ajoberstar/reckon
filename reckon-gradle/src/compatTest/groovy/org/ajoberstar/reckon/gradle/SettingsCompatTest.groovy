@@ -64,7 +64,7 @@ tasks.register('printVersion') {
     result.output.normalize().startsWith('0.1.0-alpha.0.0+')
   }
 
-  def 'if no strategies specified, version is unspecified'() {
+  def 'if no strategies specified, build fails'() {
     given:
     Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
 
@@ -81,9 +81,9 @@ tasks.register('printVersion') {
 }
 """
     when:
-    def result = build('printVersion', '-q', '--no-configuration-cache')
+    def result = buildAndFail('printVersion', '-q', '--no-configuration-cache')
     then:
-    result.output.contains('unspecified')
+    result.output.contains('Must provide a scope supplier.')
   }
 
   def 'if reckoned version has build metadata no tag created'() {
