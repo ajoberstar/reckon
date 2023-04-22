@@ -10,10 +10,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Optional;
-import java.util.Set;
 
-import org.ajoberstar.grgit.Commit;
-import org.ajoberstar.grgit.Grgit;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,17 +23,17 @@ public class ReckonerIntegTest {
   private static final String TIMESTAMP = "20180704T171826Z";
 
   private Path repoDir;
-  private Grgit grgit;
+  private Git git;
   private String initialBranch;
   private SecureRandom random = new SecureRandom();
 
   @Test
   @DisplayName("rebuild works with parallel branches")
-  public void rebuildOnParallel() throws IOException {
-    var feature1 = commit();
+  public void rebuildOnParallel() throws IOException, GitAPIException {
+    commit();
     tag("0.1.0");
     branch("release-0.1");
-    var feature2 = commit();
+    commit();
     tag("0.2.0-rc.1");
     commit();
     checkout("release-0.1");
@@ -54,23 +53,21 @@ public class ReckonerIntegTest {
   }
 
   @BeforeEach
-  public void setupRepo() throws IOException {
+  public void setupRepo() throws IOException, GitAPIException {
     repoDir = Files.createTempDirectory("repo");
-    grgit = Grgit.init(op -> {
-      op.setDir(repoDir);
-    });
-    initialBranch = grgit.getBranch().current().getName();
+    git = Git.init().setDirectory(repoDir.toFile()).call();
+    initialBranch = git.getRepository().getBranch();
   }
 
   @AfterEach
   public void cleanupRepo() {
-    grgit.close();
+    git.close();
   }
 
   private String reckonStage(Scope scope, String stage) {
     return Reckoner.builder()
         .clock(CLOCK)
-        .git(grgit.getRepository().getJgit().getRepository())
+        .git(git.getRepository())
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
         .stages("beta", "milestone", "rc", "final")
@@ -82,7 +79,7 @@ public class ReckonerIntegTest {
   private String reckonSnapshot(Scope scope, String stage) {
     return Reckoner.builder()
         .clock(CLOCK)
-        .git(grgit.getRepository().getJgit().getRepository())
+        .git(git.getRepository())
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
         .snapshots()
@@ -91,63 +88,57 @@ public class ReckonerIntegTest {
         .toString();
   }
 
-  private Commit commit() throws IOException {
+  private void commit() throws IOException, GitAPIException {
     var bytes = new byte[128];
     random.nextBytes(bytes);
     var fileName = random.nextInt();
     Files.write(repoDir.resolve(fileName + ".txt"), bytes);
-    grgit.add(op -> {
-      op.setPatterns(Set.of(fileName + ".txt"));
-    });
-    var commit = grgit.commit(op -> {
-      op.setMessage("do");
-    });
-    System.out.println("Created commit: " + commit.getAbbreviatedId());
-    return commit;
+
+    git.add()
+        .addFilepattern(fileName + ".txt")
+        .call();
+
+    var commit = git.commit()
+        .setMessage("do")
+        .call();
+
+    System.out.println("Created commit: " + commit.getId().name());
   }
 
-  private void branch(String name) {
-    var currentHead = grgit.head();
-    var currentBranch = grgit.getBranch().current();
-    var newBranch = grgit.getBranch().add(op -> {
-      op.setName(name);
-    });
-    var atCommit = grgit.getResolve().toCommit(newBranch.getFullName());
-    System.out.println("Added new branch " + name + " at " + atCommit.getAbbreviatedId());
-    assertEquals(grgit.getBranch().current(), currentBranch);
+  private void branch(String name) throws IOException, GitAPIException {
+    var currentHead = git.getRepository().resolve("HEAD");
+    var currentBranch = git.getRepository().getBranch();
+    var newBranch = git.branchCreate().setName(name).call();
+
+    var atCommit = git.getRepository().resolve(newBranch.getName());
+
+    System.out.println("Added new branch " + name + " at " + atCommit.name());
+    assertEquals(git.getRepository().getBranch(), currentBranch);
     assertEquals(atCommit, currentHead);
   }
 
-  private void tag(String name) {
+  private void tag(String name) throws GitAPIException, IOException {
     tag(name, true);
   }
 
-  private void tag(String name, boolean annotate) {
-    var currentHead = grgit.head();
-    var newTag = grgit.getTag().add(op -> {
-      op.setName(name);
-      op.setAnnotate(annotate);
-    });
-    var atCommit = grgit.getResolve().toCommit(newTag.getFullName());
-    System.out.println("Added new tag " + name + " at " + atCommit.getAbbreviatedId());
+  private void tag(String name, boolean annotate) throws IOException, GitAPIException {
+    var currentHead = git.getRepository().resolve("HEAD");
+    var newTag = git.tag().setName(name).setAnnotated(annotate).call();
+    var atCommit = git.getRepository().resolve(newTag.getName() + "^{commit}");
+    System.out.println("Added new tag " + name + " at " + atCommit.name());
     assertEquals(atCommit, currentHead);
   }
 
-  private void checkout(String name) {
-    var currentHead = grgit.head();
-    grgit.checkout(op -> {
-      op.setBranch(name);
-    });
-    var atCommit = grgit.getResolve().toCommit(name);
-    System.out.println("Checked out " + name + " at " + atCommit.getAbbreviatedId());
+  private void checkout(String name) throws IOException, GitAPIException {
+    git.checkout().setName(name).call();
+    var atCommit = git.getRepository().resolve(name + "^{commit}");
+    System.out.println("Checked out " + name + " at " + atCommit.name());
   }
 
-  private void merge(String name) {
-    var currentBranch = grgit.getBranch().current().getName();
-    grgit.merge(op -> {
-      op.setHead(name);
-    });
+  private void merge(String name) throws IOException, GitAPIException {
+    var currentBranch = git.getRepository().getBranch();
+    git.merge().include(git.getRepository().resolve(name)).call();
     System.out.println("Merged " + name + " into " + currentBranch);
-    assertEquals(grgit.getBranch().current().getName(), currentBranch);
+    assertEquals(git.getRepository().getBranch(), currentBranch);
   }
 }

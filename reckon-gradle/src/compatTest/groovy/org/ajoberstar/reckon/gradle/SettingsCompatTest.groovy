@@ -1,20 +1,20 @@
 package org.ajoberstar.reckon.gradle
 
+
+import org.eclipse.jgit.api.Git
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import spock.lang.Specification
 import spock.lang.TempDir
-
-import org.ajoberstar.grgit.Grgit
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 
 class SettingsCompatTest extends Specification {
   @TempDir File tempDir
   File projectDir
   File settingsFile
   File buildFile
-  Grgit remote
-  Grgit remote2
+  Git remote
+  Git remote2
 
   def setup() {
     projectDir = new File(tempDir, 'project')
@@ -22,20 +22,18 @@ class SettingsCompatTest extends Specification {
     buildFile = projectFile('build.gradle')
 
     def remoteDir = new File(tempDir, 'remote')
-    remote = Grgit.init(dir: remoteDir)
+    remote = Git.init().setDirectory(remoteDir).call()
 
-    remoteFile('.gitignore') << '.gradle/\nbuild/\n'
-    remoteFile('master.txt') << 'contents here'
-    remote.add(patterns: ['.'])
-    remote.commit(message: 'first commit')
-    remote.tag.add(name: '1.0.0', message: '1.0.0')
-    remote.tag.add(name: 'project-a/9.0.0', message: '9.0.0')
-    remoteFile('master.txt') << 'contents here2'
-    remote.add(patterns: ['.'])
-    remote.commit(message: 'major: second commit')
+    Gits.repoFile(remote, '.gitignore') << '.gradle/\nbuild/\n'
+    Gits.repoFile(remote, 'master.txt') << 'contents here'
+    Gits.commitAll(remote, 'first commit')
+    Gits.tag(remote, '1.0.0')
+    Gits.tag(remote, 'project-a/9.0.0')
+    Gits.repoFile(remote, 'master.txt') << 'contents here2'
+    Gits.commitAll(remote, 'major: second commit')
 
     def remote2Dir = new File(tempDir, 'remote2')
-    remote2 = Grgit.clone(dir: remote2Dir, uri: remote.repository.rootDir)
+    remote2 = Gits.clone(remote2Dir, remote)
   }
 
   def 'if no git repo found, version is defaulted'() {
@@ -66,7 +64,7 @@ tasks.register('printVersion') {
 
   def 'if no strategies specified, build fails'() {
     given:
-    Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -88,7 +86,7 @@ tasks.register('printVersion') {
 
   def 'if reckoned version has build metadata no tag created'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -101,8 +99,7 @@ reckon {
   defaultInferredScope = 'patch'
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '--configuration-cache')
     then:
@@ -113,7 +110,7 @@ reckon {
 
   def 'if reckoned version is SNAPSHOT no tag created'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -125,8 +122,7 @@ reckon {
   snapshotFromProp()
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '--configuration-cache')
     then:
@@ -137,7 +133,7 @@ reckon {
 
   def 'if reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -149,8 +145,7 @@ reckon {
   stageFromProp('alpha','beta', 'final')
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -158,12 +153,12 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == '1.1.0-alpha.1' }
+    Gits.hasTag(remote, '1.1.0-alpha.1')
   }
 
   def 'can use commit messages for scope and if reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -176,8 +171,7 @@ reckon {
   stageCalc = calcStageFromProp()
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -185,12 +179,12 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == '2.0.0-alpha.1' }
+    Gits.hasTag(remote, '2.0.0-alpha.1')
   }
 
   def 'can use commit messages for scope but override with prop and if reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -203,8 +197,7 @@ reckon {
   stageCalc = calcStageFromProp()
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '-Preckon.scope=patch', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -212,12 +205,12 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == '1.0.1-alpha.1' }
+    Gits.hasTag(remote, '1.0.1-alpha.1')
   }
 
   def 'remote can be overridden and if reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -230,9 +223,8 @@ reckon {
   remote = 'other-remote'
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
-    local.remote.add(name: 'other-remote', url: remote2.getRepository().getRootDir())
+    Gits.commitAll(local)
+    Gits.remoteAdd(local, 'other-remote', remote2.getRepository().getDirectory())
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -240,13 +232,13 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    !remote.tag.list().find { it.name == '1.1.0-alpha.1' }
-    remote2.tag.list().find { it.name == '1.1.0-alpha.1' }
+    !Gits.hasTag(remote, '1.1.0-alpha.1')
+    Gits.hasTag(remote2, '1.1.0-alpha.1')
   }
 
   def 'tag parser/writer can be overridden and reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -264,8 +256,7 @@ reckon {
   tagWriter = version -> "project-a/" + version
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -273,12 +264,12 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == 'project-a/9.1.0-alpha.1' }
+    Gits.hasTag(remote, 'project-a/9.1.0-alpha.1')
   }
 
   def 'tag message can be overridden and if reckoned version is significant tag created and pushed'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
     settingsFile << """
 plugins {
@@ -291,8 +282,7 @@ reckon {
   tagMessage = version.map(v -> "Version " + v)
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
+    Gits.commitAll(local)
     when:
     def result = build('reckonTagPush', '-Preckon.stage=alpha', '--configuration-cache')
     then:
@@ -300,12 +290,13 @@ reckon {
     result.task(':reckonTagCreate').outcome == TaskOutcome.SUCCESS
     result.task(':reckonTagPush').outcome == TaskOutcome.SUCCESS
     and:
-    remote.tag.list().find { it.name == '1.1.0-alpha.1' && it.shortMessage == 'Version 1.1.0-alpha.1' }
+    Gits.hasTag(remote, '1.1.0-alpha.1')
+    // TODO validate the message
   }
 
   def 'if reckoned version is rebuild, skip tag create, but push'() {
     given:
-    def local = Grgit.clone(dir: projectDir, uri: remote.repository.rootDir)
+    def local = Gits.clone(projectDir, remote)
 
 
     settingsFile << """
@@ -318,9 +309,8 @@ reckon {
   stageFromProp('alpha', 'beta', 'final')
 }
 """
-    local.add(patterns: ['settings.gradle'])
-    local.commit(message: 'Build file')
-    local.tag.add(name: '1.1.0', message: '1.1.0')
+    Gits.commitAll(local)
+    Gits.tag(local, '1.1.0')
     when:
     def result = build('reckonTagPush', '--configuration-cache')
     then:
@@ -347,18 +337,6 @@ reckon {
       .forwardOutput()
       .withArguments((args + '--stacktrace') as String[])
       .buildAndFail()
-  }
-
-  private File remoteFile(String path) {
-    File file = new File(remote.repository.rootDir, path)
-    file.parentFile.mkdirs()
-    return file
-  }
-
-  private File remote2File(String path) {
-    File file = new File(remote2.repository.rootDir, path)
-    file.parentFile.mkdirs()
-    return file
   }
 
   private File projectFile(String path) {

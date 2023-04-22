@@ -1,12 +1,11 @@
 package org.ajoberstar.reckon.gradle
 
-import spock.lang.IgnoreIf
+
+import org.eclipse.jgit.api.Git
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.lang.TempDir
-
-import org.ajoberstar.grgit.Grgit
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.BuildResult
 
 class CompositeBuildCompatTest extends Specification {
   @TempDir File tempDir
@@ -21,12 +20,11 @@ class CompositeBuildCompatTest extends Specification {
     build1File = projectFile(project1Dir, 'build.gradle')
     build2File = projectFile(project2Dir, 'build.gradle')
 
-    def grgit1 = Grgit.init(dir: project1Dir)
+    def git1 = Git.init().setDirectory(project1Dir).call()
     projectFile(project1Dir, 'settings.gradle') << 'rootProject.name = "project1"'
     projectFile(project1Dir, '.gitignore') << '.gradle\nbuild\n'
     build1File << '''\
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -41,17 +39,15 @@ task printVersion {
   }
 }
 '''
-    grgit1.add(patterns: ['.'])
-    grgit1.commit(message: 'first commit')
-    grgit1.tag.add(name: '1.3.0', message: 'stuff')
-    grgit1.close()
+    Gits.commitAll(git1, 'first commit')
+    Gits.tag(git1, '1.3.0')
+    git1.close()
 
-    def grgit2 = Grgit.init(dir: project2Dir)
+    def git2 = Git.init().setDirectory(project2Dir).call();
     projectFile(project2Dir, 'settings.gradle') << 'rootProject.name = "project2"'
     projectFile(project2Dir, '.gitignore') << '.gradle\nbuild\n'
     build2File << '''\
 plugins {
-  id 'org.ajoberstar.grgit'
   id 'org.ajoberstar.reckon'
 }
 
@@ -66,10 +62,9 @@ task printVersion {
   }
 }
 '''
-    grgit2.add(patterns: ['.'])
-    grgit2.commit(message: 'first commit')
-    grgit2.tag.add(name: '1.0.0-beta.1', message: 'stuff')
-    grgit2.close()
+    Gits.commitAll(git2, 'first commit')
+    Gits.tag(git2, '1.0.0-beta.1')
+    git2.close()
   }
 
   def 'if build included in composite build, reckon properties are ignored'() {

@@ -1,70 +1,110 @@
 package org.ajoberstar.reckon.gradle;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
-import org.ajoberstar.grgit.gradle.GrgitService;
-import org.ajoberstar.reckon.core.Version;
-import org.ajoberstar.reckon.core.VersionTagWriter;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.UntrackedTask;
+import org.gradle.api.tasks.*;
+import org.gradle.process.ExecOperations;
 
 @UntrackedTask(because = "Git tracks the state")
-public class ReckonCreateTagTask extends DefaultTask {
-  private Property<GrgitService> grgitService;
-  private Property<Version> version;
-  private Property<VersionTagWriter> tagWriter;
-  private Property<String> tagMessage;
-
-  @Inject
-  public ReckonCreateTagTask(ObjectFactory objectFactory) {
-    this.grgitService = objectFactory.property(GrgitService.class);
-    this.version = objectFactory.property(Version.class);
-    this.tagWriter = objectFactory.property(VersionTagWriter.class);
-    this.tagMessage = objectFactory.property(String.class);
-  }
-
+public abstract class ReckonCreateTagTask extends DefaultTask {
   @TaskAction
   public void create() {
-    var git = grgitService.get().getGrgit();;
-    var tagName = tagWriter.get().write(version.get());
-
-    // rebuilds shouldn't trigger a new tag
-    var alreadyTagged = git.getTag().list().stream()
-        .anyMatch(tag -> tag.getName().equals(tagName));
-
-    if (alreadyTagged || !version.get().isSignificant()) {
+    if (!getTagName().isPresent()) {
       setDidWork(false);
-    } else {
-      git.getTag().add(op -> {
-        op.setName(tagName);
-        op.setMessage(tagMessage.get());
-      });
-      setDidWork(true);
+      return;
+    }
+
+    tag(null, null, true);
+  }
+
+  @Inject
+  protected abstract ExecOperations getExecOperations();
+
+  @Internal
+  public abstract DirectoryProperty getRepoDirectory();
+
+  @Input
+  @Optional
+  public abstract Property<String> getTagName();
+
+  @Input
+  public abstract Property<String> getTagMessage();
+
+  private void tag(String userEmail, String userName, boolean allowRetry) {
+    var input = new ByteArrayInputStream(getTagMessage().get().getBytes(StandardCharsets.UTF_8));
+    var output = new ByteArrayOutputStream();
+    var error = new ByteArrayOutputStream();
+
+    var cmd = new ArrayList<String>();
+    cmd.add("git");
+
+    // provide a fallback for CI-like environments that may not have an identity set
+    if (userEmail != null && userName != null) {
+      cmd.add("-c");
+      cmd.add("user.email=" + userEmail);
+      cmd.add("-c");
+      cmd.add("user.name=" + userName);
+    }
+
+    cmd.add("tag");
+    cmd.add("--annotate");
+
+    // take message from STDIN
+    cmd.add("--file");
+    cmd.add("-");
+
+    cmd.add(getTagName().get());
+
+    var result = getExecOperations().exec(spec -> {
+      spec.setWorkingDir(getRepoDirectory());
+      spec.setCommandLine(cmd);
+      spec.setStandardInput(input);
+      spec.setStandardOutput(output);
+      spec.setErrorOutput(error);
+      spec.setIgnoreExitValue(true);
+    });
+
+    if (result.getExitValue() != 0) {
+      var errorStr = error.toString(StandardCharsets.UTF_8);
+      if (errorStr.contains(String.format("fatal: tag '%s' already exists", getTagName().get()))) {
+        setDidWork(false);
+      } else if (allowRetry && errorStr.contains(String.format("Committer identity unknown"))) {
+        var email = getRecentUserEmail();
+        var name = getRecentUserName();
+        System.err.println(String.format("Tagging as recent committer %s <%s>, as this machine has no git identity set.", name, email));
+        tag(email, name, false);
+      } else {
+        System.err.println(errorStr);
+        result.assertNormalExitValue();
+      }
     }
   }
 
-  @Internal
-  public Property<GrgitService> getGrgitService() {
-    return grgitService;
+  private String getRecentUserEmail() {
+    var output = new ByteArrayOutputStream();
+    var result = getExecOperations().exec(spec -> {
+      spec.setWorkingDir(getRepoDirectory());
+      spec.setCommandLine("git", "log", "-n", "1", "--pretty=format:%ae");
+      spec.setStandardOutput(output);
+    });
+    return output.toString();
   }
 
-  @Input
-  public Property<Version> getVersion() {
-    return version;
-  }
-
-  @Input
-  public Property<VersionTagWriter> getTagWriter() {
-    return tagWriter;
-  }
-
-  @Input
-  public Property<String> getTagMessage() {
-    return tagMessage;
+  private String getRecentUserName() {
+    var output = new ByteArrayOutputStream();
+    var result = getExecOperations().exec(spec -> {
+      spec.setWorkingDir(getRepoDirectory());
+      spec.setCommandLine("git", "log", "-n", "1", "--pretty=format:%an");
+      spec.setStandardOutput(output);
+    });
+    return output.toString();
   }
 }

@@ -29,12 +29,7 @@ dependencies {
   api(project(":reckon-core"))
 
   // git
-  api("org.ajoberstar.grgit:grgit-gradle:[5.0,6.0[")
   implementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
-  compatTestImplementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
-
-  // util
-  implementation("com.google.guava:guava:latest.release")
 
   // testing
   compatTestImplementation(gradleTestKit())
