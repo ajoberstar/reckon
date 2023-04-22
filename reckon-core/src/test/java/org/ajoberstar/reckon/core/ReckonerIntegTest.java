@@ -71,6 +71,7 @@ public class ReckonerIntegTest {
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
         .stages("beta", "milestone", "rc", "final")
+        .defaultInferredScope(Scope.MINOR)
         .build()
         .reckon()
         .toString();
@@ -82,6 +83,7 @@ public class ReckonerIntegTest {
         .git(git.getRepository())
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
+        .defaultInferredScope(Scope.MINOR)
         .snapshots()
         .build()
         .reckon()

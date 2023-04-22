@@ -33,6 +33,7 @@ dependencies {
 
   // testing
   compatTestImplementation(gradleTestKit())
+  compatTestImplementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
   compatTestImplementation("org.spockframework:spock-core:2.3-groovy-3.0")
 }
 

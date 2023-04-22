@@ -44,6 +44,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
 }
@@ -118,6 +119,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   snapshotFromProp()
 }
@@ -141,6 +143,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
 }
@@ -166,6 +169,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   stages('alpha','beta', 'final')
   scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages())
   stageCalc = calcStageFromProp()
@@ -192,6 +196,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   stages('alpha','beta', 'final')
   scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages())
   stageCalc = calcStageFromProp()
@@ -218,6 +223,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
   remote = 'other-remote'
@@ -246,6 +252,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
 
@@ -277,6 +284,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha','beta', 'final')
   tagMessage = version.map(v -> "Version " + v)
@@ -305,6 +313,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('alpha', 'beta', 'final')
 }

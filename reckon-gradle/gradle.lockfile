@@ -2,17 +2,17 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 com.github.zafarkhaja:java-semver:0.9.0=runtimeClasspath,testRuntimeClasspath
-com.googlecode.javaewah:JavaEWAH:1.1.13=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.googlecode.javaewah:JavaEWAH:1.1.13=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.apache.commons:commons-lang3:3.12.0=runtimeClasspath,testRuntimeClasspath
 org.apiguardian:apiguardian-api:1.1.2=compatTestCompileClasspath
 org.codehaus.groovy:groovy:3.0.12=compatTestCompileClasspath,compatTestRuntimeClasspath
-org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.hamcrest:hamcrest:2.2=compatTestCompileClasspath,compatTestRuntimeClasspath
 org.junit.platform:junit-platform-commons:1.9.0=compatTestCompileClasspath,compatTestRuntimeClasspath
 org.junit.platform:junit-platform-engine:1.9.0=compatTestCompileClasspath,compatTestRuntimeClasspath
 org.junit:junit-bom:5.9.0=compatTestCompileClasspath,compatTestRuntimeClasspath
 org.opentest4j:opentest4j:1.2.0=compatTestCompileClasspath,compatTestRuntimeClasspath
-org.slf4j:slf4j-api:1.7.30=compileClasspath,testCompileClasspath
+org.slf4j:slf4j-api:1.7.30=compatTestCompileClasspath,compatTestRuntimeClasspath,compileClasspath,testCompileClasspath
 org.slf4j:slf4j-api:2.0.7=runtimeClasspath,testRuntimeClasspath
 org.spockframework:spock-core:2.3-groovy-3.0=compatTestCompileClasspath,compatTestRuntimeClasspath
 empty=annotationProcessor,compatTestAnnotationProcessor,signatures,testAnnotationProcessor

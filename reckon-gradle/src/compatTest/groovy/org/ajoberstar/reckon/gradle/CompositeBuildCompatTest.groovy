@@ -29,6 +29,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('beta', 'final')
 }
@@ -52,6 +53,7 @@ plugins {
 }
 
 reckon {
+  defaultInferredScope = 'minor'
   scopeFromProp()
   stageFromProp('beta', 'final')
 }

@@ -185,7 +185,7 @@ public class ReckonExtension {
     try {
       reckoner = reckonerBuilder.build();
     } catch (Exception e) {
-      throw new ReckonConfigurationException("Failed to configure Reckon.", e);
+      throw new ReckonConfigurationException("Failed to configure Reckon: " + e.getMessage(), e);
     }
 
     var version = reckoner.reckon();

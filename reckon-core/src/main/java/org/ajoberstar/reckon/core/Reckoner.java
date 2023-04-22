@@ -157,7 +157,7 @@ public final class Reckoner {
     private VcsInventorySupplier inventorySupplier;
     private ScopeCalculator scopeCalc;
     private StageCalculator stageCalc;
-    private Scope defaultInferredScope = Scope.MINOR;
+    private Scope defaultInferredScope;
     private Scope parallelBranchScope = Scope.PATCH;
     private Set<String> stages;
     private String defaultStage;
