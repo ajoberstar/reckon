@@ -17,7 +17,7 @@ import org.gradle.api.provider.ProviderFactory;
 public class ReckonExtension {
   private static Logger logger = Logging.getLogger(ReckonExtension.class);
 
-  private final Reckoner.Builder reckoner;
+  private final Reckoner.Builder reckonerBuilder;
   private final Property<GrgitService> grgitService;
   private final Property<String> scope;
   private final Property<String> stage;
@@ -34,7 +34,7 @@ public class ReckonExtension {
 
   @Inject
   public ReckonExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
-    this.reckoner = Reckoner.builder();
+    this.reckonerBuilder = Reckoner.builder();
     this.grgitService = objectFactory.property(GrgitService.class);
     this.scope = objectFactory.property(String.class);
     this.stage = objectFactory.property(String.class);
@@ -56,27 +56,27 @@ public class ReckonExtension {
   }
 
   public void setDefaultInferredScope(String scope) {
-    this.reckoner.defaultInferredScope(Scope.from(scope));
+    this.reckonerBuilder.defaultInferredScope(Scope.from(scope));
   }
 
   public void setParallelBranchScope(String scope) {
-    this.reckoner.parallelBranchScope(Scope.from(scope));
+    this.reckonerBuilder.parallelBranchScope(Scope.from(scope));
   }
 
   public void stages(String... stages) {
-    this.reckoner.stages(stages);
+    this.reckonerBuilder.stages(stages);
   }
 
   public void snapshots() {
-    this.reckoner.snapshots();
+    this.reckonerBuilder.snapshots();
   }
 
   public void setScopeCalc(ScopeCalculator scopeCalc) {
-    this.reckoner.scopeCalc(scopeCalc);
+    this.reckonerBuilder.scopeCalc(scopeCalc);
   }
 
   public void setStageCalc(StageCalculator stageCalc) {
-    this.reckoner.stageCalc(stageCalc);
+    this.reckonerBuilder.stageCalc(stageCalc);
   }
 
   public ScopeCalculator calcScopeFromProp() {
@@ -97,21 +97,21 @@ public class ReckonExtension {
 
   @Deprecated
   public ReckonExtension scopeFromProp() {
-    this.reckoner.scopeCalc(calcScopeFromProp());
+    this.reckonerBuilder.scopeCalc(calcScopeFromProp());
     return this;
   }
 
   @Deprecated
   public ReckonExtension stageFromProp(String... stages) {
-    this.reckoner.stages(stages);
-    this.reckoner.stageCalc(calcStageFromProp());
+    this.reckonerBuilder.stages(stages);
+    this.reckonerBuilder.stageCalc(calcStageFromProp());
     return this;
   }
 
   @Deprecated
   public ReckonExtension snapshotFromProp() {
-    this.reckoner.snapshots();
-    this.reckoner.stageCalc(calcStageFromProp());
+    this.reckonerBuilder.snapshots();
+    this.reckonerBuilder.stageCalc(calcStageFromProp());
     return this;
   }
 
@@ -159,13 +159,20 @@ public class ReckonExtension {
     try {
       var git = grgitService.get().getGrgit();
       var repo = git.getRepository().getJgit().getRepository();
-      reckoner.git(repo, tagParser);
+      reckonerBuilder.git(repo, tagParser);
     } catch (Exception e) {
       // no git repo found
-      reckoner.git(null);
+      reckonerBuilder.git(null);
     }
 
-    var version = reckoner.build().reckon();
+    Reckoner reckoner;
+    try {
+      reckoner = reckonerBuilder.build();
+    } catch (Exception e) {
+      throw new ReckonConfigurationException("Failed to configure Reckon.", e);
+    }
+
+    var version = reckoner.reckon();
     logger.warn("Reckoned version: {}", version);
     return version;
   }

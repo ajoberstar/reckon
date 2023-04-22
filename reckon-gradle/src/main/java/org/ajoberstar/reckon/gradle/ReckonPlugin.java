@@ -91,6 +91,17 @@ public class ReckonPlugin implements Plugin<Project> {
       try {
         return versionProvider.get().toString();
       } catch (Exception e) {
+        var isConfigError = false;
+        for (Throwable ex = e; ex != null; ex = ex.getCause()) {
+          if (ex instanceof ReckonConfigurationException) {
+            isConfigError = true;
+          }
+        }
+
+        if (!isConfigError) {
+          throw e;
+        }
+
         if (warned.compareAndSet(false, true)) {
           logger.warn("Project version evaluated before reckon was configured. Run with --info to see cause.");
         }
