@@ -4,12 +4,9 @@ import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,7 +57,7 @@ public final class Reckoner {
     var reckoned = reckonTargetVersion(inventory, targetNormal);
 
     if (reckoned.isSignificant() && !inventory.isClean()) {
-      throw new IllegalStateException("Cannot release a final or significant stage without a clean repo.");
+      throw new IllegalStateException("Cannot release a final or significant stage without a clean repo. Review INFO logs for more details.");
     }
 
     if (inventory.getClaimedVersions().contains(reckoned) && !inventory.getCurrentVersion().map(reckoned::equals).orElse(false)) {
