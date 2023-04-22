@@ -20,7 +20,7 @@ java {
 
 dependencies {
   // logging
-  implementation("org.slf4j:slf4j-api:[1.7.25,1.8.0[")
+  implementation("org.slf4j:slf4j-api:[2.0,3.0[")
 
   // git
   api("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
@@ -38,7 +38,7 @@ testing {
         implementation("org.junit.jupiter:junit-jupiter-params")
         implementation("org.mockito:mockito-core:latest.release")
         implementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
-        runtimeOnly("org.slf4j:slf4j-simple:[1.7.25,1.8.0[")
+        runtimeOnly("org.slf4j:slf4j-simple:[2.0,3.0[")
       }
     }
   }
