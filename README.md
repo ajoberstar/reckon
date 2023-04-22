@@ -98,27 +98,55 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
 **NOTE:** Check the [Release Notes](https://github.com/ajoberstar/reckon/releases) for details on compatibility and changes.
 
-### Gradle
-
-#### Apply the plugin
-
 **IMPORTANT:** It is recommended to apply reckon as a Settings plugin (in settings.gradle/settings.gradle.kts) to ensure it is configured before any other plugin tries to use the project version.
 
+Reckon overrides the `project.version` property in Gradle to provide maximal compatibility with other plugins that need the version.
+
+### Recommended Configuration (Kotlin)
+
+**settings.gradle.kts**
+
+```kotlin
+plugins {
+  id("org.ajoberstar.reckon.settings") version "<version>"
+}
+
+extensions.configure<org.ajoberstar.reckon.gradle.ReckonExtension> {
+  setDefaultInferredScope("patch")
+  stages("beta", "rc", "final")
+  setScopeCalc(calcScopeFromProp().or(calcScopeFromCommitMessages()))
+  setStageCalc(calcStageFromProp())
+}
+```
+
+### Recommended Configuration (Groovy)
+
+**settings.gradle**
+
 ```groovy
-
-// if applying in settings.gradle(.kts)
 plugins {
-  id 'org.ajoberstar.reckon.settings' version '<version>'
+  id('org.ajoberstar.reckon.settings') version ''<version>'
 }
 
-// if applying in build.gradle(.kts)
-plugins {
-  id 'org.ajoberstar.reckon' version '<version>'
-}
-
-// in either case
 reckon {
-  // START As of 0.16.0
+  defaultInferredScope = 'patch'
+  stages 'beta', 'rc', 'final'
+  scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages())
+  stageCalc = calcStageFromProp()
+}
+```
+
+### Extension Properties (Groovy)
+
+```groovy
+reckon {
+  // required as of 0.18.0 (previously defaulted to 'minor')
+  defaultInferredScope = 'patch'
+  // omit this to use the default of 'patch'
+  // if you use branches like maintenance/1.2.x, set this to 'minor'
+  // if you use branches like maintenance/2.x, set this to 'major'
+  parallelBranchScope = 'minor'
+  
   // what stages are allowed
   stages('milestone', 'rc', 'final')
   // or use snapshots
@@ -131,25 +159,7 @@ reckon {
   scopeCalc = { inventory -> Optional.of(Scope.MAJOR) }
   stageCalc = { inventory, targetNormal -> Optional.of('beta') }
   
-  // END As of 0.16.0
-  
-  // START LEGACY
-  scopeFromProp()
-  stageFromProp('milestone', 'rc', 'final')
-
-  // alternative to stageFromProp
-  // snapshotFromProp()
-  // END LEGACY
-  
-  // required as of 0.18.0 (previously defaulted to 'minor')
-  defaultInferredScope = 'patch'
-  
-  // omit this to use the default of 'patch'
-  // if you use branches like maintenance/1.2.x, set this to 'minor'
-  // if you use branches like maintenance/2.x, set this to 'major'
-  parallelBranchScope = 'minor'
-
-  // omit to use default remote
+  // omit to use 'origin'
   remote = 'other-remote'
 
   // omit this to use the default of parsing tag names of the form 1.2.3 or v1.2.3
@@ -169,9 +179,35 @@ reckon {
 }
 ```
 
-**NOTE:** Reckon overrides the `project.version` property in Gradle
+### Legacy Project Plugin
 
-#### Passing scope/stage as props
+This version of the plugin will be retired before 1.0.0 (if that ever comes), due to ordering issues that can occur with other plugins reading the version. 
+
+**build.gradle.kts**
+
+```kotlin
+plugins {
+  id("org.ajoberstar.reckon") version "<version>"
+}
+
+reckon {
+  // configure as above
+}
+```
+
+**build.gradle**
+
+```groovy
+plugins {
+  id 'org.ajoberstar.reckon' version '<version>'
+}
+
+reckon {
+  // configure as above
+}
+```
+
+### Passing scope/stage as props
 
 - `reckon.scope` (allowed if `scopeCalc` includes `calcStageFromProp()` or if you called `scopeFromProp()`)
   Valid values: `major`, `minor`, `patch` (if not set the scope is inferred by other means)
@@ -188,9 +224,9 @@ When Gradle executes, the version will be inferred as soon as something tries to
 Reckoned version 1.3.0-milestone.1
 ```
 
-#### Reading scope from commit messages
+### Reading scope from commit messages
 
-If you want the scope to inferred in a more automated way, consider making use of a commit message convention. This sections describes the out-of-the-box convention supported by Reckon. Others are possible by customizing the `scopeCalc` further.
+If you want the scope to infer in a more automated way, consider making use of a commit message convention. This sections describes the out-of-the-box convention supported by Reckon. Others are possible by customizing the `scopeCalc` further.
 
 If your `scopeCalc` includes `calcScopeFromCommitMessages()`, the commit messages between your "base normal" (previous final release) and the current `HEAD` are parsed for SemVer indicators.
 
@@ -236,13 +272,13 @@ pqr1234 (HEAD -> main) major: Removed deprecated setNormal method
 
 In this case we'd be looking at all commits since the last tagged final version, `1.2.3`. We'd only care about messages that follow our convention of prefixing the message with a scope. Since there's a mix of commits using all 3 scopes, we pick the most severe of the ones we found `major`.
 
-##### Special Case for pre-1.0.0
+#### Special Case for pre-1.0.0
 
 Before 1.0.0, SemVer doesn't really guarantee anything, but a good practice seems to be a `PATCH` increment is for bug fixes, while a `MINOR` increase can be new features or breaking changes.
 
 In order to promote the convention of using `major: My message` for breaking changes, before 1.0.0 a `major` in a commit message will be read as `minor`. The goal is to promote you explicitly documenting breaking changes in your commit logs, while requiring the actual 1.0.0 version bump to come via an override with `-Preckon.scope=major`.
 
-##### DISCLAIMER this is not Convention Commits compliant
+#### DISCLAIMER this is not Convention Commits compliant
 
 While this approach is similar to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), it does not follow their spec, sticking to something more directly applicable to Reckon's scopes. User's can use the `calcScopeFromCommitMessages(Function<String, Optional<Scope>>)` form if they want to implement Conventional Commits, or any other scheme themselves.
 
