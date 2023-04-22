@@ -16,6 +16,7 @@ org.junit.jupiter:junit-jupiter-params:5.9.2=testCompileClasspath,testRuntimeCla
 org.junit.jupiter:junit-jupiter:5.9.2=testCompileClasspath,testRuntimeClasspath
 org.junit.platform:junit-platform-commons:1.9.2=testCompileClasspath,testRuntimeClasspath
 org.junit.platform:junit-platform-engine:1.9.2=testRuntimeClasspath
+org.junit.platform:junit-platform-launcher:1.9.2=testRuntimeClasspath
 org.junit:junit-bom:5.9.2=testCompileClasspath,testRuntimeClasspath
 org.mockito:mockito-core:5.3.1=testCompileClasspath,testRuntimeClasspath
 org.objenesis:objenesis:3.3=testRuntimeClasspath
