@@ -5,8 +5,10 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
-import org.ajoberstar.grgit.gradle.GrgitService;
 import org.ajoberstar.reckon.core.*;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.model.ObjectFactory;
@@ -17,8 +19,8 @@ import org.gradle.api.provider.ProviderFactory;
 public class ReckonExtension {
   private static Logger logger = Logging.getLogger(ReckonExtension.class);
 
+  private final DirectoryProperty repoDirectory;
   private final Reckoner.Builder reckonerBuilder;
-  private final Property<GrgitService> grgitService;
   private final Property<String> scope;
   private final Property<String> stage;
   private final Property<Version> version;
@@ -27,15 +29,14 @@ public class ReckonExtension {
 
   private VersionTagParser tagParser;
   private VersionTagWriter tagWriter;
-  private final Provider<VersionTagParser> tagParserProvider;
-  private final Provider<VersionTagWriter> tagWriterProvider;
+  private final Provider<String> tagName;
 
   private final Property<String> tagMessage;
 
   @Inject
   public ReckonExtension(ObjectFactory objectFactory, ProviderFactory providerFactory) {
+    this.repoDirectory = objectFactory.directoryProperty();
     this.reckonerBuilder = Reckoner.builder();
-    this.grgitService = objectFactory.property(GrgitService.class);
     this.scope = objectFactory.property(String.class);
     this.stage = objectFactory.property(String.class);
     this.version = objectFactory.property(Version.class);
@@ -49,18 +50,36 @@ public class ReckonExtension {
 
     this.tagParser = null;
     this.tagWriter = null;
-    this.tagParserProvider = providerFactory.provider(() -> this.tagParser);
-    this.tagWriterProvider = providerFactory.provider(() -> this.tagWriter);
+
+    this.tagName = version.map(v -> {
+      if (tagWriter == null || !v.isSignificant()) {
+        return null;
+      } else {
+        return tagWriter.write(v);
+      }
+    });
 
     this.tagMessage = objectFactory.property(String.class);
   }
 
+  public DirectoryProperty getRepoDirectory() {
+    return repoDirectory;
+  }
+
   public void setDefaultInferredScope(String scope) {
-    this.reckonerBuilder.defaultInferredScope(Scope.from(scope));
+    setDefaultInferredScope(Scope.from(scope));
+  }
+
+  public void setDefaultInferredScope(Scope scope) {
+    this.reckonerBuilder.defaultInferredScope(scope);
   }
 
   public void setParallelBranchScope(String scope) {
-    this.reckonerBuilder.parallelBranchScope(Scope.from(scope));
+    setParallelBranchScope(Scope.from(scope));
+  }
+
+  public void setParallelBranchScope(Scope scope) {
+    this.reckonerBuilder.parallelBranchScope(scope);
   }
 
   public void stages(String... stages) {
@@ -119,16 +138,12 @@ public class ReckonExtension {
     return remote;
   }
 
-  public Provider<VersionTagParser> getTagParser() {
-    return tagParserProvider;
-  }
-
   public void setTagParser(VersionTagParser tagParser) {
     this.tagParser = tagParser;
   }
 
-  public Provider<VersionTagWriter> getTagWriter() {
-    return tagWriterProvider;
+  public Provider<String> getTagName() {
+    return tagName;
   }
 
   public void setTagWriter(VersionTagWriter tagWriter) {
@@ -143,10 +158,6 @@ public class ReckonExtension {
     return version;
   }
 
-  Property<GrgitService> getGrgitService() {
-    return grgitService;
-  }
-
   Property<String> getScope() {
     return scope;
   }
@@ -156,24 +167,35 @@ public class ReckonExtension {
   }
 
   private Version reckonVersion() {
-    try {
-      var git = grgitService.get().getGrgit();
-      var repo = git.getRepository().getJgit().getRepository();
+    try (var repo = openRepo()) {
       reckonerBuilder.git(repo, tagParser);
+
+      Reckoner reckoner;
+      try {
+        reckoner = reckonerBuilder.build();
+      } catch (Exception e) {
+        throw new ReckonConfigurationException("Failed to configure Reckon: " + e.getMessage(), e);
+      }
+
+      var version = reckoner.reckon();
+      logger.warn("Reckoned version: {}", version);
+      return version;
+    }
+  }
+
+  private Repository openRepo() {
+    Repository repo;
+    try {
+      var builder = new FileRepositoryBuilder();
+      builder.readEnvironment();
+      builder.findGitDir(getRepoDirectory().getAsFile().get());
+      if (builder.getGitDir() == null) {
+        throw new IllegalStateException("No .git directory found!");
+      }
+      return builder.build();
     } catch (Exception e) {
       // no git repo found
-      reckonerBuilder.git(null);
+      return null;
     }
-
-    Reckoner reckoner;
-    try {
-      reckoner = reckonerBuilder.build();
-    } catch (Exception e) {
-      throw new ReckonConfigurationException("Failed to configure Reckon.", e);
-    }
-
-    var version = reckoner.reckon();
-    logger.warn("Reckoned version: {}", version);
-    return version;
   }
 }

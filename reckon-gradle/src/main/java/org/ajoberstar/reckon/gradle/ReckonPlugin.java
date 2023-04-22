@@ -2,8 +2,6 @@ package org.ajoberstar.reckon.gradle;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.ajoberstar.grgit.gradle.GrgitServiceExtension;
-import org.ajoberstar.grgit.gradle.GrgitServicePlugin;
 import org.ajoberstar.reckon.core.Version;
 import org.ajoberstar.reckon.core.VersionTagParser;
 import org.ajoberstar.reckon.core.VersionTagWriter;
@@ -28,13 +26,10 @@ public class ReckonPlugin implements Plugin<Project> {
     if (!project.equals(project.getRootProject())) {
       throw new IllegalStateException("org.ajoberstar.reckon can only be applied to the root project.");
     }
-    project.getPluginManager().apply(GrgitServicePlugin.class);
-
-    var grgitServiceExtension = project.getExtensions().getByType(GrgitServiceExtension.class);
-    var grgitService = grgitServiceExtension.getService();
 
     var extension = project.getExtensions().create("reckon", ReckonExtension.class);
-    extension.getGrgitService().set(grgitService);
+    extension.getRepoDirectory().set(project.getLayout().getProjectDirectory());
+    extension.getRemote().convention("origin");
     extension.setTagParser(VersionTagParser.getDefault());
     extension.setTagWriter(VersionTagWriter.getDefault());
     extension.getTagMessage().convention(extension.getVersion().map(Version::toString));
@@ -59,9 +54,8 @@ public class ReckonPlugin implements Plugin<Project> {
     return project.getTasks().register(TAG_TASK, ReckonCreateTagTask.class, task -> {
       task.setDescription("Tag version inferred by reckon.");
       task.setGroup("publishing");
-      task.getGrgitService().set(extension.getGrgitService());
-      task.getVersion().set(extension.getVersion());
-      task.getTagWriter().set(extension.getTagWriter());
+      task.getRepoDirectory().set(extension.getRepoDirectory());
+      task.getTagName().set(extension.getTagName());
       task.getTagMessage().set(extension.getTagMessage());
     });
   }
@@ -70,10 +64,9 @@ public class ReckonPlugin implements Plugin<Project> {
     return project.getTasks().register(PUSH_TASK, ReckonPushTagTask.class, task -> {
       task.setDescription("Push version tag created by reckon.");
       task.setGroup("publishing");
-      task.getGrgitService().set(extension.getGrgitService());
+      task.getRepoDirectory().set(extension.getRepoDirectory());
       task.getRemote().set(extension.getRemote());
-      task.getVersion().set(extension.getVersion());
-      task.getTagWriter().set(extension.getTagWriter());
+      task.getTagName().set(extension.getTagName());
     });
   }
 

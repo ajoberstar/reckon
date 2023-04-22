@@ -2,13 +2,7 @@ package org.ajoberstar.reckon.core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,9 +13,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -32,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Supplies an inventory of a Git repository.
- *
+ * <p>
  * This is intentionally package private.
  */
 final class GitInventorySupplier implements VcsInventorySupplier {
@@ -105,7 +96,17 @@ final class GitInventorySupplier implements VcsInventorySupplier {
 
   private boolean isClean() {
     try {
-      return new Git(repo).status().call().isClean();
+      var status = new Git(repo).status().call();
+      if (!status.isClean()) {
+        logger.info("Git repository is not clean: added={}, changed={}, removed={}, untracked={}, modified={}, missing={}",
+            status.getAdded(),
+            status.getChanged(),
+            status.getRemoved(),
+            status.getUntracked(),
+            status.getModified(),
+            status.getMissing());
+      }
+      return status.isClean();
     } catch (GitAPIException e) {
       logger.error("Failed to determine status of repository. Assuming not clean.", e);
       // TODO should this throw up?

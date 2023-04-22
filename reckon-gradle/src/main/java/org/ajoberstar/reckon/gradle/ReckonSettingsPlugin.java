@@ -1,6 +1,5 @@
 package org.ajoberstar.reckon.gradle;
 
-import org.ajoberstar.grgit.gradle.GrgitService;
 import org.ajoberstar.reckon.core.Version;
 import org.ajoberstar.reckon.core.VersionTagParser;
 import org.ajoberstar.reckon.core.VersionTagWriter;
@@ -19,14 +18,9 @@ public class ReckonSettingsPlugin implements Plugin<Settings> {
 
   @Override
   public void apply(Settings settings) {
-    Provider<GrgitService> grgitService = settings.getGradle().getSharedServices().registerIfAbsent("reckon-grgit", GrgitService.class, spec -> {
-      spec.getParameters().getCurrentDirectory().set(settings.getSettingsDir());
-      spec.getParameters().getInitIfNotExists().set(false);
-      spec.getMaxParallelUsages().set(1);
-    });
-
     var extension = settings.getExtensions().create("reckon", ReckonExtension.class);
-    extension.getGrgitService().set(grgitService);
+    extension.getRepoDirectory().set(settings.getSettingsDir());
+    extension.getRemote().convention("origin");
     extension.setTagParser(VersionTagParser.getDefault());
     extension.setTagWriter(VersionTagWriter.getDefault());
     extension.getTagMessage().convention(extension.getVersion().map(Version::toString));
@@ -53,9 +47,8 @@ public class ReckonSettingsPlugin implements Plugin<Settings> {
     return project.getTasks().register(TAG_TASK, ReckonCreateTagTask.class, task -> {
       task.setDescription("Tag version inferred by reckon.");
       task.setGroup("publishing");
-      task.getGrgitService().set(extension.getGrgitService());
-      task.getVersion().set(extension.getVersion());
-      task.getTagWriter().set(extension.getTagWriter());
+      task.getRepoDirectory().set(extension.getRepoDirectory());
+      task.getTagName().set(extension.getTagName());
       task.getTagMessage().set(extension.getTagMessage());
     });
   }
@@ -64,10 +57,9 @@ public class ReckonSettingsPlugin implements Plugin<Settings> {
     return project.getTasks().register(PUSH_TASK, ReckonPushTagTask.class, task -> {
       task.setDescription("Push version tag created by reckon.");
       task.setGroup("publishing");
-      task.getGrgitService().set(extension.getGrgitService());
+      task.getRepoDirectory().set(extension.getRepoDirectory());
       task.getRemote().set(extension.getRemote());
-      task.getVersion().set(extension.getVersion());
-      task.getTagWriter().set(extension.getTagWriter());
+      task.getTagName().set(extension.getTagName());
     });
   }
 

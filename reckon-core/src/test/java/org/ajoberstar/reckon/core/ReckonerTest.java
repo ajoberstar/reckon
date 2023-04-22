@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +45,7 @@ public class ReckonerTest {
         .scopeCalc(i -> Optional.empty())
         .stages("beTA", "miLEStone", "RC", "Final")
         .stageCalc(StageCalculator.ofUserString((i, v) -> Optional.of(stage)))
+        .defaultInferredScope(Scope.MINOR)
         .build()
         .reckon();
   }
@@ -362,6 +362,7 @@ public class ReckonerTest {
         .parallelBranchScope(Scope.MINOR)
         .scopeCalc(i -> Optional.ofNullable(Scope.PATCH))
         .stageCalc((i, v) -> Optional.ofNullable("final"))
+        .defaultInferredScope(Scope.MINOR)
         .stages("beta", "milestone", "rc", "final")
         .build();
 
@@ -587,6 +588,7 @@ public class ReckonerTest {
         .vcs(() -> inventory)
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
+        .defaultInferredScope(Scope.MINOR)
         .stages("beta", "milestone", "rc", "final")
         .build()
         .reckon()
@@ -599,6 +601,7 @@ public class ReckonerTest {
         .vcs(() -> inventory)
         .scopeCalc(i -> Optional.ofNullable(scope))
         .stageCalc((i, v) -> Optional.ofNullable(stage))
+        .defaultInferredScope(Scope.MINOR)
         .snapshots()
         .build()
         .reckon()

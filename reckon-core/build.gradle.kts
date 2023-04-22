@@ -37,7 +37,6 @@ testing {
       dependencies {
         implementation("org.junit.jupiter:junit-jupiter-params")
         implementation("org.mockito:mockito-core:latest.release")
-        implementation("org.ajoberstar.grgit:grgit-core:[5.0,6.0[")
         runtimeOnly("org.slf4j:slf4j-simple:[2.0,3.0[")
       }
     }

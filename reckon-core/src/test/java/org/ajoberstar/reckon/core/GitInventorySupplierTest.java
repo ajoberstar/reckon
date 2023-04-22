@@ -1,9 +1,8 @@
 package org.ajoberstar.reckon.core;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -12,19 +11,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.ajoberstar.grgit.Grgit;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GitInventorySupplierTest {
   private Path repoDir;
 
-  private Grgit grgit;
+  private Git git;
 
   private SecureRandom random = new SecureRandom();
 
@@ -32,48 +27,48 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("commit id is abbreviated, not full")
-  public void commitIdIsAbbreviated() {
-    assertEquals(Optional.of(grgit.head().getAbbreviatedId()), supplier.getInventory().getCommitId());
+  public void commitIdIsAbbreviated() throws IOException {
+    assertEquals(Optional.of(git.getRepository().resolve("HEAD").abbreviate(7).name()), supplier.getInventory().getCommitId());
   }
 
   @Test
   @DisplayName("if HEAD has no tagged versions, current version is empty")
-  public void headNotTaggedCurrentEmpty() {
+  public void headNotTaggedCurrentEmpty() throws IOException, GitAPIException {
     checkout("head-untagged");
     assertEquals(Optional.empty(), supplier.getInventory().getCurrentVersion());
   }
 
   @Test
   @DisplayName("if single tagged version on HEAD, it is current version")
-  public void headOneTagIsCurrent() {
+  public void headOneTagIsCurrent() throws IOException, GitAPIException {
     checkout("head-single-tag");
     assertEquals(Version.parse("0.1.0-milestone.1"), supplier.getInventory().getCurrentVersion());
   }
 
   @Test
   @DisplayName("if multiple tagged version on HEAD, the max is current version")
-  public void headMultiTagMaxIsCurrent() {
+  public void headMultiTagMaxIsCurrent() throws IOException, GitAPIException {
     checkout("head-multi-tag");
     assertEquals(Version.parse("0.1.0"), supplier.getInventory().getCurrentVersion());
   }
 
   @Test
   @DisplayName("if no tagged finals in HEAD\"s history, base normal is 0.0.0")
-  public void noFinalTagsBaseNormalIdentity() {
+  public void noFinalTagsBaseNormalIdentity() throws IOException, GitAPIException {
     checkout("final-unreachable");
     assertEquals(Version.parse("0.0.0").get(), supplier.getInventory().getBaseNormal());
   }
 
   @Test
   @DisplayName("if tagged finals in HEAD\"s history, base normal is max of finals which have no other final between them and HEAD")
-  public void finalTagsNormalIsNearestMax() {
+  public void finalTagsNormalIsNearestMax() throws IOException, GitAPIException {
     checkout("final-reachable");
     assertEquals(Version.parse("1.0.0").get(), supplier.getInventory().getBaseNormal());
   }
 
   @Test
   @DisplayName("if tagged finals on head, base normal and version are same as current version")
-  public void headFinalTagBaseNormalAndVersionAreCurrent() {
+  public void headFinalTagBaseNormalAndVersionAreCurrent() throws IOException, GitAPIException {
     checkout("final-current");
     var inventory = supplier.getInventory();
     assertEquals(inventory.getCurrentVersion().get(), inventory.getBaseNormal());
@@ -82,21 +77,21 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("if no tagged versions in HEAD\"s history, base version is 0.0.0")
-  public void noTagsBaseIdentity() {
+  public void noTagsBaseIdentity() throws IOException, GitAPIException {
     checkout("version-unreachable");
     assertEquals(Version.parse("0.0.0").get(), supplier.getInventory().getBaseVersion());
   }
 
   @Test
   @DisplayName("if tagged versions in HEAD\"s history, base version is max of versions which have no other version between them and HEAD")
-  public void taggedBaseVersionIsNearestMax() {
+  public void taggedBaseVersionIsNearestMax() throws IOException, GitAPIException {
     checkout("version-reachable");
     assertEquals(Version.parse("0.3.0-milestone.1").get(), supplier.getInventory().getBaseVersion());
   }
 
   @Test
   @DisplayName("if tagged versions on head, base version is same as current version")
-  public void headTaggedBaseIsCurrent() {
+  public void headTaggedBaseIsCurrent() throws IOException, GitAPIException {
     checkout("version-current");
     var inventory = supplier.getInventory();
     assertEquals(inventory.getCurrentVersion().get(), inventory.getBaseVersion());
@@ -104,7 +99,7 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("if current is tagged with final, commits since base is 0")
-  public void currentIsFInalCommitsIs0() {
+  public void currentIsFInalCommitsIs0() throws IOException, GitAPIException {
     checkout("final-current");
     assertEquals(0, supplier.getInventory().getCommitsSinceBase());
     assertEquals(List.of(), supplier.getInventory().getCommitMessages());
@@ -112,7 +107,7 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("if no reachable tagged finals, commits since base is size of log from HEAD")
-  public void noFinalTagsCommitsIsHistorySize() {
+  public void noFinalTagsCommitsIsHistorySize() throws IOException, GitAPIException {
     checkout("final-unreachable");
     assertEquals(4, supplier.getInventory().getCommitsSinceBase());
     assertEquals(List.of("do", "do", "do", "do"), supplier.getInventory().getCommitMessages());
@@ -120,28 +115,28 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("if reachable tagged finals, commits since base is size of log from HEAD excluding the base normal")
-  public void finalTagsCommitsIsSizeSinceBase() {
+  public void finalTagsCommitsIsSizeSinceBase() throws IOException, GitAPIException {
     checkout("final-reachable");
     assertEquals(10, supplier.getInventory().getCommitsSinceBase());
   }
 
   @Test
   @DisplayName("if no branches share merge base with HEAD, no parallel versions returned")
-  public void noMergeBasesNoParallel() {
+  public void noMergeBasesNoParallel() throws IOException, GitAPIException {
     checkout("parallel-no-base");
     assertEquals(Collections.emptySet(), supplier.getInventory().getParallelNormals());
   }
 
   @Test
   @DisplayName("if tagged version between HEAD and merge base, no parallel versions returned")
-  public void tagsNearerThanMergeBaseNoParallel() {
+  public void tagsNearerThanMergeBaseNoParallel() throws GitAPIException, IOException {
     checkout("parallel-tagged-since-merge");
     assertEquals(Collections.emptySet(), supplier.getInventory().getParallelNormals());
   }
 
   @Test
   @DisplayName("if no tagged version between HEAD and merge base, parallel versions returned")
-  public void noTagNearerThanMergeBaseHasParallel() {
+  public void noTagNearerThanMergeBaseHasParallel() throws IOException, GitAPIException {
     checkout("parallel-untagged-since-merge");
     assertEquals(Set.of(Version.parse("0.2.0").get()), supplier.getInventory().getParallelNormals());
   }
@@ -160,26 +155,24 @@ public class GitInventorySupplierTest {
 
   @Test
   @DisplayName("if no commits, all results are empty")
-  public void noCommitsEmpty() {
-    var emptyGrgit = Grgit.init(op -> {
-      try {
-        op.setDir(Files.createTempDirectory("repo2").toFile());
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    });
+  public void noCommitsEmpty() throws IOException, GitAPIException {
+    var emptyRepoDir = Files.createTempDirectory("repo");
+    var emptyGit = Git.init()
+        .setDirectory(emptyRepoDir.toFile())
+        .call();
 
-    var emptySupplier = new GitInventorySupplier(emptyGrgit.getRepository().getJgit().getRepository(), VersionTagParser.getDefault());
+    var emptySupplier = new GitInventorySupplier(emptyGit.getRepository(), VersionTagParser.getDefault());
     assertEquals(VcsInventory.empty(true), emptySupplier.getInventory());
   }
 
   @BeforeAll
-  public void initRepository() throws IOException {
+  public void initRepository() throws IOException, GitAPIException {
     repoDir = Files.createTempDirectory("repo");
-    grgit = Grgit.init(op -> {
-      op.setDir(repoDir);
-    });
-    var initialBranch = grgit.getBranch().current().getName();
+    git = Git.init()
+        .setDirectory(repoDir.toFile())
+        .call();
+
+    var initialBranch = git.getRepository().getBranch();
 
     commit();
     commit();
@@ -249,72 +242,67 @@ public class GitInventorySupplierTest {
   }
 
   @AfterAll
-  public void cleanupRepo() throws IOException {
-    grgit.close();
+  public void cleanupRepo() {
+    git.close();
   }
 
   @BeforeEach
   public void initSupplier() {
-    supplier = new GitInventorySupplier(grgit.getRepository().getJgit().getRepository(), VersionTagParser.getDefault());
+    supplier = new GitInventorySupplier(git.getRepository(), VersionTagParser.getDefault());
   }
 
-  private void commit() throws IOException {
+  private void commit() throws IOException, GitAPIException {
     var bytes = new byte[128];
     random.nextBytes(bytes);
     var fileName = random.nextInt();
     Files.write(repoDir.resolve(fileName + ".txt"), bytes);
-    grgit.add(op -> {
-      op.setPatterns(Set.of(fileName + ".txt"));
-    });
-    var commit = grgit.commit(op -> {
-      op.setMessage("do");
-    });
-    System.out.println("Created commit: " + commit.getAbbreviatedId());
+
+    git.add()
+        .addFilepattern(fileName + ".txt")
+        .call();
+
+    var commit = git.commit()
+        .setMessage("do")
+        .call();
+
+    System.out.println("Created commit: " + commit.getId().name());
   }
 
-  private void branch(String name) {
-    var currentHead = grgit.head();
-    var currentBranch = grgit.getBranch().current();
-    var newBranch = grgit.getBranch().add(op -> {
-      op.setName(name);
-    });
-    var atCommit = grgit.getResolve().toCommit(newBranch.getFullName());
-    System.out.println("Added new branch " + name + " at " + atCommit.getAbbreviatedId());
-    assertEquals(grgit.getBranch().current(), currentBranch);
+  private void branch(String name) throws IOException, GitAPIException {
+    var currentHead = git.getRepository().resolve("HEAD");
+    var currentBranch = git.getRepository().getBranch();
+    var newBranch = git.branchCreate().setName(name).call();
+
+    var atCommit = git.getRepository().resolve(newBranch.getName());
+
+    System.out.println("Added new branch " + name + " at " + atCommit.name());
+    assertEquals(git.getRepository().getBranch(), currentBranch);
     assertEquals(atCommit, currentHead);
   }
 
-  private void tag(String name) {
+  private void tag(String name) throws GitAPIException, IOException {
     tag(name, true);
   }
 
-  private void tag(String name, boolean annotate) {
-    var currentHead = grgit.head();
-    var newTag = grgit.getTag().add(op -> {
-      op.setName(name);
-      op.setAnnotate(annotate);
-    });
-    var atCommit = grgit.getResolve().toCommit(newTag.getFullName());
-    System.out.println("Added new tag " + name + " at " + atCommit.getAbbreviatedId());
+  private void tag(String name, boolean annotate) throws IOException, GitAPIException {
+    var currentHead = git.getRepository().resolve("HEAD");
+    var newTag = git.tag().setName(name).setAnnotated(annotate).call();
+    var atCommit = git.getRepository().resolve(newTag.getName() + "^{commit}");
+    System.out.println("Added new tag " + name + " at " + atCommit.name());
     assertEquals(atCommit, currentHead);
   }
 
-  private void checkout(String name) {
-    var currentHead = grgit.head();
-    grgit.checkout(op -> {
-      op.setBranch(name);
-    });
-    var atCommit = grgit.getResolve().toCommit(name);
-    System.out.println("Checked out " + name + " at " + atCommit.getAbbreviatedId());
-    assertEquals(grgit.getBranch().current().getName(), name);
+  private void checkout(String name) throws IOException, GitAPIException {
+    git.checkout().setName(name).call();
+    var atCommit = git.getRepository().resolve(name);
+    System.out.println("Checked out " + name + " at " + atCommit.name());
+    assertEquals(git.getRepository().getBranch(), name);
   }
 
-  private void merge(String name) {
-    var currentBranch = grgit.getBranch().current().getName();
-    grgit.merge(op -> {
-      op.setHead(name);
-    });
+  private void merge(String name) throws IOException, GitAPIException {
+    var currentBranch = git.getRepository().getBranch();
+    git.merge().include(git.getRepository().resolve(name)).call();
     System.out.println("Merged " + name + " into " + currentBranch);
-    assertEquals(grgit.getBranch().current().getName(), currentBranch);
+    assertEquals(git.getRepository().getBranch(), currentBranch);
   }
 }
