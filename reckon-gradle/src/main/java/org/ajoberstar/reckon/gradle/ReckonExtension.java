@@ -6,6 +6,7 @@ import java.util.function.Function;
 import javax.inject.Inject;
 
 import org.ajoberstar.reckon.core.*;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.logging.Logger;
@@ -166,6 +167,24 @@ public class ReckonExtension {
   }
 
   private Version reckonVersion() {
+    try (var repo = openRepo()) {
+      reckonerBuilder.git(repo, tagParser);
+
+      Reckoner reckoner;
+      try {
+        reckoner = reckonerBuilder.build();
+      } catch (Exception e) {
+        throw new ReckonConfigurationException("Failed to configure Reckon: " + e.getMessage(), e);
+      }
+
+      var version = reckoner.reckon();
+      logger.warn("Reckoned version: {}", version);
+      return version;
+    }
+  }
+
+  private Repository openRepo() {
+    Repository repo;
     try {
       var builder = new FileRepositoryBuilder();
       builder.readEnvironment();
@@ -173,23 +192,10 @@ public class ReckonExtension {
       if (builder.getGitDir() == null) {
         throw new IllegalStateException("No .git directory found!");
       }
-      var repo = builder.build();
-
-      reckonerBuilder.git(repo, tagParser);
+      return builder.build();
     } catch (Exception e) {
       // no git repo found
-      reckonerBuilder.git(null);
+      return null;
     }
-
-    Reckoner reckoner;
-    try {
-      reckoner = reckonerBuilder.build();
-    } catch (Exception e) {
-      throw new ReckonConfigurationException("Failed to configure Reckon: " + e.getMessage(), e);
-    }
-
-    var version = reckoner.reckon();
-    logger.warn("Reckoned version: {}", version);
-    return version;
   }
 }
