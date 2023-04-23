@@ -1,6 +1,6 @@
 plugins {
   id("org.ajoberstar.defaults.gradle-plugin")
-  groovy
+  id("groovy")
 
   id("org.ajoberstar.stutter")
 }
