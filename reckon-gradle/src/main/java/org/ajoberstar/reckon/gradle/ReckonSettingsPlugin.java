@@ -27,8 +27,8 @@ public class ReckonSettingsPlugin implements Plugin<Settings> {
 
     // composite builds have a parent Gradle build and can't trust the values of these properties
     if (settings.getGradle().getParent() == null) {
-      extension.getScope().set(settings.getProviders().gradleProperty(SCOPE_PROP).forUseAtConfigurationTime());
-      extension.getStage().set(settings.getProviders().gradleProperty(STAGE_PROP).forUseAtConfigurationTime());
+      extension.getScope().set(settings.getProviders().gradleProperty(SCOPE_PROP));
+      extension.getStage().set(settings.getProviders().gradleProperty(STAGE_PROP));
     }
 
     var sharedVersion = new DelayedVersion(extension.getVersion());
