@@ -3,10 +3,10 @@ pluginManagement {
     id("org.ajoberstar.defaults.java-library") version "0.17.5"
     id("org.ajoberstar.defaults.gradle-plugin") version "0.17.5"
 
-    id("org.ajoberstar.reckon.settings") version "0.18.0"
-    id("org.ajoberstar.stutter") version "0.7.2"
+    id("org.ajoberstar.reckon.settings") version "0.18.1"
+    id("org.ajoberstar.stutter") version "0.7.3"
 
-    id("com.diffplug.spotless") version "6.22.0"
+    id("com.diffplug.spotless") version "6.23.3"
   }
 
   repositories {
