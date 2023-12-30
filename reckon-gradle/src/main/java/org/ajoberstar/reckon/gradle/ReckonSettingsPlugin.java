@@ -36,9 +36,9 @@ public class ReckonSettingsPlugin implements Plugin<Settings> {
       prj.setVersion(sharedVersion);
     });
 
-    settings.getGradle().projectsLoaded(gradle -> {
-      var tag = createTagTask(settings.getGradle().getRootProject(), extension);
-      var push = createPushTask(settings.getGradle().getRootProject(), extension);
+    settings.getGradle().rootProject(rootProject -> {
+      var tag = createTagTask(rootProject, extension);
+      var push = createPushTask(rootProject, extension);
       push.configure(t -> t.dependsOn(tag));
     });
   }
