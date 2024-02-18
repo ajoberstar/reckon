@@ -2,7 +2,6 @@ package org.ajoberstar.reckon.core;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.zafarkhaja.semver.ParseException;
@@ -14,7 +13,7 @@ public final class Version implements Comparable<Version> {
   /**
    * A base version for use as a default in cases where you don't have an existing version.
    */
-  public static final Version IDENTITY = new Version(com.github.zafarkhaja.semver.Version.forIntegers(0, 0, 0));
+  public static final Version IDENTITY = new Version(com.github.zafarkhaja.semver.Version.of(0, 0, 0));
 
   private final com.github.zafarkhaja.semver.Version version;
   private final Version normal;
@@ -23,10 +22,10 @@ public final class Version implements Comparable<Version> {
   private Version(com.github.zafarkhaja.semver.Version version) {
     this.version = version;
     // need this if logic to avoid stack overflow
-    if (version.getPreReleaseVersion().isEmpty()) {
+    if (version.preReleaseVersion().isEmpty() && version.buildMetadata().isEmpty()) {
       this.normal = this;
     } else {
-      this.normal = new Version(com.github.zafarkhaja.semver.Version.forIntegers(version.getMajorVersion(), version.getMinorVersion(), version.getPatchVersion()));
+      this.normal = new Version(com.github.zafarkhaja.semver.Version.of(version.majorVersion(), version.minorVersion(), version.patchVersion()));
     }
     this.stage = Stage.valueOf(version);
   }
@@ -59,17 +58,17 @@ public final class Version implements Comparable<Version> {
    *         {@code false} otherwise
    */
   public boolean isFinal() {
-    return version.getPreReleaseVersion().isEmpty();
+    return version.preReleaseVersion().isEmpty();
   }
 
   /**
    * @return {@code true} if the version is final or any other significant stage, {@code false} if
-   *         insignficant or snapshot
+   *         insignificant or snapshot
    */
   public boolean isSignificant() {
     return isFinal() || getStage()
         .filter(stage -> !"SNAPSHOT".equals(stage.getName()))
-        .filter(stage -> version.getBuildMetadata().isEmpty())
+        .filter(stage -> version.buildMetadata().isEmpty())
         .isPresent();
   }
 
@@ -82,11 +81,11 @@ public final class Version implements Comparable<Version> {
   public Version incrementNormal(Scope scope) {
     switch (scope) {
       case MAJOR:
-        return new Version(version.incrementMajorVersion());
+        return new Version(version.nextMajorVersion());
       case MINOR:
-        return new Version(version.incrementMinorVersion());
+        return new Version(version.nextMinorVersion());
       case PATCH:
-        return new Version(version.incrementPatchVersion());
+        return new Version(version.nextPatchVersion());
       default:
         throw new AssertionError("Invalid scope: " + scope);
     }
@@ -141,14 +140,16 @@ public final class Version implements Comparable<Version> {
     }
 
     private static Stage valueOf(com.github.zafarkhaja.semver.Version version) {
-      var matcher = STAGE_REGEX.matcher(version.getPreReleaseVersion());
-      if (matcher.find()) {
-        var name = matcher.group("name");
-        int num = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
-        return new Stage(name, num);
-      } else {
-        return null;
-      }
+      var maybeMatcher = version.preReleaseVersion().map(STAGE_REGEX::matcher);
+      return maybeMatcher.map(matcher -> {
+        if (matcher.find()) {
+          var name = matcher.group("name");
+          int num = Optional.ofNullable(matcher.group("num")).map(Integer::parseInt).orElse(0);
+          return new Stage(name, num);
+        } else {
+          return null;
+        }
+      }).orElse(null);
     }
   }
 
@@ -161,7 +162,7 @@ public final class Version implements Comparable<Version> {
    */
   public static Version valueOf(String versionString) {
     try {
-      return new Version(com.github.zafarkhaja.semver.Version.valueOf(versionString));
+      return new Version(com.github.zafarkhaja.semver.Version.parse(versionString));
     } catch (IllegalArgumentException | ParseException e) {
       var message = String.format("Invalid version \"%s\": %s", versionString, e.getMessage());
       throw new IllegalArgumentException(message, e);
@@ -177,7 +178,7 @@ public final class Version implements Comparable<Version> {
    */
   public static Optional<Version> parse(String versionString) {
     try {
-      return Optional.of(new Version(com.github.zafarkhaja.semver.Version.valueOf(versionString)));
+      return Optional.of(new Version(com.github.zafarkhaja.semver.Version.parse(versionString)));
     } catch (IllegalArgumentException | ParseException e) {
       return Optional.empty();
     }

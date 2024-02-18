@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 public class ReckonerIntegTest {
   private static final Clock CLOCK = Clock.fixed(Instant.ofEpochSecond(1530724706), ZoneId.of("UTC"));
-  private static final String TIMESTAMP = "20180704T171826Z";
 
   private Path repoDir;
   private Git git;

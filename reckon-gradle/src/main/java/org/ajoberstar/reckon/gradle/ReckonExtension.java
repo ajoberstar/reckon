@@ -17,7 +17,7 @@ import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 
 public class ReckonExtension {
-  private static Logger logger = Logging.getLogger(ReckonExtension.class);
+  private static final Logger logger = Logging.getLogger(ReckonExtension.class);
 
   private final DirectoryProperty repoDirectory;
   private final Reckoner.Builder reckonerBuilder;
@@ -184,7 +184,6 @@ public class ReckonExtension {
   }
 
   private Repository openRepo() {
-    Repository repo;
     try {
       var builder = new FileRepositoryBuilder();
       builder.readEnvironment();

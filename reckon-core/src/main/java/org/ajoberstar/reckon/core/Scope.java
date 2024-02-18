@@ -46,12 +46,12 @@ public enum Scope {
    * @throws IllegalStateException if they have an invalid increment
    */
   public static Optional<Scope> infer(Version before, Version after) {
-    var major = after.getVersion().getMajorVersion() - before.getVersion().getMajorVersion();
-    var minor = after.getVersion().getMinorVersion() - before.getVersion().getMinorVersion();
-    var patch = after.getVersion().getPatchVersion() - before.getVersion().getPatchVersion();
-    if (major == 1 && after.getVersion().getMinorVersion() == 0 && after.getVersion().getPatchVersion() == 0) {
+    var major = after.getVersion().majorVersion() - before.getVersion().majorVersion();
+    var minor = after.getVersion().minorVersion() - before.getVersion().minorVersion();
+    var patch = after.getVersion().patchVersion() - before.getVersion().patchVersion();
+    if (major == 1 && after.getVersion().minorVersion() == 0 && after.getVersion().patchVersion() == 0) {
       return Optional.of(Scope.MAJOR);
-    } else if (major == 0 && minor == 1 && after.getVersion().getPatchVersion() == 0) {
+    } else if (major == 0 && minor == 1 && after.getVersion().patchVersion() == 0) {
       return Optional.of(Scope.MINOR);
     } else if (major == 0 && minor == 0 && patch == 1) {
       return Optional.of(Scope.PATCH);

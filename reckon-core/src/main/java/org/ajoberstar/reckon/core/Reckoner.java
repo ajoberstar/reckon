@@ -64,7 +64,7 @@ public final class Reckoner {
       throw new IllegalStateException("Reckoned version " + reckoned + " has already been released.");
     }
 
-    if (inventory.getClaimedVersions().contains(reckoned.getNormal()) && !inventory.getCurrentVersion().filter(reckoned.getNormal()::equals).isPresent() && reckoned.isSignificant()) {
+    if (inventory.getClaimedVersions().contains(reckoned.getNormal()) && inventory.getCurrentVersion().filter(reckoned.getNormal()::equals).isEmpty() && reckoned.isSignificant()) {
       throw new IllegalStateException("Reckoned target normal version " + reckoned.getNormal() + " has already been released.");
     }
 
@@ -94,7 +94,7 @@ public final class Reckoner {
     // if a version's already being developed on a parallel branch we'll skip it
     if (inventory.getParallelNormals().contains(targetNormal) && probableStage.isPresent()) {
       if (scope.compareTo(parallelBranchScope) < 0) {
-        logger.debug("Skipping {} as it's being developed on a parallel branch. While {} was requested, parallel branches claim a {}, using that instead.", scope, parallelBranchScope);
+        logger.debug("Skipping {} as it's being developed on a parallel branch. While {} was requested, parallel branches claim a {}, using that instead.", targetNormal, scope, parallelBranchScope);
         targetNormal = targetNormal.incrementNormal(parallelBranchScope);
       } else {
         logger.debug("Skipping {} as it's being developed on a parallel branch. Incrementing again with {}", targetNormal, scope);

@@ -80,7 +80,7 @@ public final class VcsInventory {
   }
 
   /**
-   * Number of commits between the current commmit and the base normal version tag.
+   * Number of commits between the current commit and the base normal version tag.
    */
   public int getCommitsSinceBase() {
     return commitsSinceBase;
@@ -116,7 +116,7 @@ public final class VcsInventory {
   }
 
   /**
-   * All commit messages between the current HEAD commit and the base verison's commit.
+   * All commit messages between the current HEAD commit and the base version's commit.
    */
   public List<String> getCommitMessages() {
     return commitMessages;

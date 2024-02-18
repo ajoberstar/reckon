@@ -76,10 +76,10 @@ public abstract class ReckonCreateTagTask extends DefaultTask {
       var errorStr = error.toString(StandardCharsets.UTF_8);
       if (errorStr.contains(String.format("fatal: tag '%s' already exists", getTagName().get()))) {
         setDidWork(false);
-      } else if (allowRetry && errorStr.contains(String.format("Committer identity unknown"))) {
+      } else if (allowRetry && errorStr.contains("Committer identity unknown")) {
         var email = getRecentUserEmail();
         var name = getRecentUserName();
-        System.err.println(String.format("Tagging as recent committer %s <%s>, as this machine has no git identity set.", name, email));
+        System.err.printf("Tagging as recent committer %s <%s>, as this machine has no git identity set.%n", name, email);
         tag(email, name, false);
       } else {
         System.err.println(errorStr);
@@ -90,7 +90,7 @@ public abstract class ReckonCreateTagTask extends DefaultTask {
 
   private String getRecentUserEmail() {
     var output = new ByteArrayOutputStream();
-    var result = getExecOperations().exec(spec -> {
+    getExecOperations().exec(spec -> {
       spec.setWorkingDir(getRepoDirectory());
       spec.setCommandLine("git", "log", "-n", "1", "--pretty=format:%ae");
       spec.setStandardOutput(output);
@@ -100,7 +100,7 @@ public abstract class ReckonCreateTagTask extends DefaultTask {
 
   private String getRecentUserName() {
     var output = new ByteArrayOutputStream();
-    var result = getExecOperations().exec(spec -> {
+    getExecOperations().exec(spec -> {
       spec.setWorkingDir(getRepoDirectory());
       spec.setCommandLine("git", "log", "-n", "1", "--pretty=format:%an");
       spec.setStandardOutput(output);

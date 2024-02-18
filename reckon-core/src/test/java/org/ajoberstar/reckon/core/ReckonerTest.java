@@ -360,8 +360,8 @@ public class ReckonerTest {
         .clock(CLOCK)
         .vcs(() -> inventory)
         .parallelBranchScope(Scope.MINOR)
-        .scopeCalc(i -> Optional.ofNullable(Scope.PATCH))
-        .stageCalc((i, v) -> Optional.ofNullable("final"))
+        .scopeCalc(i -> Optional.of(Scope.PATCH))
+        .stageCalc((i, v) -> Optional.of("final"))
         .defaultInferredScope(Scope.MINOR)
         .stages("beta", "milestone", "rc", "final")
         .build();
