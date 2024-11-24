@@ -41,6 +41,9 @@ public class ScopeCalculatorTest {
 
     var inventoryMultiMatchPre1 = getInventoryWithMessages(Version.valueOf("0.7.5"), "some message", "patch: some fix", "major: breaking change");
     assertEquals(Optional.of(Scope.MINOR), calc.calculate(inventoryMultiMatchPre1), "Before 1.0 should find the more significant matching scope, but cap at minor");
+
+    var inventoryMultiMatchPre1Force = getInventoryWithMessages(Version.valueOf("0.7.5"), "some message", "major!: force to 1.0", "patch: some fix", "major: breaking change");
+    assertEquals(Optional.of(Scope.MAJOR), calc.calculate(inventoryMultiMatchPre1Force), "Before 1.0, can force 1.0 using major! as a prefix");
   }
 
   private VcsInventory getInventoryWithMessages(Version baseNormal, String... messages) {

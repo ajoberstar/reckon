@@ -238,7 +238,7 @@ The general form is:
 body is not used
 ```
 
-Where `<scope>` is `major`, `minor`, or `patch` (must be lowercase).
+Where `<scope>` is `major`, `minor`, or `patch` (must be lowercase). `major!` is a special value of `<scope>` that can force an upgrade to 1.0.0.
 
 The `(area)` is not used for any programmatic reasons, but could be used by other tools to categorize changes. 
 
@@ -276,11 +276,13 @@ In this case we'd be looking at all commits since the last tagged final version,
 
 Before 1.0.0, SemVer doesn't really guarantee anything, but a good practice seems to be a `PATCH` increment is for bug fixes, while a `MINOR` increase can be new features or breaking changes.
 
-In order to promote the convention of using `major: My message` for breaking changes, before 1.0.0 a `major` in a commit message will be read as `minor`. The goal is to promote you explicitly documenting breaking changes in your commit logs, while requiring the actual 1.0.0 version bump to come via an override with `-Preckon.scope=major`.
+In order to promote the convention of using `major: My message` for breaking changes, before 1.0.0 a `major` in a commit message will be read as `minor`. The goal is to promote you explicitly documenting breaking changes in your commit logs.
+
+The bump to 1.0.0 can happen with either a `major!: My Message` or via an override with `-Preckon.scope=major`.
 
 #### DISCLAIMER this is not Convention Commits compliant
 
-While this approach is similar to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), it does not follow their spec, sticking to something more directly applicable to Reckon's scopes. User's can use the `calcScopeFromCommitMessages(Function<String, Optional<Scope>>)` form if they want to implement Conventional Commits, or any other scheme themselves.
+While this approach is similar to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), it does not follow their spec, sticking to something more directly applicable to Reckon's scopes. User's can use the `calcScopeFromCommitMessageParser(CommitMessageScopeParser)` form if they want to implement Conventional Commits, or any other scheme themselves.
 
 ### Tagging and pushing your version
 
