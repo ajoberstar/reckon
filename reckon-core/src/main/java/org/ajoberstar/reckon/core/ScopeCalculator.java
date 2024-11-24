@@ -46,7 +46,7 @@ public interface ScopeCalculator {
   /**
    * Creates a scope calculator that uses the given function to parse the inventory's commit messages
    * for the presence os scope indicators. If any are found, the most significant scope is returned.
-   * <br/>
+   * <br>
    * Before v1, MAJOR is always ignored and MINOR is substituted. If that's not desirable, see
    * {@link #ofCommitMessageParser(CommitMessageScopeParser)}.
    *
