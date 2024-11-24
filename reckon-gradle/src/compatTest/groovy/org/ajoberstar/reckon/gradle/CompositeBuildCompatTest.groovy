@@ -21,6 +21,7 @@ class CompositeBuildCompatTest extends Specification {
     build2File = projectFile(project2Dir, 'build.gradle')
 
     def git1 = Git.init().setDirectory(project1Dir).call()
+    Gits.resetConfig(git1);
     projectFile(project1Dir, 'settings.gradle') << 'rootProject.name = "project1"'
     projectFile(project1Dir, '.gitignore') << '.gradle\nbuild\n'
     build1File << '''\
@@ -45,6 +46,7 @@ task printVersion {
     git1.close()
 
     def git2 = Git.init().setDirectory(project2Dir).call();
+    Gits.resetConfig(git2);
     projectFile(project2Dir, 'settings.gradle') << 'rootProject.name = "project2"'
     projectFile(project2Dir, '.gitignore') << '.gradle\nbuild\n'
     build2File << '''\

@@ -20,6 +20,7 @@ class BaseCompatTest extends Specification {
 
     def remoteDir = new File(tempDir, 'remote')
     remote = Git.init().setDirectory(remoteDir).call()
+    Gits.resetConfig(remote);
 
     Gits.repoFile(remote, '.gitignore') << '.gradle/\nbuild/\n'
     Gits.repoFile(remote, 'master.txt') << 'contents here'
@@ -31,6 +32,7 @@ class BaseCompatTest extends Specification {
 
     def remote2Dir = new File(tempDir, 'remote2')
     remote2 = Gits.clone(remote2Dir, remote)
+    Gits.resetConfig(remote2);
   }
 
   def 'if no git repo found, version is defaulted'() {
