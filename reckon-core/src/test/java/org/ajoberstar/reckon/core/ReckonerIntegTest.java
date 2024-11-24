@@ -56,6 +56,13 @@ public class ReckonerIntegTest {
     repoDir = Files.createTempDirectory("repo");
     git = Git.init().setDirectory(repoDir.toFile()).call();
     initialBranch = git.getRepository().getBranch();
+
+    var config = git.getRepository().getConfig();
+    config.setString("user", null, "name", "Some Person");
+    config.setString("user", null, "email", "some.person@example.com");
+    config.setString("commit", null, "gpgSign", "false");
+    config.setString("tag", null, "gpgSign", "false");
+    config.save();
   }
 
   @AfterEach

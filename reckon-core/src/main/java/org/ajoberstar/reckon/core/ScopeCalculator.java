@@ -3,7 +3,6 @@ package org.ajoberstar.reckon.core;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 @FunctionalInterface
 public interface ScopeCalculator {
@@ -29,26 +28,34 @@ public interface ScopeCalculator {
   }
 
   /**
+   * Creates a scope calculator that uses the given parser to parse the inventory's commit messages
+   * for the presence os scope indicators. If any are found, the most significant scope is returned.
+   *
+   * @param parser the chosen way to read scopes from commit messages
+   * @return a legit scope calculator
+   */
+  static ScopeCalculator ofCommitMessageParser(CommitMessageScopeParser parser) {
+    return inventory -> {
+      var preV1 = inventory.getBaseNormal().compareTo(Version.valueOf("1.0.0")) < 0;
+      return inventory.getCommitMessages().stream()
+          .flatMap(msg -> parser.parse(msg, preV1).stream())
+          .max(Comparator.naturalOrder());
+    };
+  }
+
+  /**
    * Creates a scope calculator that uses the given function to parse the inventory's commit messages
    * for the presence os scope indicators. If any are found, the most significant scope is returned.
+   * <br/>
+   * Before v1, MAJOR is always ignored and MINOR is substituted. If that's not desirable, see
+   * {@link #ofCommitMessageParser(CommitMessageScopeParser)}.
    *
    * @param messageScope function that parses a single commit message for a scope indicator
    * @return a legit scope calculator
    */
   static ScopeCalculator ofCommitMessage(Function<String, Optional<Scope>> messageScope) {
-    return inventory -> {
-      var scope = inventory.getCommitMessages().stream()
-          .map(messageScope)
-          .flatMap(Optional::stream)
-          .max(Comparator.naturalOrder());
-
-      // if we're still below 1.0, don't let a commit message push you there
-      if (Optional.of(Scope.MAJOR).equals(scope) && inventory.getBaseNormal().compareTo(Version.valueOf("1.0.0")) < 0) {
-        return Optional.of(Scope.MINOR);
-      } else {
-        return scope;
-      }
-    };
+    var parser = CommitMessageScopeParser.ofLegacy(messageScope);
+    return ofCommitMessageParser(parser);
   }
 
   /**
@@ -59,14 +66,6 @@ public interface ScopeCalculator {
    * @return a legit scope calculator
    */
   static ScopeCalculator ofCommitMessages() {
-    var pattern = Pattern.compile("^(major|minor|patch)(?:\\(.*?\\))?: .+");
-    return ScopeCalculator.ofCommitMessage(msg -> {
-      var matcher = pattern.matcher(msg);
-      if (matcher.find()) {
-        return Optional.of(Scope.from(matcher.group(1)));
-      } else {
-        return Optional.empty();
-      }
-    });
+    return ScopeCalculator.ofCommitMessageParser(CommitMessageScopeParser.subjectPrefix());
   }
 }

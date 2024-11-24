@@ -110,6 +110,10 @@ public class ReckonExtension {
     return ScopeCalculator.ofCommitMessage(messageParser);
   }
 
+  public ScopeCalculator calcScopeFromCommitMessageParser(CommitMessageScopeParser messageParser) {
+    return ScopeCalculator.ofCommitMessageParser(messageParser);
+  }
+
   public StageCalculator calcStageFromProp() {
     return StageCalculator.ofUserString((inventory, targetNormal) -> Optional.ofNullable(stage.getOrNull()));
   }

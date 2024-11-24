@@ -172,6 +172,13 @@ public class GitInventorySupplierTest {
         .setDirectory(repoDir.toFile())
         .call();
 
+    var config = git.getRepository().getConfig();
+    config.setString("user", null, "name", "Some Person");
+    config.setString("user", null, "email", "some.person@example.com");
+    config.setString("commit", null, "gpgSign", "false");
+    config.setString("tag", null, "gpgSign", "false");
+    config.save();
+
     var initialBranch = git.getRepository().getBranch();
 
     commit();

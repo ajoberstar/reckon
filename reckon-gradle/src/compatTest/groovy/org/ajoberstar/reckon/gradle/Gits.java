@@ -2,6 +2,7 @@ package org.ajoberstar.reckon.gradle;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,9 +15,24 @@ import org.eclipse.jgit.transport.URIish;
 public final class Gits {
   private static final SecureRandom random = new SecureRandom();
 
+  public static void resetConfig(Git git) {
+    try {
+      var config = git.getRepository().getConfig();
+      config.setString("user", null, "name", "Some Person");
+      config.setString("user", null, "email", "some.person@example.com");
+      config.setString("commit", null, "gpgSign", "false");
+      config.setString("tag", null, "gpgSign", "false");
+      config.save();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   public static Git clone(File dir, Git origin) throws GitAPIException {
     var uri = origin.getRepository().getDirectory().getAbsolutePath();
-    return Git.cloneRepository().setDirectory(dir).setURI(uri).setCloneAllBranches(true).setNoCheckout(false).call();
+    var git = Git.cloneRepository().setDirectory(dir).setURI(uri).setCloneAllBranches(true).setNoCheckout(false).call();
+    resetConfig(git);
+    return git;
   }
 
   public static Path repoFile(Git git, String path) throws IOException {
