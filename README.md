@@ -305,6 +305,15 @@ reckonTagCreate.dependsOn check
 
 See [How Reckon Works](docs/index.md), which includes examples of how reckon will behave in various scenarios.
 
+### Tips for localdev performance
+
+In some localdev configurations it can be a performance drag to be using the stage version scheme which can result in rebuilt JARs due to timestamp changes even when nothing else is different. There are two main ways to work around this.
+
+- Use the snapshot version scheme (which is more limited and means you can't use stages like `rc` or `beta`).
+- Conditionally use the version. Many CI environments use a `CI=true` environment variable, which you could use to trigger logic to overwrite the version number.
+
+Nothing's built in to address this since it can be affected quite a bit by personal preference.
+
 ## Finding versions of reckon
 
 ### Newest versions are on Maven Central
