@@ -6,8 +6,12 @@ import java.util.function.Function;
 import javax.inject.Inject;
 
 import org.ajoberstar.reckon.core.*;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.SystemReader;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
@@ -171,6 +175,15 @@ public class ReckonExtension {
   }
 
   private Version reckonVersion() {
+    /*
+     * this is a workaround for how JGit uses calls the git executable in order to find the location
+     * of the system configuration file. the downside of this workaround is that we can't support any
+     * settings in a user's system configuration file. however, this is needed to support configuration
+     * caching.
+     */
+    var oldSystemReader = SystemReader.getInstance();
+    var workaroundSystemReader = workaroundSystemReader(oldSystemReader);
+    SystemReader.setInstance(workaroundSystemReader);
     try (var repo = openRepo()) {
       reckonerBuilder.git(repo, tagParser);
 
@@ -184,6 +197,8 @@ public class ReckonExtension {
       var version = reckoner.reckon();
       logger.warn("Reckoned version: {}", version);
       return version;
+    } finally {
+      SystemReader.setInstance(oldSystemReader);
     }
   }
 
@@ -200,5 +215,14 @@ public class ReckonExtension {
       // no git repo found
       return null;
     }
+  }
+
+  private SystemReader workaroundSystemReader(SystemReader delegate) {
+    return new SystemReader.Delegate(delegate) {
+      @Override
+      public FileBasedConfig openSystemConfig(Config parent, FS fs) {
+        return null;
+      }
+    };
   }
 }
