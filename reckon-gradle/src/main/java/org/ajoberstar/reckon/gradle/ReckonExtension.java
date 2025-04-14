@@ -176,8 +176,8 @@ public class ReckonExtension {
 
   private Version reckonVersion() {
     /*
-     * this is a workaround for how JGit uses calls the git executable in order to find the location
-     * of the system configuration file. the downside of this workaround is that we can't support any
+     * this is a workaround for how JGit uses calls the git executable in order to find the location of
+     * the system configuration file. the downside of this workaround is that we can't support any
      * settings in a user's system configuration file. however, this is needed to support configuration
      * caching.
      */
