@@ -125,7 +125,7 @@ extensions.configure<org.ajoberstar.reckon.gradle.ReckonExtension> {
 
 ```groovy
 plugins {
-  id('org.ajoberstar.reckon.settings') version ''<version>'
+  id('org.ajoberstar.reckon.settings') version '<version>'
 }
 
 reckon {
