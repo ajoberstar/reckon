@@ -33,7 +33,7 @@ dependencies {
 testing {
   suites {
     val test by getting(JvmTestSuite::class) {
-      useJUnitJupiter("latest.release")
+      useJUnitJupiter("[5.0,6.0[")
       dependencies {
         implementation("org.junit.jupiter:junit-jupiter-params")
         implementation("org.mockito:mockito-core:latest.release")
