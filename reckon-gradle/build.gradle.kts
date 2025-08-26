@@ -30,15 +30,19 @@ dependencies {
 
   // git
   implementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
-
-  // testing
-  compatTestImplementation(gradleTestKit())
-  compatTestImplementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
-  compatTestImplementation("org.spockframework:spock-core:2.3-groovy-3.0")
 }
 
-tasks.withType<Test> {
-  useJUnitPlatform()
+testing {
+  suites {
+    val compatTest by getting(JvmTestSuite::class) {
+      useSpock("2.3-groovy-4.0")
+
+      dependencies {
+        implementation(gradleTestKit())
+        implementation("org.eclipse.jgit:org.eclipse.jgit:[6.0,7.0[")
+      }
+    }
+  }
 }
 
 stutter {
@@ -47,7 +51,7 @@ stutter {
       languageVersion.set(JavaLanguageVersion.of(11))
     }
     gradleVersions {
-      compatibleRange("7.0")
+      compatibleRange("7.0", "9.0")
     }
   }
   val java17 by matrices.creating {
