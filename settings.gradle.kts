@@ -1,10 +1,10 @@
 pluginManagement {
   plugins {
-    id("org.ajoberstar.defaults.java-library") version "0.18.3"
-    id("org.ajoberstar.defaults.gradle-plugin") version "0.18.3"
+    id("org.ajoberstar.defaults.java-library") version "0.20.0"
+    id("org.ajoberstar.defaults.gradle-plugin") version "0.20.0"
 
-    id("org.ajoberstar.reckon.settings") version "0.19.2"
-    id("org.ajoberstar.stutter") version "2.0.0"
+    id("org.ajoberstar.reckon.settings") version "1.0.0"
+    id("org.ajoberstar.stutter") version "2.0.1"
 
     id("com.diffplug.spotless") version "7.2.1"
   }
