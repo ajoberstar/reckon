@@ -1,5 +1,8 @@
 # reckon
 
+> [!IMPORTANT]
+> This plugin is now maintained on [SourceHut](https://git.sr.ht/~ajoberstar/reckon).
+
 [![builds.sr.ht status](https://builds.sr.ht/~ajoberstar/reckon.svg)](https://builds.sr.ht/~ajoberstar/reckon?)
 
 **NOTE:** As of 0.13.1, reckon is published to Maven Central
