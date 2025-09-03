@@ -1,14 +1,6 @@
+# Gradle
 .gradle
 build
-.settings
-.project
-.classpath
-bin
-*~
-*.iml
-*.iws
-*.ipr
+
+# Intellij
 .idea
-out
-*.sublime-*
-*.swp
