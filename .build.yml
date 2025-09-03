@@ -1,0 +1,82 @@
+image: debian/trixie
+arch: amd64
+repositories:
+  adoptium: https://packages.adoptium.net/artifactory/deb trixie main 3B04D753C9050D9A5D343F39843C48A565F8F04B
+packages:
+  - temurin-11-jdk
+  - temurin-17-jdk
+  - temurin-21-jdk
+  - jq
+  - zip
+secrets:
+  - d90a8ca7-1411-4ae0-8b7d-44e167489462
+  - d966aab8-9dff-4f90-ae48-1265e4a9ad34
+environment:
+  CI: true
+  BUNDLE_REPO: .bundle
+tasks:
+  - build: |
+      cd reckon
+      ./gradlew check --continue
+  - check-tag: |
+      if [[ $GIT_REF != refs/tags/* ]]; then
+        echo "⛔ Not a tag, so skipping publish"
+        complete-build
+      fi
+  - bundle: |
+      cd reckon
+      ./gradlew publishAllPublicationsToCentralRepository
+
+      cd .bundle
+      zip -q -r ../bundle.zip *
+  - publish: |
+      set +x
+
+      cd reckon
+
+      NAME="reckon@$(git describe)"
+      TOKEN=$(cat ~/.central_token)
+
+      DEPLOYMENT_ID=$(curl --request POST \
+        --silent \
+        --header "Authorization: Bearer ${TOKEN}" \
+        --form bundle=@bundle.zip \
+        "https://central.sonatype.com/api/v1/publisher/upload?name=${NAME}&publishingType=USER_MANAGED")
+
+      echo "Deploying ID: $DEPLOYMENT_ID"
+
+      EXIT=""
+      while [ -z "$EXIT" ]; do
+        sleep 5
+        STATUS=$(curl --request POST \
+          --silent \
+          --header "Authorization: Bearer ${TOKEN}" \
+          "https://central.sonatype.com/api/v1/publisher/status?id=${DEPLOYMENT_ID}")
+
+        STATE=$(echo $STATUS | jq -r '.deploymentState')
+        case $STATE in
+          PENDING | VALIDATING | PUBLISHING)
+            echo "⌛ Bundle $STATE..."
+            ;;
+          VALIDATED)
+            echo "✅ Bundle validated succesfully. Use the portal to finish publishing."
+            echo "$STATUS" | jq
+            EXIT="0"
+            ;;
+          PUBLISHED)
+            echo "✅ Bundle published successfully"
+            echo "$STATUS" | jq
+            EXIT="0"
+            ;;
+          FAILED)
+            echo "❌ Failed to publish bundle"
+            echo "$STATUS" | jq
+            EXIT="1"
+            ;;
+          *)
+            echo "⁉️ Unknown state"
+            EXIT="1"
+            ;;
+        esac
+      done
+      exit $EXIT
