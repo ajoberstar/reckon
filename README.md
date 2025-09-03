@@ -1,14 +1,16 @@
 # reckon
 
-[![CI](https://github.com/ajoberstar/reckon/actions/workflows/ci.yaml/badge.svg)](https://github.com/ajoberstar/reckon/actions/workflows/ci.yaml)
+[![builds.sr.ht status](https://builds.sr.ht/~ajoberstar/reckon.svg)](https://builds.sr.ht/~ajoberstar/reckon?)
 
 **NOTE:** As of 0.13.1, reckon is published to Maven Central
 
 ## Getting Help or Contributing
 
-**IMPORANT:** Nowadays, I'm not spending a lot of time on maintenance due to other time commitments. While, I will eventually get to issues or PRs raised, **do not** expect a timely response. I'm not trying to be rude or dismissive, I only get back to this project periodically (on the order of _months_, in many cases). Please set your expectations appropriately as you file issues or open PRs.
+**IMPORTANT:** I consider this plugin feature complete and don't spend a lot of time on maintenance. I do try to keep it updated a few times a year to ensure compatibility with new Gradle versions, etc.
 
-Please use the repo's [issues](https://github.com/ajoberstar/reckon/issues) for all questions, bug reports, and feature requests.
+Send questions or patches to the [mailing list](https://lists.sr.ht/~ajoberstar/public-inbox). Accepted feature requests and confirmed bugs will be stored in the [issue tracker](https://todo.sr.ht/~ajoberstar/gradle-plugins).
+
+You DO NOT need a SourceHut account to contribute or ask questions.
 
 ## Why do you care?
 
@@ -96,7 +98,7 @@ Reckon can alternately use SNAPSHOT versions instead of the stage concept.
 
 ## How do I use it?
 
-**NOTE:** Check the [Release Notes](https://github.com/ajoberstar/reckon/releases) for details on compatibility and changes.
+**NOTE:** Check the `CHANGELOG.md` for details on compatibility and changes.
 
 **IMPORTANT:** It is recommended to apply reckon as a Settings plugin (in settings.gradle/settings.gradle.kts) to ensure it is configured before any other plugin tries to use the project version.
 
